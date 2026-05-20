@@ -379,6 +379,18 @@
       </div>
       <div id="api-key-status" style="font-size:13px;color:var(--text3);"></div>
 
+      <div class="section-title">Cloudflare Worker URL</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">Vereist om de AI te gebruiken. Zie de instructies om je gratis Worker aan te maken.</p>
+      <div class="field">
+        <label>Worker URL</label>
+        <input type="text" id="worker-url-input" placeholder="https://vastgoed-proxy.jouwnaam.workers.dev" />
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn btn-dark btn-sm" onclick="saveWorkerUrl()">Opslaan</button>
+        <button class="btn btn-light btn-sm" onclick="testWorker()">Test verbinding</button>
+      </div>
+      <div id="worker-status" style="font-size:13px;color:var(--text3);margin-bottom:8px;"></div>
+
       <div class="section-title">Over deze app</div>
       <div class="settings-row">
         <div><div class="settings-label">VastgoedInspectie PWA</div><div class="settings-sub">Versie 1.0 — Werkt offline</div></div>
@@ -425,7 +437,40 @@ function saveState() {
 }
 
 function getApiKey() { return localStorage.getItem('vi-apikey') || ''; }
-function saveApiKey() {
+function saveWorkerUrl() {
+  const v = document.getElementById('worker-url-input').value.trim();
+  if (!v) { showToast('Vul een Worker URL in'); return; }
+  localStorage.setItem('vi-worker', v);
+  document.getElementById('worker-status').textContent = '✓ Worker URL opgeslagen';
+  showToast('Worker URL opgeslagen');
+}
+
+async function testWorker() {
+  const url = localStorage.getItem('vi-worker') || document.getElementById('worker-url-input').value.trim();
+  const key = getApiKey();
+  const status = document.getElementById('worker-status');
+  if (!url) { status.textContent = 'Vul eerst een Worker URL in'; return; }
+  if (!key) { status.textContent = 'Vul eerst je API-sleutel in'; return; }
+  status.textContent = 'Verbinding testen...';
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'Zeg alleen: OK' }] })
+    });
+    if (resp.ok) {
+      status.textContent = '✓ Verbinding werkt! De app is klaar voor gebruik.';
+      status.style.color = 'var(--green-text)';
+    } else {
+      const err = await resp.json().catch(()=>({}));
+      status.textContent = '✗ Fout: ' + (err.error?.message || resp.status);
+      status.style.color = 'var(--red-text)';
+    }
+  } catch(e) {
+    status.textContent = '✗ Kan Worker niet bereiken: ' + e.message;
+    status.style.color = 'var(--red-text)';
+  }
+}
   const v = document.getElementById('api-key-input').value.trim();
   if (!v) { showToast('Vul een sleutel in'); return; }
   localStorage.setItem('vi-apikey', v);
@@ -830,12 +875,14 @@ function copyMJOP() {
 async function callClaude(content) {
   const key = getApiKey();
   if (!key) throw new Error('Geen API-sleutel');
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const workerUrl = localStorage.getItem('vi-worker') || '';
+  if (!workerUrl) throw new Error('Stel eerst de Worker-URL in bij Instellingen');
+  const resp = await fetch(workerUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content }] })
   });
-  if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || resp.status); }
+  if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || resp.status); }
   const data = await resp.json();
   return data.content?.map(b=>b.text||'').join('') || '';
 }
@@ -872,6 +919,11 @@ function initSettings() {
   if (key) {
     document.getElementById('api-key-input').value = key;
     document.getElementById('api-key-status').textContent = 'Sleutel actief: ' + key.substring(0,16) + '...';
+  }
+  const worker = localStorage.getItem('vi-worker');
+  if (worker) {
+    document.getElementById('worker-url-input').value = worker;
+    document.getElementById('worker-status').textContent = 'Worker URL actief';
   }
 }
 
