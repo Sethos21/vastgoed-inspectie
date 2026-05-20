@@ -471,12 +471,15 @@ async function testWorker() {
     status.style.color = 'var(--red-text)';
   }
 }
+
+function saveApiKey() {
   const v = document.getElementById('api-key-input').value.trim();
   if (!v) { showToast('Vul een sleutel in'); return; }
   localStorage.setItem('vi-apikey', v);
   document.getElementById('api-key-status').textContent = 'Sleutel opgeslagen (' + v.substring(0,12) + '...)';
   showToast('API-sleutel opgeslagen');
 }
+
 function toggleKeyVis() {
   const inp = document.getElementById('api-key-input');
   inp.type = inp.type === 'password' ? 'text' : 'password';
