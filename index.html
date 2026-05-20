@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#1a1a1a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Inspectie" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>VastgoedInspectie</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f5;
+    --bg3: #ebebeb;
+    --text: #1a1a1a;
+    --text2: #555;
+    --text3: #999;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.2);
+    --accent: #1a1a1a;
+    --accent-text: #fff;
+    --green-bg: #eaf3de; --green-text: #3b6d11;
+    --amber-bg: #faeeda; --amber-text: #854f0b;
+    --orange-bg: #faece7; --orange-text: #993c1d;
+    --red-bg: #fcebeb; --red-text: #a32d2d;
+    --red2-text: #501313;
+    --blue-bg: #e6f1fb; --blue-text: #185fa5;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a; --bg2: #252525; --bg3: #2f2f2f;
+      --text: #f0f0f0; --text2: #aaa; --text3: #666;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --accent: #f0f0f0; --accent-text: #1a1a1a;
+      --green-bg: #1a2e0a; --green-text: #8ecf50;
+      --amber-bg: #2e1f00; --amber-text: #f5b942;
+      --orange-bg: #2e1208; --orange-text: #f09060;
+      --red-bg: #2e0a0a; --red-text: #f07070;
+      --red2-text: #f9a0a0;
+      --blue-bg: #0a1e35; --blue-text: #6aadee;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+  
+  /* APP SHELL */
+  #app { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
+  
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: calc(var(--safe-top) + 12px) 16px 12px;
+    background: var(--bg); border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0; min-height: calc(var(--safe-top) + 52px);
+  }
+  .topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .topbar-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--bg2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 18px; flex-shrink: 0; }
+  
+  /* TABS */
+  .tabbar {
+    display: flex; background: var(--bg); border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+  }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tabbar-btn {
+    flex: 1; min-width: 70px; padding: 10px 4px 8px; border: none; background: none; cursor: pointer;
+    font-size: 11px; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 3px;
+    border-bottom: 2px solid transparent; transition: color 0.15s;
+  }
+  .tabbar-btn.active { color: var(--text); border-bottom-color: var(--text); }
+  .tabbar-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .page { display: none; padding: 16px; padding-bottom: calc(16px + var(--safe-bot)); }
+  .page.active { display: block; }
+  
+  /* FORM ELEMENTS */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  input[type=text], input[type=number], input[type=password], input[type=email], select, textarea {
+    width: 100%; padding: 11px 13px; border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); background: var(--bg); color: var(--text);
+    font-size: 16px; font-family: inherit; outline: none; appearance: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--text); }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* BUTTONS */
+  .btn { padding: 12px 18px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 15px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.15s, transform 0.1s; }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-dark { background: var(--accent); color: var(--accent-text); }
+  .btn-light { background: var(--bg2); color: var(--text); border: 0.5px solid var(--border2); }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  
+  /* PRESET CHIPS */
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { padding: 6px 12px; border-radius: 99px; border: 0.5px solid var(--border2); background: var(--bg2); cursor: pointer; font-size: 13px; color: var(--text2); font-family: inherit; }
+  .chip:active { background: var(--bg3); }
+
+  /* CARDS */
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .card-name-input { flex: 1; border: none; background: none; font-size: 16px; font-weight: 600; color: var(--text); font-family: inherit; outline: none; padding: 0; }
+  .del-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--bg2); cursor: pointer; color: var(--text3); font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* RATING */
+  .rating-row { display: flex; gap: 6px; }
+  .rating-dot { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; color: var(--text2); font-family: inherit; transition: all 0.1s; }
+  .rating-dot.s1 { background: var(--green-bg); color: var(--green-text); border-color: transparent; }
+  .rating-dot.s2 { background: var(--amber-bg); color: var(--amber-text); border-color: transparent; }
+  .rating-dot.s3 { background: var(--orange-bg); color: var(--orange-text); border-color: transparent; }
+  .rating-dot.s4 { background: var(--red-bg); color: var(--red-text); border-color: transparent; }
+  .rating-dot.s5 { background: var(--red-bg); color: var(--red2-text); border-color: var(--red-text); }
+
+  /* BADGE */
+  .badge { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 99px; font-weight: 500; }
+  .badge-1 { background: var(--green-bg); color: var(--green-text); }
+  .badge-2 { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-3 { background: var(--orange-bg); color: var(--orange-text); }
+  .badge-4 { background: var(--red-bg); color: var(--red-text); }
+  .badge-5 { background: var(--red-bg); color: var(--red2-text); }
+  .badge-ai { background: var(--blue-bg); color: var(--blue-text); }
+
+  /* PHOTO UPLOAD */
+  .photo-drop { border: 0.5px dashed var(--border2); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; background: var(--bg2); margin-top: 6px; }
+  .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .photo-thumb { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 0.5px solid var(--border); }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-del { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; cursor: pointer; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+
+  /* AI RESULT BOX */
+  .ai-box { background: var(--blue-bg); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; line-height: 1.6; color: var(--text); margin-top: 8px; }
+  .ai-box-label { font-size: 11px; font-weight: 600; color: var(--blue-text); margin-bottom: 4px; }
+
+  /* RESULT / RAPPORT */
+  .result-card { background: var(--bg2); border-radius: var(--radius); padding: 14px; font-size: 14px; line-height: 1.7; color: var(--text); white-space: pre-wrap; margin-bottom: 14px; }
+
+  /* MJOP TABLE */
+  .mjop-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--bg2); border-radius: var(--radius-sm); padding: 12px; }
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .stat-val { font-size: 20px; font-weight: 700; }
+  .mjop-item { padding: 12px 0; border-bottom: 0.5px solid var(--border); }
+  .mjop-item-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .mjop-item-name { font-weight: 600; font-size: 14px; }
+  .mjop-item-year { font-size: 13px; color: var(--text2); }
+  .mjop-item-year.urgent { color: var(--red-text); font-weight: 600; }
+  .mjop-item-actie { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .mjop-item-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .mjop-kosten { font-size: 13px; font-weight: 600; }
+
+  /* LOADING */
+  .loading-row { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 14px; padding: 8px 0; }
+  .dots { display: flex; gap: 4px; }
+  .dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: blink 1.2s infinite; }
+  .dots span:nth-child(2) { animation-delay: 0.25s; }
+  .dots span:nth-child(3) { animation-delay: 0.5s; }
+  @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; margin-top: 18px; }
+  .section-title:first-child { margin-top: 0; }
+
+  /* SETTINGS */
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 0.5px solid var(--border); gap: 12px; }
+  .settings-label { font-size: 15px; }
+  .settings-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .api-key-show { font-family: monospace; font-size: 12px; color: var(--text3); margin-top: 6px; word-break: break-all; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; margin: 0 auto 12px; display: block; }
+  .empty p { font-size: 14px; }
+
+  /* BAG AUTOCOMPLETE */
+  .bag-wrap { position: relative; }
+  .bag-dropdown { position: absolute; left: 0; right: 0; top: 100%; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); z-index: 100; max-height: 220px; overflow-y: auto; margin-top: 3px; }
+  .bag-item { padding: 10px 13px; font-size: 14px; cursor: pointer; border-bottom: 0.5px solid var(--border); color: var(--text); }
+  .bag-item:last-child { border-bottom: none; }
+  .bag-item:active, .bag-item:hover { background: var(--bg2); }
+  .bag-item b { color: var(--text); }
+  .bag-item small { display: block; font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .bag-loading { padding: 10px 13px; font-size: 13px; color: var(--text3); }
+  .bag-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 9px; border-radius: 99px; background: var(--green-bg); color: var(--green-text); margin-top: 6px; font-weight: 500; }
+  .bag-badge.fail { background: var(--amber-bg); color: var(--amber-text); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: calc(20px + var(--safe-bot)); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: var(--accent-text); padding: 10px 18px; border-radius: 99px; font-size: 13px; font-weight: 500; transition: transform 0.3s; z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* OBJECT SELECTOR */
+  .obj-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; cursor: pointer; }
+  .obj-item:active { background: var(--bg2); }
+  .obj-item-info { flex: 1; }
+  .obj-item-name { font-weight: 600; font-size: 15px; }
+  .obj-item-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .obj-item-arr { color: var(--text3); font-size: 20px; }
+
+  /* PROGRESS STEPS */
+  .progress-steps { display: flex; align-items: center; gap: 0; margin-bottom: 18px; }
+  .prog-step { display: flex; align-items: center; gap: 0; flex: 1; }
+  .prog-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
+  .prog-dot.done { background: var(--green-bg); color: var(--green-text); }
+  .prog-dot.current { background: var(--accent); color: var(--accent-text); }
+  .prog-line { flex: 1; height: 1px; background: var(--border2); }
+  .prog-line.done { background: var(--green-text); }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">VastgoedInspectie</div>
+      <div class="topbar-sub" id="topbar-sub">Selecteer of maak een object</div>
+    </div>
+    <button class="icon-btn" onclick="showPage('settings')" aria-label="Instellingen">⚙</button>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tabbar" id="tabbar">
+    <button class="tabbar-btn active" data-page="objects" onclick="showPage('objects')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+      Objecten
+    </button>
+    <button class="tabbar-btn" data-page="inspectie" onclick="showPage('inspectie')">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>
+      Inspectie
+    </button>
+    <button class="tabbar-btn" data-page="rapport" onclick="showPage('rapport')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Rapport
+    </button>
+    <button class="tabbar-btn" data-page="mjop" onclick="showPage('mjop')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+      MJOP
+    </button>
+    <button class="tabbar-btn" data-page="settings" onclick="showPage('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Instellingen
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- OBJECTS PAGE -->
+    <div id="page-objects" class="page active">
+      <div class="section-title">Mijn objecten</div>
+      <div id="objects-list"></div>
+      <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
+    </div>
+
+    <!-- NEW/EDIT OBJECT FORM (hidden by default, shown inline) -->
+    <div id="page-object-form" class="page">
+      <div class="section-title">Objectgegevens</div>
+
+      <div class="field">
+        <label>Adres zoeken (BAG) <span style="color:var(--text3);font-size:11px;font-weight:400;">— automatisch ingevuld</span></label>
+        <div class="bag-wrap">
+          <input type="text" id="f-bag-search" placeholder="Begin te typen: Kerkstraat 12 Nijmegen…" autocomplete="off" oninput="bagSuggest(this.value)" />
+          <div id="bag-dropdown" class="bag-dropdown" style="display:none;"></div>
+        </div>
+        <div id="bag-status"></div>
+      </div>
+
+      <div class="field">
+        <label>Volledige adres / naam object</label>
+        <input type="text" id="f-naam" placeholder="Wordt automatisch ingevuld of typ zelf" />
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Type object</label>
+          <select id="f-type">
+            <option>Appartementencomplex</option>
+            <option>Eengezinswoning</option>
+            <option>Kantoorpand</option>
+            <option>Winkelruimte</option>
+            <option>Bedrijfshal</option>
+            <option>Gemengd gebruik</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label>
+          <input type="number" id="f-jaar" placeholder="Uit BAG of handmatig" />
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Opp. (m²) <span id="f-opp-badge" style="color:var(--green-text);font-size:11px;"></span></label>
+          <input type="number" id="f-opp" placeholder="Uit BAG of handmatig" />
+        </div>
+        <div class="field">
+          <label>Aantal eenheden</label>
+          <input type="number" id="f-eenheden" placeholder="12" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Postcode &amp; plaats</label>
+        <input type="text" id="f-postcode" placeholder="Uit BAG of handmatig" />
+      </div>
+      <div class="field">
+        <label>Context / bijzonderheden</label>
+        <textarea id="f-context" placeholder="Monumentaal pand, VvE, recent dak vervangen..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
+        <button class="btn btn-light" onclick="showPage('objects')">Annuleren</button>
+      </div>
+    </div>
+
+    <!-- INSPECTIE PAGE -->
+    <div id="page-inspectie" class="page">
+      <div id="inspectie-no-object" class="empty">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+        <p>Selecteer eerst een object<br>via het tabblad Objecten</p>
+      </div>
+      <div id="inspectie-form" style="display:none;">
+        <div id="elements-container"></div>
+        <button class="btn btn-light btn-full" style="margin-bottom:10px;" onclick="addElement()">+ Bouwdeel toevoegen</button>
+        <div class="section-title">Snelle toevoeging</div>
+        <div class="chip-row" id="preset-chips"></div>
+        <button class="btn btn-dark btn-full" style="margin-top:6px;" onclick="generateReport()">↑ Rapport genereren met AI</button>
+      </div>
+    </div>
+
+    <!-- RAPPORT PAGE -->
+    <div id="page-rapport" class="page">
+      <div id="rapport-empty" class="empty">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>Voer eerst een inspectie uit<br>en genereer een rapport</p>
+      </div>
+      <div id="rapport-loading" style="display:none;" class="loading-row"><div class="dots"><span></span><span></span><span></span></div> AI genereert rapport...</div>
+      <div id="rapport-content" style="display:none;">
+        <div id="rapport-text" class="result-card"></div>
+        <div class="btn-row">
+          <button class="btn btn-dark" onclick="generateMJOP()">→ MJOP genereren</button>
+          <button class="btn btn-light" onclick="copyRapport()">Kopieer tekst</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MJOP PAGE -->
+    <div id="page-mjop" class="page">
+      <div id="mjop-empty" class="empty">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <p>Genereer eerst een rapport<br>om het MJOP te maken</p>
+      </div>
+      <div id="mjop-loading" style="display:none;" class="loading-row"><div class="dots"><span></span><span></span><span></span></div> AI stelt MJOP op...</div>
+      <div id="mjop-content" style="display:none;"></div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="page-settings" class="page">
+      <div class="section-title">API-sleutel</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">Vul je Anthropic API-sleutel in. Deze wordt lokaal op je telefoon opgeslagen en nergens naartoe verzonden.</p>
+      <div class="field">
+        <label>Anthropic API-sleutel</label>
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
+      </div>
+      <div class="btn-row" style="margin-bottom:18px;">
+        <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
+        <button class="btn btn-light btn-sm" onclick="toggleKeyVis()">Toon/verberg</button>
+      </div>
+      <div id="api-key-status" style="font-size:13px;color:var(--text3);"></div>
+
+      <div class="section-title">Over deze app</div>
+      <div class="settings-row">
+        <div><div class="settings-label">VastgoedInspectie PWA</div><div class="settings-sub">Versie 1.0 — Werkt offline</div></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">API-sleutel ophalen</div><div class="settings-sub">console.anthropic.com → API Keys</div></div>
+      </div>
+
+      <div class="section-title">Data</div>
+      <div class="btn-row">
+        <button class="btn btn-light btn-sm" onclick="exportData()">Exporteer alle data</button>
+        <button class="btn btn-light btn-sm" style="color:var(--red-text);" onclick="clearAll()">Alles wissen</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// STATE
+let state = {
+  objects: [],
+  currentObjectId: null,
+  elements: [],
+  reportText: '',
+  mjopData: []
+};
+
+// PRESETS
+const PRESETS = ['Dak','Gevel','Kozijnen','CV-installatie','Electra','Riool/afvoer','Lift','Fundering','Beglazing','Dakgoten'];
+const PRESET_LIFE = { 'Dak':25,'Gevel':30,'Kozijnen':20,'CV-installatie':10,'Electra':15,'Riool/afvoer':20,'Lift':20,'Fundering':50,'Beglazing':20,'Dakgoten':15 };
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('vi-state');
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('vi-state', JSON.stringify(state)); } catch(e) {}
+}
+
+function getApiKey() { return localStorage.getItem('vi-apikey') || ''; }
+function saveApiKey() {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v) { showToast('Vul een sleutel in'); return; }
+  localStorage.setItem('vi-apikey', v);
+  document.getElementById('api-key-status').textContent = 'Sleutel opgeslagen (' + v.substring(0,12) + '...)';
+  showToast('API-sleutel opgeslagen');
+}
+function toggleKeyVis() {
+  const inp = document.getElementById('api-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// NAVIGATION
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tabbar-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  document.getElementById('page-' + name).classList.add('active');
+  updateTopbar();
+}
+
+function updateTopbar() {
+  const obj = getCurrentObject();
+  if (obj) {
+    document.getElementById('topbar-title').textContent = obj.naam || 'Object';
+    document.getElementById('topbar-sub').textContent = obj.type + (obj.jaar ? ', ' + obj.jaar : '');
+  } else {
+    document.getElementById('topbar-title').textContent = 'VastgoedInspectie';
+    document.getElementById('topbar-sub').textContent = 'Selecteer of maak een object';
+  }
+}
+
+function getCurrentObject() {
+  return state.objects.find(o => o.id === state.currentObjectId) || null;
+}
+
+// OBJECTS
+function renderObjects() {
+  const list = document.getElementById('objects-list');
+  if (state.objects.length === 0) {
+    list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.<br>Maak er een aan.</p></div>';
+    return;
+  }
+  list.innerHTML = state.objects.map(o => `
+    <div class="obj-item" onclick="selectObject('${o.id}')">
+      <div class="obj-item-info">
+        <div class="obj-item-name">${o.naam || 'Naamloos object'}</div>
+        <div class="obj-item-sub">${o.type}${o.jaar ? ' · ' + o.jaar : ''}${o.opp ? ' · ' + o.opp + ' m²' : ''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">✎</button>
+        <span class="obj-item-arr">›</span>
+      </div>
+    </div>`).join('');
+}
+
+function newObject() {
+  clearForm();
+  document.getElementById('page-object-form').dataset.editId = '';
+  showPage('object-form');
+}
+
+function editObject(id) {
+  const o = state.objects.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('f-naam').value = o.naam || '';
+  document.getElementById('f-type').value = o.type || '';
+  document.getElementById('f-jaar').value = o.jaar || '';
+  document.getElementById('f-opp').value = o.opp || '';
+  document.getElementById('f-eenheden').value = o.eenheden || '';
+  document.getElementById('f-postcode').value = o.postcode || '';
+  document.getElementById('f-context').value = o.context || '';
+  document.getElementById('f-bag-search').value = o.naam || '';
+  const s = document.getElementById('bag-status'); if (s) s.innerHTML = '';
+  document.getElementById('page-object-form').dataset.editId = id;
+  showPage('object-form');
+}
+
+function clearForm() {
+  ['f-naam','f-jaar','f-opp','f-eenheden','f-context','f-postcode','f-bag-search'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('f-type').selectedIndex = 0;
+  const s = document.getElementById('bag-status'); if (s) s.innerHTML = '';
+  const jb = document.getElementById('f-jaar-badge'); if (jb) jb.textContent = '';
+  const ob = document.getElementById('f-opp-badge'); if (ob) ob.textContent = '';
+  hideBagDropdown();
+}
+
+function saveObject() {
+  const naam = document.getElementById('f-naam').value.trim();
+  if (!naam) { showToast('Vul een naam in'); return; }
+  const editId = document.getElementById('page-object-form').dataset.editId;
+  const obj = {
+    id: editId || Date.now().toString(),
+    naam, type: document.getElementById('f-type').value,
+    jaar: document.getElementById('f-jaar').value,
+    opp: document.getElementById('f-opp').value,
+    eenheden: document.getElementById('f-eenheden').value,
+    postcode: document.getElementById('f-postcode').value,
+    context: document.getElementById('f-context').value
+  };
+  if (editId) {
+    const idx = state.objects.findIndex(o => o.id === editId);
+    if (idx >= 0) state.objects[idx] = obj;
+  } else {
+    state.objects.push(obj);
+  }
+  saveState();
+  showToast('Object opgeslagen');
+  showPage('objects');
+  renderObjects();
+}
+
+function selectObject(id) {
+  state.currentObjectId = id;
+  state.elements = [];
+  state.reportText = '';
+  state.mjopData = [];
+  saveState();
+  updateTopbar();
+  renderInspectie();
+  resetRapport();
+  resetMJOP();
+  showPage('inspectie');
+}
+
+// INSPECTIE
+const COND_LABELS = ['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
+
+function renderInspectie() {
+  const hasObj = !!state.currentObjectId;
+  document.getElementById('inspectie-no-object').style.display = hasObj ? 'none' : 'block';
+  document.getElementById('inspectie-form').style.display = hasObj ? 'block' : 'none';
+  if (!hasObj) return;
+
+  // Render preset chips
+  const chips = document.getElementById('preset-chips');
+  chips.innerHTML = PRESETS.map(p =>
+    `<button class="chip" onclick="addPreset('${p}')">${p}</button>`
+  ).join('');
+
+  renderElements();
+}
+
+function renderElements() {
+  const c = document.getElementById('elements-container');
+  if (state.elements.length === 0) {
+    c.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;padding:20px 0 10px;">Nog geen bouwdelen. Voeg er een toe.</div>';
+    return;
+  }
+  c.innerHTML = state.elements.map((el, i) => {
+    const cond = el.cond || 1;
+    const photos = el.photos || [];
+    const ai = el.aiResult || '';
+    const analyzing = el.analyzing || false;
+
+    const thumbs = photos.map((p, pi) =>
+      `<div class="photo-thumb">
+        <img src="${p.dataUrl}" alt="" loading="lazy"/>
+        <button class="photo-del" onclick="removePhoto(${i},${pi})">×</button>
+      </div>`
+    ).join('');
+
+    const aiHtml = analyzing
+      ? `<div class="ai-box"><div class="loading-row" style="margin:0"><div class="dots"><span></span><span></span><span></span></div><span style="font-size:12px;">Analyseren...</span></div></div>`
+      : ai ? `<div class="ai-box"><div class="ai-box-label">AI foto-analyse</div>${ai.replace(/\n/g,'<br>')}</div>` : '';
+
+    return `<div class="card">
+      <div class="card-header">
+        <input class="card-name-input" value="${el.name}" onchange="state.elements[${i}].name=this.value;saveState()" />
+        <span class="badge badge-${cond}">${COND_LABELS[cond]}</span>
+        <button class="del-btn" onclick="removeEl(${i})">×</button>
+      </div>
+      <div class="field">
+        <label>Conditiescore (1=goed, 5=slecht)</label>
+        <div class="rating-row">
+          ${[1,2,3,4,5].map(n=>`<button class="rating-dot ${cond==n?'s'+n:''}" onclick="setRating(${i},${n})">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Resterend leven (jr)</label>
+          <input type="number" value="${el.life||''}" onchange="state.elements[${i}].life=this.value;saveState()" placeholder="15" min="0" max="50" />
+        </div>
+        <div class="field">
+          <label>Kosten herstel (€)</label>
+          <input type="number" value="${el.kosten||''}" onchange="state.elements[${i}].kosten=this.value;saveState()" placeholder="5000" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Bevindingen</label>
+        <textarea onchange="state.elements[${i}].notes=this.value;saveState()" placeholder="Beschrijf de staat...">${el.notes||''}</textarea>
+      </div>
+      <div class="field">
+        <label>Foto's ${photos.length}/4</label>
+        ${photos.length < 4 ? `<div class="photo-drop" onclick="triggerUpload(${i})">
+          <div style="font-size:24px;margin-bottom:4px;">📷</div>
+          <div style="font-size:12px;color:var(--text3);">Tik om foto te kiezen of te maken</div>
+          <input type="file" id="fu-${i}" accept="image/*" multiple capture="environment" style="display:none;" onchange="handleUpload(event,${i})" />
+        </div>` : ''}
+        ${thumbs ? `<div class="photo-grid">${thumbs}</div>` : ''}
+        ${photos.length > 0 && !ai && !analyzing
+          ? `<button class="btn btn-light btn-sm" style="margin-top:8px;" onclick="analyzePhotos(${i})">✦ Analyseer foto's</button>` : ''}
+        ${aiHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addElement() {
+  state.elements.push({ name: 'Nieuw bouwdeel', cond: 1, life: '', kosten: '', notes: '', photos: [], aiResult: '', analyzing: false });
+  saveState();
+  renderElements();
+}
+
+function addPreset(name) {
+  state.elements.push({ name, cond: 1, life: PRESET_LIFE[name]||20, kosten: '', notes: '', photos: [], aiResult: '', analyzing: false });
+  saveState();
+  renderElements();
+}
+
+function removeEl(i) {
+  state.elements.splice(i, 1);
+  saveState();
+  renderElements();
+}
+
+function setRating(i, n) {
+  state.elements[i].cond = n;
+  saveState();
+  renderElements();
+}
+
+function triggerUpload(i) { document.getElementById('fu-'+i).click(); }
+
+function handleUpload(event, i) {
+  const files = Array.from(event.target.files);
+  const el = state.elements[i];
+  if (!el.photos) el.photos = [];
+  const slots = 4 - el.photos.length;
+  let done = 0;
+  files.slice(0, slots).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      el.photos.push({ dataUrl: e.target.result });
+      done++;
+      if (done === Math.min(files.length, slots)) { saveState(); renderElements(); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removePhoto(i, pi) {
+  state.elements[i].photos.splice(pi, 1);
+  state.elements[i].aiResult = '';
+  saveState();
+  renderElements();
+}
+
+async function analyzePhotos(i) {
+  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
+  state.elements[i].analyzing = true;
+  renderElements();
+  const el = state.elements[i];
+  const imageContent = el.photos.map(p => ({
+    type: 'image',
+    source: { type: 'base64', media_type: 'image/jpeg', data: p.dataUrl.split(',')[1] }
+  }));
+  const prompt = `Je bent een vastgoedinspecteur. Analyseer de foto's van bouwdeel "${el.name}". Geef: 1) Visuele conditie, 2) Gebreken of risico's, 3) Aanbevolen actie. Bondig, max 100 woorden.`;
+  try {
+    const text = await callClaude([...imageContent, { type: 'text', text: prompt }]);
+    state.elements[i].aiResult = text;
+    if (!state.elements[i].notes) state.elements[i].notes = text.substring(0,200);
+  } catch(e) {
+    state.elements[i].aiResult = 'Analyse mislukt. Probeer opnieuw.';
+  }
+  state.elements[i].analyzing = false;
+  saveState();
+  renderElements();
+}
+
+// RAPPORT
+function resetRapport() {
+  document.getElementById('rapport-empty').style.display = 'block';
+  document.getElementById('rapport-content').style.display = 'none';
+  document.getElementById('rapport-loading').style.display = 'none';
+  state.reportText = '';
+}
+
+function resetMJOP() {
+  document.getElementById('mjop-empty').style.display = 'block';
+  document.getElementById('mjop-content').style.display = 'none';
+  document.getElementById('mjop-loading').style.display = 'none';
+  state.mjopData = [];
+}
+
+async function generateReport() {
+  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
+  if (!state.currentObjectId) { showToast('Selecteer eerst een object'); return; }
+  showPage('rapport');
+  document.getElementById('rapport-empty').style.display = 'none';
+  document.getElementById('rapport-content').style.display = 'none';
+  document.getElementById('rapport-loading').style.display = 'flex';
+  const obj = getCurrentObject();
+  const elStr = state.elements.map(e => {
+    let l = `- ${e.name}: score ${e.cond}/5, resterend leven ${e.life||'?'} jr. ${e.notes||''}`;
+    if (e.aiResult) l += ' Foto: ' + e.aiResult;
+    return l;
+  }).join('\n');
+  const prompt = `Je bent een vastgoedinspecteur. Schrijf een professionele inspectierapportage in het Nederlands.
+
+Object: ${obj.naam} (${obj.type}), bouwjaar ${obj.jaar||'?'}, ${obj.opp||'?'} m², ${obj.eenheden||'?'} eenheden.
+Context: ${obj.context||'-'}
+
+Bouwdelen:
+${elStr || 'Geen bouwdelen geregistreerd.'}
+
+Schrijf: samenvatting, bevindingen per bouwdeel, prioritaire aandachtspunten, algeheel oordeel. Gebruik **Koptekst** voor koppen. Max 400 woorden.`;
+  try {
+    state.reportText = await callClaude([{ type:'text', text: prompt }]);
+    saveState();
+    document.getElementById('rapport-loading').style.display = 'none';
+    document.getElementById('rapport-text').innerHTML = state.reportText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    document.getElementById('rapport-content').style.display = 'block';
+  } catch(e) {
+    document.getElementById('rapport-loading').style.display = 'none';
+    document.getElementById('rapport-empty').style.display = 'block';
+    document.getElementById('rapport-empty').querySelector('p').textContent = 'Fout bij genereren. Controleer je API-sleutel.';
+    showToast('Fout: ' + e.message);
+  }
+}
+
+function copyRapport() {
+  navigator.clipboard.writeText(state.reportText).then(() => showToast('Rapport gekopieerd'));
+}
+
+// MJOP
+async function generateMJOP() {
+  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
+  showPage('mjop');
+  document.getElementById('mjop-empty').style.display = 'none';
+  document.getElementById('mjop-content').style.display = 'none';
+  document.getElementById('mjop-loading').style.display = 'flex';
+  const obj = getCurrentObject();
+  const elStr = state.elements.map(e => `${e.name}: score ${e.cond}/5, leven ${e.life||20} jr`).join('; ');
+  const thisYear = new Date().getFullYear();
+  const prompt = `MJOP voor ${obj?.naam||'object'} voor de komende 10 jaar.
+Bouwdelen: ${elStr}
+Antwoord ALLEEN als JSON array, geen uitleg, geen backticks:
+[{"element":"naam","actie":"omschrijving","jaar":${thisYear},"kosten":5000,"prioriteit":"hoog"}]`;
+  try {
+    const raw = await callClaude([{ type:'text', text: prompt }]);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    state.mjopData = JSON.parse(clean);
+    saveState();
+    renderMJOP();
+  } catch(e) {
+    document.getElementById('mjop-loading').style.display = 'none';
+    document.getElementById('mjop-empty').style.display = 'block';
+    showToast('MJOP genereren mislukt');
+  }
+}
+
+function renderMJOP() {
+  document.getElementById('mjop-loading').style.display = 'none';
+  const data = state.mjopData;
+  const total = data.reduce((s,r) => s+(r.kosten||0), 0);
+  const urgent = data.filter(r => r.prioriteit==='hoog').length;
+  const thisYear = new Date().getFullYear();
+  let html = `<div class="mjop-summary">
+    <div class="stat-card"><div class="stat-label">Totaal 10 jaar</div><div class="stat-val">€${Math.round(total/1000)}k</div></div>
+    <div class="stat-card"><div class="stat-label">Hoog prio</div><div class="stat-val" style="color:var(--red-text);">${urgent}</div></div>
+    <div class="stat-card"><div class="stat-label">Acties</div><div class="stat-val">${data.length}</div></div>
+  </div>`;
+  data.sort((a,b)=>a.jaar-b.jaar).forEach(r => {
+    const pc = r.prioriteit==='hoog'?'badge-4':r.prioriteit==='midden'?'badge-2':'badge-1';
+    const urg = r.jaar <= thisYear+1;
+    html += `<div class="mjop-item">
+      <div class="mjop-item-top">
+        <span class="mjop-item-name">${r.element}</span>
+        <span class="mjop-item-year ${urg?'urgent':''}">${r.jaar}</span>
+      </div>
+      <div class="mjop-item-actie">${r.actie}</div>
+      <div class="mjop-item-bottom">
+        <span class="mjop-kosten">€ ${(r.kosten||0).toLocaleString('nl-NL')}</span>
+        <span class="badge ${pc}">${r.prioriteit}</span>
+      </div>
+    </div>`;
+  });
+  html += `<div style="margin-top:16px;">
+    <button class="btn btn-light btn-full btn-sm" onclick="copyMJOP()">Kopieer MJOP als tekst</button>
+  </div>`;
+  document.getElementById('mjop-content').innerHTML = html;
+  document.getElementById('mjop-content').style.display = 'block';
+}
+
+function copyMJOP() {
+  const lines = state.mjopData.map(r => `${r.jaar} | ${r.element} | ${r.actie} | €${r.kosten} | ${r.prioriteit}`).join('\n');
+  navigator.clipboard.writeText('MJOP\n' + lines).then(() => showToast('MJOP gekopieerd'));
+}
+
+// API CALL
+async function callClaude(content) {
+  const key = getApiKey();
+  if (!key) throw new Error('Geen API-sleutel');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content }] })
+  });
+  if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || resp.status); }
+  const data = await resp.json();
+  return data.content?.map(b=>b.text||'').join('') || '';
+}
+
+// UTILS
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'vastgoed-data.json'; a.click();
+  showToast('Data geëxporteerd');
+}
+
+function clearAll() {
+  if (!confirm('Alle data wissen?')) return;
+  localStorage.removeItem('vi-state');
+  state = { objects: [], currentObjectId: null, elements: [], reportText: '', mjopData: [] };
+  renderObjects();
+  renderInspectie();
+  resetRapport();
+  resetMJOP();
+  showToast('Data gewist');
+}
+
+// SETTINGS PAGE INIT
+function initSettings() {
+  const key = getApiKey();
+  if (key) {
+    document.getElementById('api-key-input').value = key;
+    document.getElementById('api-key-status').textContent = 'Sleutel actief: ' + key.substring(0,16) + '...';
+  }
+}
+
+// BAG / PDOK INTEGRATIE
+let bagTimer = null;
+let bagIgnoreNext = false;
+
+function hideBagDropdown() {
+  const dd = document.getElementById('bag-dropdown');
+  if (dd) { dd.style.display = 'none'; dd.innerHTML = ''; }
+}
+
+function bagSuggest(q) {
+  clearTimeout(bagTimer);
+  if (!q || q.length < 3) { hideBagDropdown(); return; }
+  bagTimer = setTimeout(() => _bagFetch(q), 280);
+}
+
+async function _bagFetch(q) {
+  const dd = document.getElementById('bag-dropdown');
+  if (!dd) return;
+  dd.style.display = 'block';
+  dd.innerHTML = '<div class="bag-loading">Zoeken...</div>';
+  try {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(q)}&fq=type:(adres)&rows=8&fl=id,weergavenaam,straatnaam,huisnummer,huisletter,huisnummertoevoeging,postcode,woonplaatsnaam,bron`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const docs = data?.response?.docs || [];
+    if (docs.length === 0) {
+      dd.innerHTML = '<div class="bag-loading">Geen resultaten gevonden</div>';
+      return;
+    }
+    dd.innerHTML = docs.map(d => `
+      <div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">
+        <b>${escHtml(d.weergavenaam)}</b>
+      </div>`).join('');
+  } catch(e) {
+    dd.innerHTML = '<div class="bag-loading">Fout bij zoeken — check internet</div>';
+  }
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+async function bagSelect(id, weergavenaam) {
+  hideBagDropdown();
+  document.getElementById('f-bag-search').value = weergavenaam;
+  document.getElementById('f-naam').value = weergavenaam;
+  const status = document.getElementById('bag-status');
+  status.innerHTML = '<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG gegevens ophalen...</div>';
+
+  try {
+    const lookupUrl = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?id=${id}&fl=id,weergavenaam,postcode,woonplaatsnaam,nummeraanduiding_id,pandidentificatie,bouwjaar,gebruiksdoel,oppervlakte_min,oppervlakte_max`;
+    const resp = await fetch(lookupUrl);
+    const data = await resp.json();
+    const doc = data?.response?.docs?.[0];
+    if (!doc) throw new Error('Geen detail gevonden');
+
+    let gevonden = [];
+
+    if (doc.postcode && doc.woonplaatsnaam) {
+      document.getElementById('f-postcode').value = doc.postcode + ' ' + doc.woonplaatsnaam;
+    }
+
+    if (doc.bouwjaar) {
+      document.getElementById('f-jaar').value = doc.bouwjaar;
+      document.getElementById('f-jaar-badge').textContent = '✓ BAG';
+      gevonden.push('bouwjaar');
+    }
+
+    if (doc.oppervlakte_min) {
+      document.getElementById('f-opp').value = doc.oppervlakte_min;
+      document.getElementById('f-opp-badge').textContent = '✓ BAG';
+      gevonden.push('oppervlakte');
+    }
+
+    if (doc.gebruiksdoel) {
+      const gd = Array.isArray(doc.gebruiksdoel) ? doc.gebruiksdoel[0] : doc.gebruiksdoel;
+      const typeMap = {
+        'woonfunctie': 'Eengezinswoning',
+        'wonen': 'Appartementencomplex',
+        'kantoorfunctie': 'Kantoorpand',
+        'winkelfunctie': 'Winkelruimte',
+        'industriefunctie': 'Bedrijfshal',
+        'bedrijf': 'Bedrijfshal'
+      };
+      const mapped = Object.entries(typeMap).find(([k]) => gd.toLowerCase().includes(k));
+      if (mapped) {
+        const sel = document.getElementById('f-type');
+        for (let opt of sel.options) { if (opt.value === mapped[1]) { sel.value = mapped[1]; break; } }
+      }
+    }
+
+    if (gevonden.length > 0) {
+      status.innerHTML = `<div class="bag-badge">✓ BAG: ${gevonden.join(' + ')} overgenomen</div>`;
+    } else {
+      status.innerHTML = `<div class="bag-badge fail">Adres gevonden, maar geen extra BAG-data beschikbaar</div>`;
+    }
+
+  } catch(e) {
+    status.innerHTML = `<div class="bag-badge fail">BAG lookup mislukt — vul handmatig in</div>`;
+  }
+}
+
+// Sluit dropdown bij klik buiten
+document.addEventListener('click', e => {
+  if (!e.target.closest('.bag-wrap')) hideBagDropdown();
+});
+
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// BOOT
+loadState();
+renderObjects();
+renderInspectie();
+initSettings();
+if (state.reportText) {
+  document.getElementById('rapport-empty').style.display = 'none';
+  document.getElementById('rapport-text').innerHTML = state.reportText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  document.getElementById('rapport-content').style.display = 'block';
+}
+if (state.mjopData && state.mjopData.length > 0) {
+  renderMJOP();
+}
+updateTopbar();
+</script>
+</body>
+</html>
