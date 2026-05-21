@@ -1039,8 +1039,9 @@ async function bagSelect(id, weergavenaam) {
       }
     }
 
-    if (doc.status_pand) {
-      gevonden.push('status: ' + doc.status_pand);
+    if (doc.aantal_eenheden) {
+      document.getElementById('f-eenheden').value = doc.aantal_eenheden;
+      gevonden.push('eenheden: ' + doc.aantal_eenheden);
     }
 
     if (gevonden.length > 0) {
