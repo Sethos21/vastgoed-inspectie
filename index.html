@@ -1004,30 +1004,43 @@ async function bagSelect(id, weergavenaam) {
     if (doc.bouwjaar) {
       document.getElementById('f-jaar').value = doc.bouwjaar;
       document.getElementById('f-jaar-badge').textContent = '✓ BAG';
-      gevonden.push('bouwjaar');
+      gevonden.push('bouwjaar ' + doc.bouwjaar);
     }
 
-    if (doc.oppervlakte_min) {
-      document.getElementById('f-opp').value = doc.oppervlakte_min;
-      document.getElementById('f-opp-badge').textContent = '✓ BAG';
-      gevonden.push('oppervlakte');
+    // Pandoppervlakte heeft voorkeur boven verblijfsobject oppervlakte
+    const opp = doc.oppervlakte_pand || doc.oppervlakte_vbo || doc.oppervlakte_min;
+    if (opp) {
+      document.getElementById('f-opp').value = opp;
+      document.getElementById('f-opp-badge').textContent = doc.oppervlakte_pand ? '✓ BAG pand' : '✓ BAG vbo';
+      gevonden.push('oppervlakte ' + opp + ' m²');
+    }
+
+    if (doc.gemeente) {
+      // Voeg gemeente toe aan context als extra info
+      const ctx = document.getElementById('f-context');
+      if (!ctx.value) ctx.value = 'Gemeente: ' + doc.gemeente;
     }
 
     if (doc.gebruiksdoel) {
       const gd = Array.isArray(doc.gebruiksdoel) ? doc.gebruiksdoel[0] : doc.gebruiksdoel;
       const typeMap = {
-        'woonfunctie': 'Eengezinswoning',
-        'wonen': 'Appartementencomplex',
         'kantoorfunctie': 'Kantoorpand',
+        'woonfunctie': 'Eengezinswoning',
         'winkelfunctie': 'Winkelruimte',
         'industriefunctie': 'Bedrijfshal',
-        'bedrijf': 'Bedrijfshal'
+        'bijeenkomstfunctie': 'Gemengd gebruik',
+        'gezondheidszorgfunctie': 'Gemengd gebruik',
       };
       const mapped = Object.entries(typeMap).find(([k]) => gd.toLowerCase().includes(k));
       if (mapped) {
         const sel = document.getElementById('f-type');
         for (let opt of sel.options) { if (opt.value === mapped[1]) { sel.value = mapped[1]; break; } }
+        gevonden.push('type: ' + mapped[1]);
       }
+    }
+
+    if (doc.status_pand) {
+      gevonden.push('status: ' + doc.status_pand);
     }
 
     if (gevonden.length > 0) {
