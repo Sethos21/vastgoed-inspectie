@@ -1,4 +1,4 @@
-const CACHE = 'vastgoed-v16';
+const CACHE = 'vastgoed-v17';
 const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
