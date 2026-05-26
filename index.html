@@ -30,9 +30,10 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
 #app{display:flex;flex-direction:column;height:100%;height:100dvh;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top) + 12px) 16px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top)+12px) 16px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .topbar-title{font-size:17px;font-weight:600;letter-spacing:-0.3px;}
 .topbar-sub{font-size:12px;color:var(--text3);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
 .icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
 .tabbar{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .tabbar-btn{flex:1;padding:10px 4px 8px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;font-family:inherit;}
@@ -43,7 +44,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .page.active{display:block;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500;}
-input[type=text],input[type=number],input[type=password],select,textarea{width:100%;padding:11px 13px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;-webkit-appearance:none;}
+input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;padding:11px 13px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;-webkit-appearance:none;}
 input:focus,select:focus,textarea:focus{border-color:var(--text);}
 textarea{resize:vertical;min-height:72px;line-height:1.5;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -73,18 +74,13 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 .empty svg{width:48px;height:48px;stroke:var(--text3);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px;display:block;}
 .toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--accent-text);padding:10px 18px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:999;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-
-/* BAG */
 .bag-wrap{position:relative;}
 .bag-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:100;max-height:220px;overflow-y:auto;margin-top:3px;}
 .bag-item{padding:10px 13px;font-size:14px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
 .bag-item:active{background:var(--bg2);}
 .bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:6px;font-weight:500;}
 .bag-badge.fail{background:var(--amber-bg);color:var(--amber-text);}
-
-/* FOTO UPLOAD */
-.photo-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 16px;text-align:center;cursor:pointer;background:var(--bg2);transition:background .15s;}
-.photo-upload-zone:active{background:var(--bg3);}
+.photo-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 16px;text-align:center;cursor:pointer;background:var(--bg2);}
 .photo-upload-zone .icon{font-size:40px;margin-bottom:8px;}
 .photo-upload-zone .title{font-size:16px;font-weight:600;margin-bottom:4px;}
 .photo-upload-zone .sub{font-size:13px;color:var(--text3);}
@@ -98,35 +94,39 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 .photo-del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
 .progress-bar-wrap{background:var(--bg2);border-radius:99px;height:6px;margin:10px 0;overflow:hidden;}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
-
-/* RAPPORT */
 .result-card{background:var(--bg2);border-radius:var(--radius);padding:14px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
-.result-card strong{color:var(--text);}
-.result-card br{display:block;margin:2px 0;}
-
-/* OBJECTEN */
 .obj-item{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
 .obj-item:active{background:var(--bg2);}
-.obj-item-name{font-weight:600;font-size:15px;}
-.obj-item-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-text);display:inline-block;margin-right:4px;}
+.sync-dot.offline{background:var(--amber-text);}
 
-/* SETTINGS */
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:0.5px solid var(--border);gap:12px;}
-.settings-label{font-size:15px;}
-.settings-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+/* LOGIN */
+#page-login{display:flex;flex-direction:column;justify-content:center;min-height:100%;}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo .icon{font-size:48px;margin-bottom:8px;}
+.login-logo h1{font-size:22px;font-weight:700;}
+.login-logo p{font-size:14px;color:var(--text3);margin-top:4px;}
+.login-card{background:var(--bg2);border-radius:var(--radius);padding:20px;}
+.login-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;}
+.login-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;border-radius:6px;font-family:inherit;color:var(--text2);}
+.login-tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="topbar">
+  <div class="topbar" id="topbar" style="display:none;">
     <div>
       <div class="topbar-title" id="topbar-title">VastgoedInspectie</div>
-      <div class="topbar-sub" id="topbar-sub">Selecteer of maak een object</div>
+      <div class="topbar-sub" id="topbar-sub">Laden...</div>
     </div>
-    <button class="icon-btn" onclick="showPage('settings')">⚙</button>
+    <div class="topbar-right">
+      <span id="sync-status" style="font-size:11px;color:var(--text3);"></span>
+      <button class="icon-btn" onclick="showPage('settings')" title="Instellingen">⚙</button>
+      <button class="icon-btn" onclick="uitloggen()" title="Uitloggen" style="font-size:13px;">↩</button>
+    </div>
   </div>
 
-  <div class="tabbar" id="tabbar">
+  <div class="tabbar" id="tabbar" style="display:none;">
     <button class="tabbar-btn active" data-page="objects" onclick="showPage('objects')">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>Objecten
     </button>
@@ -143,8 +143,36 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 
   <div class="content">
 
+    <!-- LOGIN -->
+    <div id="page-login" class="page active">
+      <div class="login-logo">
+        <div class="icon">🏢</div>
+        <h1>VastgoedInspectie</h1>
+        <p>Professionele inspectietool met AI</p>
+      </div>
+      <div class="login-card">
+        <div class="login-tabs">
+          <button class="login-tab active" onclick="switchLoginTab('inloggen')">Inloggen</button>
+          <button class="login-tab" onclick="switchLoginTab('registreren')">Registreren</button>
+        </div>
+        <div id="login-form">
+          <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
+          <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password"/></div>
+          <button class="btn btn-dark btn-full" onclick="inloggen()">Inloggen</button>
+          <div id="login-error" style="font-size:13px;color:var(--red-text);margin-top:10px;text-align:center;"></div>
+        </div>
+        <div id="register-form" style="display:none;">
+          <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
+          <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
+          <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens" autocomplete="new-password"/></div>
+          <button class="btn btn-dark btn-full" onclick="registreren()">Account aanmaken</button>
+          <div id="reg-error" style="font-size:13px;color:var(--red-text);margin-top:10px;text-align:center;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- OBJECTS -->
-    <div id="page-objects" class="page active">
+    <div id="page-objects" class="page">
       <div class="section-title">Mijn objecten</div>
       <div id="objects-list"></div>
       <button class="btn btn-dark btn-full" onclick="showPage('object-form');clearForm()">+ Nieuw object aanmaken</button>
@@ -154,52 +182,26 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
     <div id="page-object-form" class="page">
       <div class="section-title">Objectgegevens</div>
       <div class="field">
-        <label>Adres zoeken (BAG) <span style="color:var(--text3);font-size:11px;font-weight:400;">— automatisch ingevuld</span></label>
+        <label>Adres zoeken (BAG)</label>
         <div class="bag-wrap">
-          <input type="text" id="f-bag-search" placeholder="Begin te typen: Kerkstraat 12 Nijmegen…" autocomplete="off" oninput="bagSuggest(this.value)"/>
+          <input type="text" id="f-bag-search" placeholder="Begin te typen: Kerkstraat 12..." autocomplete="off" oninput="bagSuggest(this.value)"/>
           <div id="bag-dropdown" class="bag-dropdown" style="display:none;"></div>
         </div>
         <div id="bag-status"></div>
       </div>
-      <div class="field">
-        <label>Naam / adres object</label>
-        <input type="text" id="f-naam" placeholder="Wordt automatisch ingevuld"/>
+      <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Wordt automatisch ingevuld"/></div>
+      <div class="grid2">
+        <div class="field"><label>Type</label>
+          <select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select>
+        </div>
+        <div class="field"><label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-jaar" placeholder="Uit BAG"/></div>
       </div>
       <div class="grid2">
-        <div class="field">
-          <label>Type object</label>
-          <select id="f-type">
-            <option>Appartementencomplex</option>
-            <option>Eengezinswoning</option>
-            <option>Kantoorpand</option>
-            <option>Winkelruimte</option>
-            <option>Bedrijfshal</option>
-            <option>Gemengd gebruik</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label>
-          <input type="number" id="f-jaar" placeholder="Uit BAG of handmatig"/>
-        </div>
+        <div class="field"><label>Opp. m² <span id="f-opp-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-opp" placeholder="Uit BAG"/></div>
+        <div class="field"><label>Eenheden</label><input type="number" id="f-eenheden" placeholder="12"/></div>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label>Opp. (m²) <span id="f-opp-badge" style="color:var(--green-text);font-size:11px;"></span></label>
-          <input type="number" id="f-opp" placeholder="Uit BAG of handmatig"/>
-        </div>
-        <div class="field">
-          <label>Eenheden</label>
-          <input type="number" id="f-eenheden" placeholder="12"/>
-        </div>
-      </div>
-      <div class="field">
-        <label>Postcode &amp; plaats</label>
-        <input type="text" id="f-postcode" placeholder="Uit BAG of handmatig"/>
-      </div>
-      <div class="field">
-        <label>Context / bijzonderheden</label>
-        <textarea id="f-context" placeholder="Monumentaal pand, VvE, recent dak vervangen..."></textarea>
-      </div>
+      <div class="field"><label>Postcode &amp; plaats</label><input type="text" id="f-postcode" placeholder="Uit BAG"/></div>
+      <div class="field"><label>Context</label><textarea id="f-context" placeholder="VvE, monumentaal, recent dak vervangen..."></textarea></div>
       <div class="btn-row">
         <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
         <button class="btn btn-light" onclick="showPage('objects')">Annuleren</button>
@@ -210,13 +212,13 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
     <div id="page-fotos" class="page">
       <div id="fotos-no-object" class="empty">
         <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p>Selecteer eerst een object<br>via het tabblad Objecten</p>
+        <p>Selecteer eerst een object</p>
       </div>
       <div id="fotos-content" style="display:none;">
         <div class="photo-upload-zone" onclick="document.getElementById('photo-input').click()">
           <div class="icon">📷</div>
           <div class="title">Foto's toevoegen</div>
-          <div class="sub">Tik om foto's te kiezen of te maken<br>Maximaal 100 foto's</div>
+          <div class="sub">Tik om te kiezen of te maken · Max 100</div>
           <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(event)"/>
         </div>
         <div id="photo-count" style="text-align:center;margin-top:10px;"></div>
@@ -232,17 +234,17 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
     <div id="page-rapport" class="page">
       <div id="rapport-empty" class="empty">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        <p>Upload foto's en genereer<br>een rapport via het Foto's tabblad</p>
+        <p>Upload foto's en genereer een rapport</p>
       </div>
       <div id="rapport-loading" style="display:none;">
-        <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="loading-status">AI analyseert foto's...</span></div>
+        <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="loading-status">Bezig...</span></div>
         <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
         <div id="loading-detail" style="font-size:12px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div id="rapport-content" style="display:none;">
         <div id="rapport-text" class="result-card"></div>
         <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn btn-dark" onclick="generateRapport()">↺ Opnieuw genereren</button>
+          <button class="btn btn-dark" onclick="generateRapport()">↺ Opnieuw</button>
           <button class="btn btn-light" onclick="copyRapport()">Kopieer</button>
         </div>
         <div class="btn-row">
@@ -254,190 +256,217 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 
     <!-- SETTINGS -->
     <div id="page-settings" class="page">
-      <div class="section-title">API-sleutel</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">Vul je Anthropic API-sleutel in. Lokaal opgeslagen op je telefoon.</p>
-      <div class="field">
-        <label>Anthropic API-sleutel</label>
-        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..."/>
+      <div id="user-info" style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--text2);">Ingelogd als</div>
+        <div id="user-email" style="font-weight:600;margin-top:2px;"></div>
       </div>
-      <div class="btn-row" style="margin-bottom:18px;">
+      <div class="section-title">Inspectie API</div>
+      <div class="field"><label>Anthropic API-sleutel</label><input type="password" id="api-key-input" placeholder="sk-ant-..."/></div>
+      <div class="btn-row" style="margin-bottom:8px;">
         <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
-        <button class="btn btn-light btn-sm" onclick="toggleKeyVis()">Toon/verberg</button>
+        <button class="btn btn-light btn-sm" onclick="document.getElementById('api-key-input').type=document.getElementById('api-key-input').type==='password'?'text':'password'">Toon/verberg</button>
       </div>
       <div id="api-key-status" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></div>
-
-      <div class="section-title">Cloudflare Worker URL</div>
-      <div class="field">
-        <label>Worker URL</label>
-        <input type="text" id="worker-url-input" placeholder="https://....workers.dev"/>
-      </div>
+      <div class="section-title">Worker URL</div>
+      <div class="field"><input type="text" id="worker-url-input" placeholder="https://....workers.dev"/></div>
       <div class="btn-row" style="margin-bottom:6px;">
         <button class="btn btn-dark btn-sm" onclick="saveWorkerUrl()">Opslaan</button>
-        <button class="btn btn-light btn-sm" onclick="testWorker()">Test verbinding</button>
+        <button class="btn btn-light btn-sm" onclick="testWorker()">Test</button>
       </div>
       <div id="worker-status" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></div>
-
-      <div class="section-title">Data</div>
-      <div class="btn-row">
-        <button class="btn btn-light btn-sm" onclick="exportData()">Exporteer data</button>
-        <button class="btn btn-light btn-sm" style="color:var(--red-text);" onclick="clearAll()">Alles wissen</button>
-      </div>
+      <button class="btn btn-light btn-full btn-sm" style="color:var(--red-text);" onclick="uitloggen()">Uitloggen</button>
     </div>
 
   </div>
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
-// STATE
-let state = {
-  objects: [],
-  currentObjectId: null,
-  inspections: {} // { id: { photos: [], reportText: '' } }
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",
+  authDomain: "inspectie-app-26ca2.firebaseapp.com",
+  projectId: "inspectie-app-26ca2",
+  storageBucket: "inspectie-app-26ca2.firebasestorage.app",
+  messagingSenderId: "668843955807",
+  appId: "1:668843955807:web:bd8437df3bf233d931edea"
 };
 
-function getInsp(id) {
-  const oid = id || state.currentObjectId;
-  if (!oid) return { photos: [], reportText: '' };
-  if (!state.inspections[oid]) state.inspections[oid] = { photos: [], reportText: '' };
-  return state.inspections[oid];
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-function loadState() {
-  try {
-    const s = localStorage.getItem('vi-state2');
-    if (!s) return;
-    const saved = JSON.parse(s);
-    state.objects = saved.objects || [];
-    state.currentObjectId = saved.currentObjectId || null;
-    // Laad inspections maar zonder foto dataUrls (te groot voor localStorage)
-    state.inspections = saved.inspections || {};
-  } catch(e) {}
-}
+// STATE
+let currentUser = null;
+let currentObjectId = null;
+let currentPhotos = [];
+let objects = [];
 
-function saveState() {
-  try {
-    // Sla op zonder foto data (die zit in IndexedDB)
-    const toSave = {
-      objects: state.objects,
-      currentObjectId: state.currentObjectId,
-      inspections: {}
-    };
-    Object.entries(state.inspections).forEach(([id, insp]) => {
-      toSave.inspections[id] = { reportText: insp.reportText || '', photoCount: (insp.photos||[]).length };
-    });
-    localStorage.setItem('vi-state2', JSON.stringify(toSave));
-  } catch(e) {}
-}
-
-// IndexedDB voor foto's (localStorage is te klein)
-let db;
-function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open('vastgoed-db', 1);
-    req.onupgradeneeded = e => e.target.result.createObjectStore('photos');
-    req.onsuccess = e => { db = e.target.result; res(db); };
-    req.onerror = rej;
-  });
-}
-async function dbSet(key, val) {
-  await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction('photos', 'readwrite');
-    tx.objectStore('photos').put(val, key);
-    tx.oncomplete = res; tx.onerror = rej;
-  });
-}
-async function dbGet(key) {
-  await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction('photos', 'readonly');
-    const req = tx.objectStore('photos').get(key);
-    req.onsuccess = () => res(req.result);
-    req.onerror = rej;
-  });
-}
-async function dbDel(key) {
-  await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction('photos', 'readwrite');
-    tx.objectStore('photos').delete(key);
-    tx.oncomplete = res; tx.onerror = rej;
-  });
-}
-
-// Sla foto's per object op in IndexedDB
-async function savePhotos(objectId, photos) {
-  await dbSet('photos_' + objectId, photos);
-}
-async function loadPhotos(objectId) {
-  const photos = await dbGet('photos_' + objectId);
-  return photos || [];
-}
-
-// NAVIGATION
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tabbar-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
-  const page = document.getElementById('page-' + name);
-  if (page) page.classList.add('active');
-  updateTopbar();
-}
-
-function updateTopbar() {
-  const obj = getCurrentObject();
-  if (obj) {
-    document.getElementById('topbar-title').textContent = obj.naam || 'Object';
-    document.getElementById('topbar-sub').textContent = obj.type + (obj.jaar ? ', ' + obj.jaar : '');
+// AUTH STATE
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('tabbar').style.display = 'flex';
+    document.getElementById('user-email').textContent = user.email;
+    initSettings();
+    laadObjecten();
+    showPage('objects');
   } else {
-    document.getElementById('topbar-title').textContent = 'VastgoedInspectie';
-    document.getElementById('topbar-sub').textContent = 'Selecteer of maak een object';
+    currentUser = null;
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('tabbar').style.display = 'none';
+    showPage('login');
+  }
+});
+
+// HELPERS — gedeelde paden (niet per user)
+const objCol = () => collection(db, 'objects');
+const objDoc = (id) => doc(db, 'objects', id);
+const dataDoc = (objId, type) => doc(db, 'objects', objId, 'data', type);
+
+// LOGIN / REGISTREREN
+window.switchLoginTab = (tab) => {
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='inloggen')||(i===1&&tab==='registreren')));
+  document.getElementById('login-form').style.display = tab==='inloggen'?'block':'none';
+  document.getElementById('register-form').style.display = tab==='registreren'?'block':'none';
+};
+
+window.inloggen = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  document.getElementById('login-error').textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    document.getElementById('login-error').textContent = vertaalFout(e.code);
+  }
+};
+
+window.registreren = async () => {
+  const naam = document.getElementById('reg-naam').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  document.getElementById('reg-error').textContent = '';
+  if (!naam) { document.getElementById('reg-error').textContent = 'Vul je naam in'; return; }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: naam });
+    showToast('Account aangemaakt!');
+  } catch(e) {
+    document.getElementById('reg-error').textContent = vertaalFout(e.code);
+  }
+};
+
+window.uitloggen = async () => {
+  await signOut(auth);
+  currentObjectId = null;
+  currentPhotos = [];
+  objects = [];
+};
+
+function vertaalFout(code) {
+  const map = {
+    'auth/invalid-email': 'Ongeldig e-mailadres',
+    'auth/user-not-found': 'Geen account gevonden met dit e-mailadres',
+    'auth/wrong-password': 'Onjuist wachtwoord',
+    'auth/invalid-credential': 'E-mail of wachtwoord onjuist',
+    'auth/email-already-in-use': 'Dit e-mailadres is al in gebruik',
+    'auth/weak-password': 'Wachtwoord moet minimaal 6 tekens zijn',
+  };
+  return map[code] || 'Er ging iets mis. Probeer opnieuw.';
+}
+
+// OBJECTEN
+async function laadObjecten() {
+  if (!currentUser) return;
+  document.getElementById('sync-status').innerHTML = '<span class="sync-dot offline"></span>Laden...';
+  try {
+    const q = query(objCol(), orderBy('aangemaaktOp', 'desc'));
+    onSnapshot(q, snap => {
+      objects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderObjects();
+      document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Gesynchroniseerd';
+    });
+  } catch(e) {
+    showToast('Fout bij laden objecten');
+    document.getElementById('sync-status').textContent = '⚠ Offline';
   }
 }
 
-function getCurrentObject() {
-  return state.objects.find(o => o.id === state.currentObjectId) || null;
-}
-
-// OBJECTS
 function renderObjects() {
   const list = document.getElementById('objects-list');
-  if (!state.objects.length) {
-    list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.<br>Maak er een aan.</p></div>';
+  if (!objects.length) {
+    list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.</p></div>';
     return;
   }
-  list.innerHTML = state.objects.map(o => {
-    const insp = state.inspections[o.id];
-    const fotoCount = insp?.photoCount || 0;
-    const hasRapport = !!insp?.reportText;
-    return `<div class="obj-item" onclick="selectObject('${o.id}')">
+  list.innerHTML = objects.map(o => `
+    <div class="obj-item" onclick="selectObject('${o.id}')">
       <div style="flex:1;">
-        <div class="obj-item-name">${o.naam||'Naamloos'}</div>
-        <div class="obj-item-sub">${o.type}${o.jaar?' · '+o.jaar:''}${fotoCount?' · '+fotoCount+' foto\'s':''}</div>
+        <div style="font-weight:600;font-size:15px;">${o.naam||'Naamloos'}</div>
+        <div style="font-size:12px;color:var(--text3);">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.fotoCount?' · '+o.fotoCount+' foto\'s':''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        ${hasRapport?'<span class="badge badge-green" style="font-size:10px;">rapport</span>':''}
+        ${o.heeftRapport?'<span class="badge badge-green" style="font-size:10px;">rapport</span>':''}
         <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">✎</button>
+        <button onclick="event.stopPropagation();verwijderObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">🗑</button>
         <span style="color:var(--text3);font-size:18px;">›</span>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-function clearForm() {
-  ['f-naam','f-jaar','f-opp','f-eenheden','f-context','f-postcode','f-bag-search'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('f-type').selectedIndex = 0;
-  const s = document.getElementById('bag-status'); if (s) s.innerHTML = '';
-  const jb = document.getElementById('f-jaar-badge'); if (jb) jb.textContent = '';
-  const ob = document.getElementById('f-opp-badge'); if (ob) ob.textContent = '';
-  hideBagDropdown();
-  document.getElementById('page-object-form').dataset.editId = '';
-}
+window.selectObject = async (id) => {
+  currentObjectId = id;
+  updateTopbar();
+  document.getElementById('sync-status').textContent = 'Foto\'s laden...';
+  currentPhotos = await laadFotos(id);
+  renderFotos();
+  const obj = objects.find(o => o.id === id);
+  if (obj?.heeftRapport) {
+    const snap = await getDoc(dataDoc(id, 'rapport'));
+    if (snap.exists()) {
+      const text = snap.data().tekst || '';
+      document.getElementById('rapport-empty').style.display = 'none';
+      document.getElementById('rapport-text').innerHTML = renderRapportHtml(text) + renderFotoBijlage();
+      document.getElementById('rapport-content').style.display = 'block';
+    }
+  } else {
+    document.getElementById('rapport-empty').style.display = 'block';
+    document.getElementById('rapport-content').style.display = 'none';
+  }
+  document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Gesynchroniseerd';
+  showPage('fotos');
+};
 
-function editObject(id) {
-  const o = state.objects.find(x => x.id === id);
+window.saveObject = async () => {
+  const naam = document.getElementById('f-naam').value.trim();
+  if (!naam) { showToast('Vul een naam in'); return; }
+  const editId = document.getElementById('page-object-form').dataset.editId;
+  const id = editId || Date.now().toString();
+  const bestaand = objects.find(o => o.id === editId);
+  const obj = {
+    naam, type: document.getElementById('f-type').value,
+    jaar: document.getElementById('f-jaar').value,
+    opp: document.getElementById('f-opp').value,
+    eenheden: document.getElementById('f-eenheden').value,
+    postcode: document.getElementById('f-postcode').value,
+    context: document.getElementById('f-context').value,
+    aangemaaktOp: bestaand?.aangemaaktOp || serverTimestamp(),
+    aangemaaktDoor: bestaand?.aangemaaktDoor || (currentUser?.displayName || currentUser?.email || ''),
+    heeftRapport: bestaand?.heeftRapport || false,
+    fotoCount: bestaand?.fotoCount || 0,
+  };
+  await setDoc(objDoc(id), obj);
+  showToast('Object opgeslagen');
+  showPage('objects');
+};
+
+window.editObject = (id) => {
+  const o = objects.find(x => x.id === id);
   if (!o) return;
   document.getElementById('f-naam').value = o.naam||'';
   document.getElementById('f-type').value = o.type||'';
@@ -450,65 +479,48 @@ function editObject(id) {
   document.getElementById('bag-status').innerHTML = '';
   document.getElementById('page-object-form').dataset.editId = id;
   showPage('object-form');
-}
+};
 
-function saveObject() {
-  const naam = document.getElementById('f-naam').value.trim();
-  if (!naam) { showToast('Vul een naam in'); return; }
-  const editId = document.getElementById('page-object-form').dataset.editId;
-  const obj = {
-    id: editId || Date.now().toString(),
-    naam, type: document.getElementById('f-type').value,
-    jaar: document.getElementById('f-jaar').value,
-    opp: document.getElementById('f-opp').value,
-    eenheden: document.getElementById('f-eenheden').value,
-    postcode: document.getElementById('f-postcode').value,
-    context: document.getElementById('f-context').value
-  };
-  if (editId) {
-    const idx = state.objects.findIndex(o => o.id === editId);
-    if (idx >= 0) state.objects[idx] = obj;
-  } else {
-    state.objects.push(obj);
-  }
-  saveState();
-  showToast('Object opgeslagen');
-  showPage('objects');
-  renderObjects();
-}
+window.verwijderObject = async (id) => {
+  if (!confirm('Object en alle data verwijderen?')) return;
+  await deleteDoc(objDoc(id));
+  if (currentObjectId === id) { currentObjectId = null; currentPhotos = []; }
+  showToast('Object verwijderd');
+};
 
-async function selectObject(id) {
-  state.currentObjectId = id;
-  if (!state.inspections[id]) state.inspections[id] = { photos: [], reportText: '', photoCount: 0 };
-  // Laad foto's uit IndexedDB
-  const photos = await loadPhotos(id);
-  state.inspections[id].photos = photos;
-  saveState();
-  updateTopbar();
-  renderFotos();
-  // Herstel rapport
-  const insp = getInsp(id);
-  if (insp.reportText) {
-    document.getElementById('rapport-empty').style.display = 'none';
-    document.getElementById('rapport-text').innerHTML = renderRapportHtml(insp.reportText) + renderFotoBijlage();
-    document.getElementById('rapport-content').style.display = 'block';
-  } else {
-    document.getElementById('rapport-empty').style.display = 'block';
-    document.getElementById('rapport-content').style.display = 'none';
-  }
-  showPage('fotos');
-}
+window.clearForm = () => {
+  ['f-naam','f-jaar','f-opp','f-eenheden','f-context','f-postcode','f-bag-search'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-type').selectedIndex = 0;
+  document.getElementById('bag-status').innerHTML = '';
+  document.getElementById('f-jaar-badge').textContent = '';
+  document.getElementById('f-opp-badge').textContent = '';
+  hideBagDropdown();
+  document.getElementById('page-object-form').dataset.editId = '';
+};
 
 // FOTO'S
-let currentPhotos = []; // { dataUrl, label }
+async function laadFotos(objectId) {
+  try {
+    const snap = await getDoc(dataDoc(objectId, 'fotos'));
+    if (snap.exists()) return snap.data().lijst || [];
+    return [];
+  } catch(e) { return []; }
+}
+
+async function slaFotosOp(objectId, fotos) {
+  await setDoc(dataDoc(objectId, 'fotos'), {
+    lijst: fotos.map(f => ({ label: f.label||'', dataUrl: f.dataUrl })),
+    bijgewerktOp: serverTimestamp(),
+    bijgewerktDoor: currentUser?.displayName || currentUser?.email || ''
+  });
+  await setDoc(objDoc(objectId), { fotoCount: fotos.length }, { merge: true });
+}
 
 function renderFotos() {
-  const hasObj = !!state.currentObjectId;
+  const hasObj = !!currentObjectId;
   document.getElementById('fotos-no-object').style.display = hasObj ? 'none' : 'block';
   document.getElementById('fotos-content').style.display = hasObj ? 'block' : 'none';
   if (!hasObj) return;
-
-  currentPhotos = getInsp().photos || [];
   renderPhotoGrid();
 }
 
@@ -516,521 +528,358 @@ function renderPhotoGrid() {
   const grid = document.getElementById('photo-grid');
   const countEl = document.getElementById('photo-count');
   const actions = document.getElementById('fotos-actions');
-
-  if (currentPhotos.length === 0) {
-    grid.innerHTML = '';
-    countEl.innerHTML = '';
-    actions.style.display = 'none';
-    return;
-  }
-
-  countEl.innerHTML = `<span class="photo-count-badge">📷 ${currentPhotos.length} foto's geladen</span>`;
+  if (!currentPhotos.length) { grid.innerHTML=''; countEl.innerHTML=''; actions.style.display='none'; return; }
+  countEl.innerHTML = `<span class="photo-count-badge">📷 ${currentPhotos.length} foto's</span>`;
   actions.style.display = 'block';
-
-  grid.innerHTML = currentPhotos.map((p, i) => `
+  grid.innerHTML = currentPhotos.map((p,i) => `
     <div class="photo-item">
       <img src="${p.dataUrl}" alt="Foto ${i+1}" loading="lazy"/>
       <button class="photo-del" onclick="removePhoto(${i})">×</button>
       <div class="photo-item-overlay">
-        <input class="photo-label-input" placeholder="Label (optioneel)" value="${p.label||''}" onchange="updateLabel(${i},this.value)" />
+        <input class="photo-label-input" placeholder="Label (optioneel)" value="${p.label||''}" onchange="updateLabel(${i},this.value)"/>
       </div>
     </div>`).join('');
 }
 
-function handlePhotoUpload(event) {
-  const files = Array.from(event.target.files);
-  const remaining = 100 - currentPhotos.length;
-  const toAdd = files.slice(0, remaining);
-  if (files.length > remaining) showToast(`Max 100 foto's — ${files.length - remaining} overgeslagen`);
-
-  let loaded = 0;
-  toAdd.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      currentPhotos.push({ dataUrl: e.target.result, label: '' });
-      loaded++;
-      if (loaded === toAdd.length) {
-        getInsp().photos = currentPhotos;
-        getInsp().photoCount = currentPhotos.length;
-        await savePhotos(state.currentObjectId, currentPhotos);
-        saveState();
-        renderPhotoGrid();
-        showToast(`${toAdd.length} foto's toegevoegd`);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-  event.target.value = '';
-}
-
-function updateLabel(i, val) {
-  currentPhotos[i].label = val;
-  getInsp().photos = currentPhotos;
-  savePhotos(state.currentObjectId, currentPhotos);
-}
-
-function removePhoto(i) {
-  currentPhotos.splice(i, 1);
-  getInsp().photos = currentPhotos;
-  getInsp().photoCount = currentPhotos.length;
-  savePhotos(state.currentObjectId, currentPhotos);
-  saveState();
-  renderPhotoGrid();
-}
-
-async function clearPhotos() {
-  if (!confirm('Alle foto\'s verwijderen?')) return;
-  currentPhotos = [];
-  getInsp().photos = [];
-  getInsp().photoCount = 0;
-  await savePhotos(state.currentObjectId, []);
-  saveState();
-  renderPhotoGrid();
-}
-
-// Foto comprimeren voor API (max 1MB per foto)
 function compressPhoto(dataUrl, maxWidth=1024) {
   return new Promise(res => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      res(canvas.toDataURL('image/jpeg', 0.75));
+      let w=img.width, h=img.height;
+      if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      res(canvas.toDataURL('image/jpeg',0.75));
     };
     img.onerror = () => res(dataUrl);
     img.src = dataUrl;
   });
 }
 
-// RAPPORT GENEREREN
-async function generateRapport() {
-  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
-  if (!state.currentObjectId) { showToast('Selecteer eerst een object'); return; }
-  if (!currentPhotos.length) { showToast('Upload eerst foto\'s'); showPage('fotos'); return; }
+window.handlePhotoUpload = async (event) => {
+  const files = Array.from(event.target.files);
+  const remaining = 100 - currentPhotos.length;
+  const toAdd = files.slice(0, remaining);
+  if (files.length > remaining) showToast(`Max 100 foto's — ${files.length-remaining} overgeslagen`);
+  showToast(`${toAdd.length} foto's verwerken...`);
+  let loaded = 0;
+  for (const file of toAdd) {
+    const reader = new FileReader();
+    const dataUrl = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
+    const compressed = await compressPhoto(dataUrl);
+    currentPhotos.push({ dataUrl: compressed, label: '' });
+    loaded++;
+    if (loaded % 5 === 0 || loaded === toAdd.length) renderPhotoGrid();
+  }
+  await slaFotosOp(currentObjectId, currentPhotos);
+  showToast(`${toAdd.length} foto's opgeslagen`);
+  event.target.value = '';
+};
 
+window.updateLabel = async (i, val) => {
+  currentPhotos[i].label = val;
+  await slaFotosOp(currentObjectId, currentPhotos);
+};
+
+window.removePhoto = async (i) => {
+  currentPhotos.splice(i, 1);
+  renderPhotoGrid();
+  await slaFotosOp(currentObjectId, currentPhotos);
+};
+
+window.clearPhotos = async () => {
+  if (!confirm('Alle foto\'s verwijderen?')) return;
+  currentPhotos = [];
+  await slaFotosOp(currentObjectId, []);
+  renderPhotoGrid();
+};
+
+// RAPPORT
+window.generateRapport = async () => {
+  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
+  if (!currentObjectId) { showToast('Selecteer eerst een object'); return; }
+  if (!currentPhotos.length) { showToast('Upload eerst foto\'s'); showPage('fotos'); return; }
   showPage('rapport');
   document.getElementById('rapport-empty').style.display = 'none';
   document.getElementById('rapport-content').style.display = 'none';
   document.getElementById('rapport-loading').style.display = 'block';
-
-  const obj = getCurrentObject();
-  const datum = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' });
-
-  // Comprimeer foto's eerst
+  const obj = objects.find(o => o.id === currentObjectId);
+  const datum = new Date().toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
   document.getElementById('loading-status').textContent = 'Foto\'s voorbereiden...';
   document.getElementById('progress-bar').style.width = '5%';
-
-  const compressed = [];
-  for (let i = 0; i < currentPhotos.length; i++) {
-    const c = await compressPhoto(currentPhotos[i].dataUrl);
-    compressed.push({ dataUrl: c, label: currentPhotos[i].label });
-    if (i % 5 === 0) document.getElementById('progress-bar').style.width = (5 + Math.round(i/currentPhotos.length*15)) + '%';
-  }
-
-  const BATCH = 8; // Kleinere batches voor betrouwbaarheid
+  const BATCH = 8;
   const batches = [];
-  for (let i = 0; i < compressed.length; i += BATCH) batches.push(compressed.slice(i, i + BATCH));
-
+  for (let i=0; i<currentPhotos.length; i+=BATCH) batches.push(currentPhotos.slice(i,i+BATCH));
   const analyses = [];
-  const totalBatches = batches.length;
-
-  for (let b = 0; b < batches.length; b++) {
-    const pct = 20 + Math.round((b / totalBatches) * 60);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('loading-status').textContent = `Batch ${b+1} van ${totalBatches} analyseren...`;
-    document.getElementById('loading-detail').textContent = `Foto's ${b*BATCH+1}–${Math.min((b+1)*BATCH, compressed.length)} van ${compressed.length}`;
-
-    const content = batches[b].map(p => ({
-      type: 'image',
-      source: { type: 'base64', media_type: 'image/jpeg', data: p.dataUrl.split(',')[1] }
-    }));
-
-    const labelInfo = batches[b].map((p,i) => p.label ? `Foto ${b*BATCH+i+1}: ${p.label}` : `Foto ${b*BATCH+i+1}`).join(', ');
-
-    content.push({ type: 'text', text: `Analyseer deze vastgoedinspectiefoto's (${labelInfo}).
-
-Per zichtbaar bouwdeel: naam, conditie, gebreken. Reageer ALLEEN met JSON array:
-[{"bouwdeel":"naam","conditie":"Matig","bevinding":"beschrijving gebrek","foto_nr":${b*BATCH+1}}]
-Geen uitleg, alleen JSON.` });
-
+  for (let b=0; b<batches.length; b++) {
+    const pct = 10 + Math.round((b/batches.length)*65);
+    document.getElementById('progress-bar').style.width = pct+'%';
+    document.getElementById('loading-status').textContent = `Batch ${b+1} van ${batches.length} analyseren...`;
+    document.getElementById('loading-detail').textContent = `Foto's ${b*BATCH+1}–${Math.min((b+1)*BATCH,currentPhotos.length)} van ${currentPhotos.length}`;
+    const content = batches[b].map(p => ({type:'image',source:{type:'base64',media_type:'image/jpeg',data:p.dataUrl.split(',')[1]}}));
+    const labels = batches[b].map((p,i) => `Foto ${b*BATCH+i+1}${p.label?': '+p.label:''}`).join(', ');
+    content.push({type:'text',text:`Analyseer deze vastgoedinspectiefoto's (${labels}). Per zichtbaar bouwdeel: naam, conditie, gebreken. ALLEEN JSON:\n[{"bouwdeel":"naam","conditie":"Matig","bevinding":"omschrijving","foto_nr":${b*BATCH+1}}]`});
     try {
       const raw = await callClaude(content);
-      const clean = raw.replace(/```json|```/g,'').trim();
-      const startIdx = clean.indexOf('[');
-      const endIdx = clean.lastIndexOf(']');
-      if (startIdx >= 0 && endIdx > startIdx) {
-        const parsed = JSON.parse(clean.substring(startIdx, endIdx+1));
-        analyses.push(...parsed);
-      }
-    } catch(e) {
-      console.error('Batch ' + (b+1) + ' mislukt:', e);
-      // Ga door met volgende batch
-    }
+      const clean = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+      const s=clean.indexOf('['), e=clean.lastIndexOf(']');
+      if(s>=0&&e>s) analyses.push(...JSON.parse(clean.substring(s,e+1)));
+    } catch(e) { console.error('Batch '+(b+1)+' fout:', e); }
   }
-
-  // Stap 2: genereer volledig rapport op basis van alle analyses
   document.getElementById('progress-bar').style.width = '80%';
-  document.getElementById('loading-status').textContent = 'Rapport en kostenraming opstellen...';
-  document.getElementById('loading-detail').textContent = `${analyses.length} bevindingen verwerken`;
+  document.getElementById('loading-status').textContent = 'Rapport opstellen...';
+  document.getElementById('loading-detail').textContent = analyses.length+' bevindingen verwerken';
+  const analyseStr = analyses.map(a => `- ${a.bouwdeel}: ${a.conditie} — ${a.bevinding}${a.foto_nr?' (foto '+a.foto_nr+')':''}`).join('\n');
+  const prompt = `Je bent een vastgoedinspecteur. Schrijf een professioneel inspectierapport in het Nederlands op basis van AI-analyse van ${currentPhotos.length} foto's.
 
-  // Voeg fotonummers toe aan analyses
-  const analyseStr = analyses.map(a => {
-    const fotoRef = a.foto_nr ? ` (foto ${a.foto_nr})` : '';
-    return `- ${a.bouwdeel}: ${a.conditie} — ${a.bevinding}${fotoRef}`;
-  }).join('\n');
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
 
-  const rapportPrompt = `Je bent een vastgoedinspecteur. Schrijf een professioneel maar beknopt inspectierapport in het Nederlands op basis van de AI-analyse van ${currentPhotos.length} foto's.
-
-Object: ${obj.naam} | Type: ${obj.type} | Bouwjaar: ${obj.jaar||'?'} | Opp: ${obj.opp||'?'}m² | Datum: ${datum}
-
-Geanalyseerde bevindingen (met fotonummers):
+Bevindingen (met fotonummers):
 ${analyseStr}
 
-Schrijf het rapport EXACT in dit format. Houd elk onderdeel beknopt — max 2 niveaus diep, geen subsecties.
+Schrijf het rapport in dit exacte format. Max 2 niveaus diep, max 8 hoofdonderdelen.
 
 **SAMENVATTING**
-[2-3 zinnen algehele staat van het object]
+[2-3 zinnen algehele staat]
 
 **OVERZICHTSTABEL**
-| Onderdeel | Conditie | Prioriteit | Kosten (indicatief) |
+| Onderdeel | Conditie | Prioriteit | Kosten indicatief |
 |---|---|---|---|
-[Vul alle hoofdonderdelen in — max 10 rijen]
+[max 10 rijen]
 **Totaal: € [som]**
 
 **BEVINDINGEN PER ONDERDEEL**
-[Per hoofdonderdeel (max 8 onderdelen totaal, geen subsecties):
-### [Naam onderdeel] — [Conditie]
-- Bevinding 1 (foto X, Y)
-- Bevinding 2 (foto Z)
-Prioriteit: [URGENT/HOOG/GEMIDDELD/LAAG]]
+### [Onderdeel] — [Conditie]
+- [bevinding (foto X)]
+Prioriteit: [URGENT/HOOG/GEMIDDELD/LAAG]
 
 **KOSTENRAMING**
 | Onderdeel | Maatregel | Kosten | Onderbouwing |
 |---|---|---|---|
-[Per bevinding een concrete schatting MET onderbouwing zoals "€8.400 (280 m¹ × €30/m¹)"]
 **Totaal indicatief: € [som]**
 
 **AANBEVELINGEN**
-Urgent (direct): [bullets]
+Urgent: [bullets]
 Hoog (1-3 mnd): [bullets]
 Gemiddeld (6-12 mnd): [bullets]
-Laag (planmatig): [bullets]
+Laag: [bullets]
 
 **DISCLAIMER**
-Dit rapport is opgesteld op basis van visuele analyse van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.
-
-Gebruik **vetgedrukte koppen** en ### voor onderdelen. Verwijs naar fotonummers waar beschikbaar.`;
-
+Dit rapport is opgesteld op basis van visuele analyse van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.`;
   try {
-    const rapportText = await callClaude([{ type: 'text', text: rapportPrompt }]);
-    getInsp().reportText = rapportText;
-    saveState();
-
+    const rapportText = await callClaude([{type:'text',text:prompt}]);
+    await setDoc(dataDoc(currentObjectId, 'rapport'), {
+      tekst: rapportText,
+      aangemaaktOp: serverTimestamp(),
+      aangemaaktDoor: currentUser?.displayName || currentUser?.email || ''
+    });
+    await setDoc(objDoc(currentObjectId), { heeftRapport: true }, { merge: true });
     document.getElementById('progress-bar').style.width = '100%';
     setTimeout(() => {
       document.getElementById('rapport-loading').style.display = 'none';
-      document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportText);
-      // Fotobijlage toevoegen
-      document.getElementById('rapport-text').innerHTML += renderFotoBijlage();
+      document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportText) + renderFotoBijlage();
       document.getElementById('rapport-content').style.display = 'block';
     }, 400);
   } catch(e) {
     document.getElementById('rapport-loading').style.display = 'none';
     document.getElementById('rapport-empty').style.display = 'block';
-    showToast('Fout bij genereren rapport');
+    showToast('Fout: '+e.message);
   }
-}
+};
 
-// RAPPORT HTML RENDERING
-function renderRapportHtml(text) {
+// RENDER HELPERS
+window.renderRapportHtml = (text) => {
   let html = text
-    // Koppen
-    .replace(/^### (.*)/gm, '<h3 style="font-size:14px;font-weight:700;margin:14px 0 5px;color:var(--text);">$1</h3>')
-    .replace(/^## (.*)/gm, '<h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
-    // Tabellen
-    .replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split('|').filter((c,i,a) => i>0 && i<a.length-1).map(c => c.trim());
-      if (cells.every(c => /^[-:]+$/.test(c))) return ''; // Separator rij overslaan
-      const isHeader = match.includes('---');
-      const tag = 'td';
-      return '<tr>' + cells.map(c => `<${tag} style="padding:6px 8px;border:0.5px solid var(--border);font-size:12px;">${c}</${tag}>`).join('') + '</tr>';
+    .replace(/^### (.*)/gm,'<h3 style="font-size:14px;font-weight:700;margin:14px 0 5px;">$1</h3>')
+    .replace(/^## (.*)/gm,'<h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
+    .replace(/\|(.+)\|/g, match => {
+      const cells = match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
+      if(cells.every(c=>/^[-:]+$/.test(c))) return '';
+      return '<tr>'+cells.map(c=>`<td style="padding:6px 8px;border:0.5px solid var(--border);font-size:12px;">${c}</td>`).join('')+'</tr>';
     });
-
-  // Wikkel tabelrijen in table tags
-  html = html.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g,
-    m => `<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;">${m}</table>`);
-
-  // Vet, bullets, regeleinden
+  html = html.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g, m=>`<table style="width:100%;border-collapse:collapse;margin:8px 0;">${m}</table>`);
   html = html
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.*)/gm, '<div style="padding:3px 0 3px 14px;font-size:13px;">• $1</div>')
-    .replace(/\n\n/g, '<br>')
-    .replace(/\n/g, '<br>');
-
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^- (.*)/gm,'<div style="padding:3px 0 3px 14px;font-size:13px;">• $1</div>')
+    .replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
   return html;
-}
+};
 
-function renderFotoBijlage() {
+window.renderFotoBijlage = () => {
   if (!currentPhotos.length) return '';
   let html = '<br><h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">FOTOBIJLAGE</h2>';
   html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">';
-  currentPhotos.forEach((p, i) => {
+  currentPhotos.forEach((p,i) => {
     html += `<div style="position:relative;">
       <div style="position:absolute;top:3px;left:3px;background:rgba(0,0,0,0.65);color:#fff;font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;">${i+1}</div>
       <img src="${p.dataUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:0.5px solid var(--border);" loading="lazy"/>
-      ${p.label ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.label}</div>` : ''}
+      ${p.label?`<div style="font-size:10px;color:var(--text3);margin-top:2px;text-align:center;">${p.label}</div>`:''}
     </div>`;
   });
-  html += '</div>';
-  return html;
-}
+  return html + '</div>';
+};
 
 // EXPORT
-function copyRapport() {
-  const text = getInsp().reportText || '';
-  navigator.clipboard.writeText(text).then(() => showToast('Rapport gekopieerd'));
-}
+window.copyRapport = () => {
+  const el = document.getElementById('rapport-text');
+  navigator.clipboard.writeText(el.innerText||el.textContent||'').then(()=>showToast('Rapport gekopieerd'));
+};
 
-function downloadPDF() {
-  const obj = getCurrentObject();
-  const rapportHtml = renderRapportHtml(getInsp().reportText || '');
-  const fotoBijlage = renderFotoBijlageForPrint();
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html lang="nl"><head>
-  <meta charset="UTF-8">
-  <title>Inspectierapport ${obj?.naam||''}</title>
-  <style>
-    body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;color:#000;}
-    h2{font-size:13pt;font-weight:bold;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}
-    h3{font-size:12pt;font-weight:bold;margin:12pt 0 4pt;}
-    table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}
-    td,th{border:1px solid #ccc;padding:5pt 7pt;}
-    strong{font-weight:bold;}
-    .foto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;margin-top:8pt;}
-    .foto-item{position:relative;page-break-inside:avoid;}
-    .foto-nr{background:#333;color:#fff;font-size:9pt;font-weight:bold;padding:2pt 4pt;display:inline-block;margin-bottom:2pt;border-radius:3pt;}
-    .foto-item img{width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;}
-    .foto-label{font-size:8pt;color:#666;margin-top:2pt;text-align:center;}
-    @media print{body{margin:1.5cm;}h2{page-break-before:auto;}}
-  </style>
-  </head><body>
-  <h1 style="font-size:16pt;text-align:center;margin-bottom:4pt;">${obj?.naam||''}</h1>
-  <p style="text-align:center;color:#666;font-size:10pt;margin-bottom:20pt;">Inspectierapport — ${new Date().toLocaleDateString('nl-NL')}</p>
-  ${rapportHtml}
-  ${fotoBijlage}
-  </body></html>`);
-  win.document.close();
-  setTimeout(() => win.print(), 600);
-}
+window.downloadPDF = () => {
+  const obj = objects.find(o=>o.id===currentObjectId);
+  const rapportHtml = document.getElementById('rapport-text').innerHTML;
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Rapport ${obj?.naam||''}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h2{font-size:13pt;font-weight:bold;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;font-weight:bold;margin:12pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}strong{font-weight:bold;}@media print{body{margin:1.5cm;}}</style>
+  </head><body><h1 style="font-size:16pt;text-align:center;">${obj?.naam||''}</h1><p style="text-align:center;color:#666;font-size:10pt;">${new Date().toLocaleDateString('nl-NL')}</p>${rapportHtml}</body></html>`);
+  win.document.close(); setTimeout(()=>win.print(),600);
+};
 
-function renderFotoBijlageForPrint() {
-  if (!currentPhotos.length) return '';
-  let html = '<h2>FOTOBIJLAGE</h2><div class="foto-grid">';
-  currentPhotos.forEach((p, i) => {
-    html += `<div class="foto-item">
-      <div class="foto-nr">Foto ${i+1}</div>
-      <img src="${p.dataUrl}" alt="Foto ${i+1}"/>
-      ${p.label ? `<div class="foto-label">${p.label}</div>` : ''}
-    </div>`;
-  });
-  html += '</div>';
-  return html;
-}
-
-async function downloadWord() {
-  showToast('Word document wordt aangemaakt...');
+window.downloadWord = async () => {
+  showToast('Word document aanmaken...');
   try {
-    if (!window.docx) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://unpkg.com/docx@8.5.0/build/index.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
+    if(!window.docx){
+      await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
     }
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
-    const obj = getCurrentObject();
-    const text = getInsp().reportText || '';
-    const datum = new Date().toLocaleDateString('nl-NL');
+    const {Document,Packer,Paragraph,TextRun,AlignmentType} = docx;
+    const obj = objects.find(o=>o.id===currentObjectId);
+    const snap = await getDoc(dataDoc(currentObjectId, 'rapport'));
+    const text = snap.exists() ? snap.data().tekst||'' : '';
     const children = [];
-
-    children.push(new Paragraph({ children: [new TextRun({ text: 'ONDERHOUDSINSPECTIE RAPPORT', bold: true, size: 40, font: 'Arial' })], alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
-    children.push(new Paragraph({ children: [new TextRun({ text: obj?.naam||'', size: 28, font: 'Arial' })], alignment: AlignmentType.CENTER, spacing: { after: 100 } }));
-    children.push(new Paragraph({ children: [new TextRun({ text: `Datum: ${datum}`, size: 22, color: '666666', font: 'Arial' })], alignment: AlignmentType.CENTER, spacing: { after: 600 } }));
-
-    text.split('\n').forEach(line => {
-      const t = line.trim();
-      if (!t) { children.push(new Paragraph({ spacing: { after: 80 } })); return; }
-      const parts = t.split(/\*\*(.*?)\*\*/g);
-      const runs = parts.map((p, i) => new TextRun({ text: p, bold: i%2===1, font: 'Arial', size: 22 }));
-      children.push(new Paragraph({ children: runs, spacing: { after: 100 } }));
+    children.push(new Paragraph({children:[new TextRun({text:'ONDERHOUDSINSPECTIE RAPPORT',bold:true,size:40,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:200}}));
+    children.push(new Paragraph({children:[new TextRun({text:obj?.naam||'',size:28,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
+    children.push(new Paragraph({children:[new TextRun({text:`Datum: ${new Date().toLocaleDateString('nl-NL')}`,size:22,color:'666666',font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:600}}));
+    text.split('\n').forEach(line=>{
+      const t=line.trim(); if(!t){children.push(new Paragraph({spacing:{after:80}}));return;}
+      const parts=t.split(/\*\*(.*?)\*\*/g);
+      children.push(new Paragraph({children:parts.map((p,i)=>new TextRun({text:p,bold:i%2===1,font:'Arial',size:22})),spacing:{after:100}}));
     });
-
-    const doc = new Document({ sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }] });
-    const buffer = await Packer.toBuffer(doc);
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Rapport_${(obj?.naam||'rapport').replace(/[^a-z0-9]/gi,'_')}.docx`;
-    a.click();
-    showToast('Word gedownload');
-  } catch(e) { showToast('Fout: ' + e.message); }
-}
-
-// SETTINGS
-function getApiKey() { return localStorage.getItem('vi-apikey') || ''; }
-function saveApiKey() {
-  const v = document.getElementById('api-key-input').value.trim();
-  if (!v) { showToast('Vul een sleutel in'); return; }
-  localStorage.setItem('vi-apikey', v);
-  document.getElementById('api-key-status').textContent = 'Sleutel opgeslagen: ' + v.substring(0,16) + '...';
-  showToast('API-sleutel opgeslagen');
-}
-function toggleKeyVis() {
-  const inp = document.getElementById('api-key-input');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-function saveWorkerUrl() {
-  const v = document.getElementById('worker-url-input').value.trim();
-  if (!v) { showToast('Vul een URL in'); return; }
-  localStorage.setItem('vi-worker', v);
-  document.getElementById('worker-status').textContent = '✓ Worker URL opgeslagen';
-  showToast('Worker URL opgeslagen');
-}
-async function testWorker() {
-  const url = localStorage.getItem('vi-worker') || '';
-  const key = getApiKey();
-  const status = document.getElementById('worker-status');
-  if (!url || !key) { status.textContent = 'Vul eerst URL en sleutel in'; return; }
-  status.textContent = 'Verbinding testen...';
-  try {
-    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key }, body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 10, messages: [{ role: 'user', content: 'OK' }] }) });
-    status.textContent = resp.ok ? '✓ Verbinding werkt!' : '✗ Fout: ' + resp.status;
-    status.style.color = resp.ok ? 'var(--green-text)' : 'var(--red-text)';
-  } catch(e) { status.textContent = '✗ ' + e.message; status.style.color = 'var(--red-text)'; }
-}
-function initSettings() {
-  const key = getApiKey();
-  if (key) { document.getElementById('api-key-input').value = key; document.getElementById('api-key-status').textContent = 'Actief: ' + key.substring(0,16) + '...'; }
-  const worker = localStorage.getItem('vi-worker');
-  if (worker) { document.getElementById('worker-url-input').value = worker; document.getElementById('worker-status').textContent = 'Worker URL actief'; }
-}
-function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vastgoed-data.json'; a.click();
-}
-function clearAll() {
-  if (!confirm('Alles wissen inclusief foto\'s?')) return;
-  localStorage.removeItem('vi-state2');
-  state = { objects: [], currentObjectId: null, inspections: {} };
-  currentPhotos = [];
-  renderObjects();
-  renderFotos();
-  showToast('Alles gewist');
-}
+    const docFile = new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
+    const buffer = await Packer.toBuffer(docFile);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
+    a.download=`Rapport_${(obj?.naam||'rapport').replace(/[^a-z0-9]/gi,'_')}.docx`;
+    a.click(); showToast('Word gedownload');
+  } catch(e){showToast('Fout: '+e.message);}
+};
 
 // API
-async function callClaude(content) {
-  const key = getApiKey();
-  if (!key) throw new Error('Geen API-sleutel');
-  const workerUrl = localStorage.getItem('vi-worker') || '';
-  if (!workerUrl) throw new Error('Geen Worker URL ingesteld');
-  const resp = await fetch(workerUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key },
-    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, messages: [{ role: 'user', content }] })
-  });
-  if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || resp.status); }
-  const data = await resp.json();
-  return data.content?.map(b => b.text||'').join('') || '';
+function getApiKey(){ return localStorage.getItem('vi-apikey')||''; }
+window.saveApiKey = ()=>{
+  const v=document.getElementById('api-key-input').value.trim();
+  if(!v){showToast('Vul een sleutel in');return;}
+  localStorage.setItem('vi-apikey',v);
+  document.getElementById('api-key-status').textContent='Actief: '+v.substring(0,16)+'...';
+  showToast('Opgeslagen');
+};
+window.saveWorkerUrl = ()=>{
+  const v=document.getElementById('worker-url-input').value.trim();
+  if(!v){showToast('Vul een URL in');return;}
+  localStorage.setItem('vi-worker',v);
+  document.getElementById('worker-status').textContent='✓ Opgeslagen';
+  showToast('Opgeslagen');
+};
+window.testWorker = async ()=>{
+  const url=localStorage.getItem('vi-worker')||'';
+  const key=getApiKey();
+  const s=document.getElementById('worker-status');
+  if(!url||!key){s.textContent='Vul URL en sleutel in';return;}
+  s.textContent='Testen...';
+  try{
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'OK'}]})});
+    s.textContent=r.ok?'✓ Verbinding werkt!':'✗ Fout: '+r.status;
+    s.style.color=r.ok?'var(--green-text)':'var(--red-text)';
+  }catch(e){s.textContent='✗ '+e.message;s.style.color='var(--red-text)';}
+};
+
+async function callClaude(content){
+  const key=getApiKey();
+  if(!key) throw new Error('Geen API-sleutel');
+  const workerUrl=localStorage.getItem('vi-worker')||'';
+  if(!workerUrl) throw new Error('Geen Worker URL');
+  const resp=await fetch(workerUrl,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content}]})});
+  if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||resp.status);}
+  const data=await resp.json();
+  return data.content?.map(b=>b.text||'').join('')||'';
+}
+
+function initSettings(){
+  const key=getApiKey();
+  if(key){document.getElementById('api-key-input').value=key;document.getElementById('api-key-status').textContent='Actief: '+key.substring(0,16)+'...';}
+  const w=localStorage.getItem('vi-worker');
+  if(w){document.getElementById('worker-url-input').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
+}
+
+// NAVIGATIE
+window.showPage = (name) => {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tabbar-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  const page=document.getElementById('page-'+name);
+  if(page) page.classList.add('active');
+  updateTopbar();
+};
+
+function updateTopbar(){
+  const obj = objects.find(o=>o.id===currentObjectId);
+  if(obj){
+    document.getElementById('topbar-title').textContent=obj.naam||'Object';
+    document.getElementById('topbar-sub').textContent=obj.type+(obj.jaar?', '+obj.jaar:'');
+  } else {
+    document.getElementById('topbar-title').textContent='VastgoedInspectie';
+    document.getElementById('topbar-sub').textContent=currentUser?currentUser.email:'';
+  }
 }
 
 // BAG
-let bagTimer = null;
-function bagSuggest(q) {
-  clearTimeout(bagTimer);
-  if (!q || q.length < 3) { hideBagDropdown(); return; }
-  bagTimer = setTimeout(() => _bagFetch(q), 280);
+let bagTimer=null;
+window.bagSuggest=(q)=>{clearTimeout(bagTimer);if(!q||q.length<3){hideBagDropdown();return;}bagTimer=setTimeout(()=>_bagFetch(q),280);};
+async function _bagFetch(q){
+  const dd=document.getElementById('bag-dropdown');
+  dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
+  const wUrl=localStorage.getItem('vi-worker')||'';
+  if(!wUrl){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
+  try{
+    const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam,postcode,woonplaatsnaam');
+    const data=await r.json();
+    const docs=data?.response?.docs||[];
+    if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
+    dd.innerHTML=docs.map(d=>`<div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">${escHtml(d.weergavenaam)}</div>`).join('');
+  }catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout bij zoeken</div>';}
 }
-async function _bagFetch(q) {
-  const dd = document.getElementById('bag-dropdown');
-  dd.style.display = 'block';
-  dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
-  const workerUrl = localStorage.getItem('vi-worker') || '';
-  if (!workerUrl) { dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel eerst Worker URL in</div>'; return; }
-  try {
-    const params = `?q=${encodeURIComponent(q)}&fq=type:(adres)&rows=8&fl=id,weergavenaam,postcode,woonplaatsnaam`;
-    const resp = await fetch(workerUrl.replace(/\/$/, '') + '/bag/suggest' + params);
-    const data = await resp.json();
-    const docs = data?.response?.docs || [];
-    if (!docs.length) { dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>'; return; }
-    dd.innerHTML = docs.map(d => `<div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">${escHtml(d.weergavenaam)}</div>`).join('');
-  } catch(e) { dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout bij zoeken</div>'; }
-}
-function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-async function bagSelect(id, naam) {
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+window.bagSelect=async(id,naam)=>{
   hideBagDropdown();
-  document.getElementById('f-bag-search').value = naam;
-  document.getElementById('f-naam').value = naam;
-  const status = document.getElementById('bag-status');
-  status.innerHTML = '<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG gegevens ophalen...</div>';
-  const workerUrl = localStorage.getItem('vi-worker') || '';
-  if (!workerUrl) return;
-  try {
-    const params = `?q=${encodeURIComponent(naam)}&fq=type:(adres)&rows=1&fl=id,weergavenaam,postcode,woonplaatsnaam`;
-    const sugResp = await fetch(workerUrl.replace(/\/$/, '') + '/bag/suggest' + params);
-    const sugData = await sugResp.json();
-    const sugId = sugData?.response?.docs?.[0]?.id || id;
-    const resp = await fetch(workerUrl.replace(/\/$/, '') + '/bag/lookup?id=' + sugId);
-    const data = await resp.json();
-    const doc = data?.response?.docs?.[0];
-    if (!doc) { status.innerHTML = '<div class="bag-badge fail">Geen BAG data gevonden</div>'; return; }
-    const gevonden = [];
-    if (doc.postcode && doc.woonplaatsnaam) document.getElementById('f-postcode').value = doc.postcode + ' ' + doc.woonplaatsnaam;
-    if (doc.bouwjaar) { document.getElementById('f-jaar').value = doc.bouwjaar; document.getElementById('f-jaar-badge').textContent = '✓ BAG'; gevonden.push('bouwjaar ' + doc.bouwjaar); }
-    if (doc.oppervlakte_min) { document.getElementById('f-opp').value = doc.oppervlakte_min; document.getElementById('f-opp-badge').textContent = '✓ BAG'; gevonden.push('opp. ' + doc.oppervlakte_min + ' m²'); }
-    if (doc.aantal_eenheden) { document.getElementById('f-eenheden').value = doc.aantal_eenheden; gevonden.push(doc.aantal_eenheden + ' eenheden'); }
-    if (doc.gebruiksdoel) {
-      const gd = Array.isArray(doc.gebruiksdoel) ? doc.gebruiksdoel[0] : doc.gebruiksdoel;
-      const typeMap = { 'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal','bijeenkomstfunctie':'Gemengd gebruik' };
-      const mapped = Object.entries(typeMap).find(([k]) => gd.toLowerCase().includes(k));
-      if (mapped) document.getElementById('f-type').value = mapped[1];
-    }
-    if (doc.gemeente && !document.getElementById('f-context').value) document.getElementById('f-context').value = 'Gemeente: ' + doc.gemeente;
-    status.innerHTML = gevonden.length ? `<div class="bag-badge">✓ BAG: ${gevonden.join(' · ')}</div>` : `<div class="bag-badge fail">Adres gevonden, beperkte BAG data</div>`;
-  } catch(e) { status.innerHTML = '<div class="bag-badge fail">BAG lookup mislukt</div>'; }
-}
-function hideBagDropdown() {
-  const dd = document.getElementById('bag-dropdown');
-  if (dd) { dd.style.display = 'none'; dd.innerHTML = ''; }
-}
-document.addEventListener('click', e => { if (!e.target.closest('.bag-wrap')) hideBagDropdown(); });
+  document.getElementById('f-bag-search').value=naam;
+  document.getElementById('f-naam').value=naam;
+  const status=document.getElementById('bag-status');
+  status.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG gegevens ophalen...</div>';
+  const wUrl=localStorage.getItem('vi-worker')||'';
+  if(!wUrl) return;
+  try{
+    const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/lookup?id='+id);
+    const data=await r.json();
+    const d=data?.response?.docs?.[0];
+    if(!d){status.innerHTML='<div class="bag-badge fail">Geen BAG data</div>';return;}
+    const gevonden=[];
+    if(d.postcode&&d.woonplaatsnaam) document.getElementById('f-postcode').value=d.postcode+' '+d.woonplaatsnaam;
+    if(d.bouwjaar){document.getElementById('f-jaar').value=d.bouwjaar;document.getElementById('f-jaar-badge').textContent='✓ BAG';gevonden.push('bouwjaar '+d.bouwjaar);}
+    if(d.oppervlakte_min){document.getElementById('f-opp').value=d.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';gevonden.push('opp. '+d.oppervlakte_min+'m²');}
+    if(d.aantal_eenheden) document.getElementById('f-eenheden').value=d.aantal_eenheden;
+    if(d.gebruiksdoel){const gd=Array.isArray(d.gebruiksdoel)?d.gebruiksdoel[0]:d.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
+    if(d.gemeente&&!document.getElementById('f-context').value) document.getElementById('f-context').value='Gemeente: '+d.gemeente;
+    status.innerHTML=gevonden.length?`<div class="bag-badge">✓ BAG: ${gevonden.join(' · ')}</div>`:'<div class="bag-badge fail">Adres gevonden, beperkte data</div>';
+  }catch(e){status.innerHTML='<div class="bag-badge fail">BAG lookup mislukt</div>';}
+};
+function hideBagDropdown(){const dd=document.getElementById('bag-dropdown');if(dd){dd.style.display='none';dd.innerHTML='';}}
+document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagDropdown();});
 
 // TOAST
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+window.showToast=(msg)=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
 
 // SERVICE WORKER
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
+if('serviceWorker'in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// BOOT
-loadState();
-renderObjects();
-initSettings();
-if (state.currentObjectId) {
-  updateTopbar();
-  selectObject(state.currentObjectId);
-} else {
-  updateTopbar();
-}
 </script>
 </body>
 </html>
