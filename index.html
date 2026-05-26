@@ -588,6 +588,23 @@ async function clearPhotos() {
   renderPhotoGrid();
 }
 
+// Foto comprimeren voor API (max 1MB per foto)
+function compressPhoto(dataUrl, maxWidth=1024) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      res(canvas.toDataURL('image/jpeg', 0.75));
+    };
+    img.onerror = () => res(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 // RAPPORT GENEREREN
 async function generateRapport() {
   if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
@@ -601,39 +618,56 @@ async function generateRapport() {
 
   const obj = getCurrentObject();
   const datum = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' });
-  const BATCH = 12; // foto's per API-aanroep
+
+  // Comprimeer foto's eerst
+  document.getElementById('loading-status').textContent = 'Foto\'s voorbereiden...';
+  document.getElementById('progress-bar').style.width = '5%';
+
+  const compressed = [];
+  for (let i = 0; i < currentPhotos.length; i++) {
+    const c = await compressPhoto(currentPhotos[i].dataUrl);
+    compressed.push({ dataUrl: c, label: currentPhotos[i].label });
+    if (i % 5 === 0) document.getElementById('progress-bar').style.width = (5 + Math.round(i/currentPhotos.length*15)) + '%';
+  }
+
+  const BATCH = 8; // Kleinere batches voor betrouwbaarheid
   const batches = [];
-  for (let i = 0; i < currentPhotos.length; i += BATCH) batches.push(currentPhotos.slice(i, i + BATCH));
+  for (let i = 0; i < compressed.length; i += BATCH) batches.push(compressed.slice(i, i + BATCH));
 
   const analyses = [];
   const totalBatches = batches.length;
 
   for (let b = 0; b < batches.length; b++) {
-    const pct = Math.round((b / totalBatches) * 70);
+    const pct = 20 + Math.round((b / totalBatches) * 60);
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('loading-status').textContent = `Batch ${b+1} van ${totalBatches} analyseren...`;
-    document.getElementById('loading-detail').textContent = `${batches[b].length} foto's in deze batch`;
+    document.getElementById('loading-detail').textContent = `Foto's ${b*BATCH+1}–${Math.min((b+1)*BATCH, compressed.length)} van ${compressed.length}`;
 
     const content = batches[b].map(p => ({
       type: 'image',
       source: { type: 'base64', media_type: 'image/jpeg', data: p.dataUrl.split(',')[1] }
     }));
 
-    const labelInfo = batches[b].map((p,i) => p.label ? `Foto ${b*BATCH+i+1}: ${p.label}` : null).filter(Boolean).join(', ');
+    const labelInfo = batches[b].map((p,i) => p.label ? `Foto ${b*BATCH+i+1}: ${p.label}` : `Foto ${b*BATCH+i+1}`).join(', ');
 
-    content.push({ type: 'text', text: `Analyseer deze ${batches[b].length} vastgoedinspectiefoto's van ${obj.naam} (batch ${b+1}/${totalBatches}).${labelInfo ? ' Labels: ' + labelInfo : ''}
+    content.push({ type: 'text', text: `Analyseer deze vastgoedinspectiefoto's (${labelInfo}).
 
-Identificeer per zichtbaar bouwdeel: wat is het, wat is de conditie, welke gebreken zijn zichtbaar? Geef een beknopte lijst van bevindingen met conditieoordeel (Goed/Redelijk/Matig/Slecht). JSON-formaat:
-[{"bouwdeel":"naam","conditie":"Matig","bevinding":"omschrijving gebrek","foto_nr":1}]
-Alleen JSON, geen uitleg.` });
+Per zichtbaar bouwdeel: naam, conditie, gebreken. Reageer ALLEEN met JSON array:
+[{"bouwdeel":"naam","conditie":"Matig","bevinding":"beschrijving gebrek","foto_nr":${b*BATCH+1}}]
+Geen uitleg, alleen JSON.` });
 
     try {
       const raw = await callClaude(content);
       const clean = raw.replace(/```json|```/g,'').trim();
-      const parsed = JSON.parse(clean);
-      analyses.push(...parsed.map(a => ({...a, batch: b+1})));
+      const startIdx = clean.indexOf('[');
+      const endIdx = clean.lastIndexOf(']');
+      if (startIdx >= 0 && endIdx > startIdx) {
+        const parsed = JSON.parse(clean.substring(startIdx, endIdx+1));
+        analyses.push(...parsed);
+      }
     } catch(e) {
-      analyses.push({ bouwdeel: `Batch ${b+1}`, conditie: 'Onbekend', bevinding: 'Analyse mislukt voor deze foto\'s', foto_nr: b*BATCH+1 });
+      console.error('Batch ' + (b+1) + ' mislukt:', e);
+      // Ga door met volgende batch
     }
   }
 
