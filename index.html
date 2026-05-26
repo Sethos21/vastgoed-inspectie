@@ -386,9 +386,13 @@
       <div id="rapport-loading" style="display:none;" class="loading-row"><div class="dots"><span></span><span></span><span></span></div> AI genereert rapport...</div>
       <div id="rapport-content" style="display:none;">
         <div id="rapport-text" class="result-card"></div>
-        <div class="btn-row">
+        <div class="btn-row" style="margin-bottom:8px;">
           <button class="btn btn-dark" onclick="generateMJOP()">→ MJOP genereren</button>
           <button class="btn btn-light" onclick="copyRapport()">Kopieer tekst</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-light btn-sm" onclick="downloadRapportWord()">⬇ Word (.docx)</button>
+          <button class="btn btn-light btn-sm" onclick="downloadRapportPDF()">⬇ PDF afdrukken</button>
         </div>
       </div>
     </div>
@@ -400,7 +404,28 @@
         <p>Genereer eerst een rapport<br>om het MJOP te maken</p>
       </div>
       <div id="mjop-loading" style="display:none;" class="loading-row"><div class="dots"><span></span><span></span><span></span></div> AI stelt MJOP op...</div>
-      <div id="mjop-content" style="display:none;"></div>
+      <div id="mjop-content" style="display:none;">
+        <!-- Reservering instellingen -->
+        <div id="reservering-panel" style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:16px;border:0.5px solid var(--border);">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Reservefonds berekening</div>
+          <div class="grid3" style="margin-bottom:10px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>Startjaar dotatie</label>
+              <input type="number" id="res-startjaar" placeholder="2018" min="2000" max="2030" onchange="herbereken()" />
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Huidige stand (€)</label>
+              <input type="number" id="res-huidig" placeholder="0" onchange="herbereken()" />
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Rente (%)</label>
+              <input type="number" id="res-rente" placeholder="1.5" step="0.1" min="0" max="10" onchange="herbereken()" />
+            </div>
+          </div>
+          <div id="res-resultaat" style="font-size:13px;color:var(--text2);"></div>
+        </div>
+        <div id="mjop-inner"></div>
+      </div>
     </div>
 
     <!-- SETTINGS PAGE -->
@@ -946,6 +971,8 @@ function resetMJOP() {
   document.getElementById('mjop-empty').style.display = 'block';
   document.getElementById('mjop-content').style.display = 'none';
   document.getElementById('mjop-loading').style.display = 'none';
+  const inner = document.getElementById('mjop-inner');
+  if (inner) inner.innerHTML = '';
   state.mjopData = [];
 }
 
@@ -957,25 +984,106 @@ async function generateReport() {
   document.getElementById('rapport-content').style.display = 'none';
   document.getElementById('rapport-loading').style.display = 'flex';
   const obj = getCurrentObject();
+  const datum = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Bouw inspectie data op inclusief foto-analyses
   const elStr = state.elements.map(e => {
-    let l = `- ${e.name}: score ${e.cond}/5, resterend leven ${e.life||'?'} jr. ${e.notes||''}`;
-    if (e.aiResult) l += ' Foto: ' + e.aiResult;
+    const subStr = e.subItems?.length ? ` [onderdelen: ${e.subItems.join(', ')}]` : '';
+    const condLabel = ['','Goed','Redelijk','Matig','Slecht','Zeer slecht'][e.cond||1];
+    let l = `- ${e.name}${subStr}: conditie ${condLabel} (${e.cond}/5), resterend leven ~${e.life||'?'} jr.`;
+    if (e.notes) l += ` Notities: ${e.notes}`;
+    if (e.aiResult) l += ` Foto-analyse: ${e.aiResult}`;
     return l;
   }).join('\n');
-  const prompt = `Je bent een vastgoedinspecteur. Schrijf een professionele inspectierapportage in het Nederlands.
 
-Object: ${obj.naam} (${obj.type}), bouwjaar ${obj.jaar||'?'}, ${obj.opp||'?'} m², ${obj.eenheden||'?'} eenheden.
-Context: ${obj.context||'-'}
+  // Verzamel foto's voor meesturen naar AI (max 6 foto's totaal)
+  const allPhotos = [];
+  state.elements.forEach(e => {
+    (e.photos||[]).slice(0,2).forEach(p => {
+      if (allPhotos.length < 6) allPhotos.push({ dataUrl: p.dataUrl, element: e.name });
+    });
+  });
 
-Bouwdelen:
+  const prompt = `Je bent een professioneel vastgoedinspecteur. Schrijf een uitgebreid inspectierapport in het Nederlands op basis van de onderstaande inspectiedata${allPhotos.length > 0 ? ' en bijgevoegde foto\'s' : ''}.
+
+**OBJECTGEGEVENS:**
+- Adres: ${obj.naam}
+- Type: ${obj.type}
+- Bouwjaar: ${obj.jaar||'onbekend'}
+- Oppervlakte: ${obj.opp||'?'} m²
+- Eenheden: ${obj.eenheden||'?'}
+- Gemeente: ${obj.context||'-'}
+- Inspectiedatum: ${datum}
+
+**GEÏNSPECTEERDE BOUWDELEN:**
 ${elStr || 'Geen bouwdelen geregistreerd.'}
 
-Schrijf: samenvatting, bevindingen per bouwdeel, prioritaire aandachtspunten, algeheel oordeel. Gebruik **Koptekst** voor koppen. Max 400 woorden.`;
+Schrijf het rapport EXACT in dit format:
+
+# ONDERHOUDSINSPECTIE RAPPORT
+## [Adres]
+Datum: [datum]
+
+## 1. ALGEMENE INFORMATIE
+Tabel met adres, type, bouwjaar, oppervlakte, inspectiedatum.
+
+## 2. PRIORITEITENLEGENDA
+Tabel met URGENT / HOOG / GEMIDDELD / LAAG en omschrijving.
+
+## 3. BEVINDINGEN PER ONDERDEEL
+Per bouwdeel een sectie met tabel: Bevinding | Beschrijving | Prioriteit.
+Wijs per bevinding een prioriteit toe (URGENT/HOOG/GEMIDDELD/LAAG) op basis van de conditiescore en notities.
+Conditie 5 = mogelijke URGENT bevindingen, 4 = HOOG, 3 = GEMIDDELD, 1-2 = LAAG.
+
+## 4. SAMENVATTING EN ACTIEPLAN
+### 4.1 Urgente punten
+### 4.2 Hoge prioriteit (binnen 3 maanden)
+### 4.3 Gemiddelde prioriteit (6-12 maanden)
+### 4.4 Lage prioriteit / planmatig onderhoud
+
+## 5. DISCLAIMER
+Standaard disclaimer over visuele inspectie.
+
+Schrijf professioneel en concreet. Gebruik de foto-analyses waar beschikbaar voor specifieke bevindingen.`;
+
   try {
-    state.reportText = await callClaude([{ type:'text', text: prompt }]);
+    // Bouw content array op met eventuele foto's
+    const content = [];
+    if (allPhotos.length > 0) {
+      allPhotos.forEach(p => {
+        content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: p.dataUrl.split(',')[1] } });
+      });
+    }
+    content.push({ type: 'text', text: prompt });
+
+    state.reportText = await callClaude(content);
     saveState();
     document.getElementById('rapport-loading').style.display = 'none';
-    document.getElementById('rapport-text').innerHTML = state.reportText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+
+    // Render rapport mooi opgemaakt
+    const html = state.reportText
+      .replace(/^# (.*)/gm, '<h1 style="font-size:18px;font-weight:700;margin:16px 0 8px;color:var(--text);">$1</h1>')
+      .replace(/^## (.*)/gm, '<h2 style="font-size:15px;font-weight:700;margin:14px 0 6px;color:var(--text);border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
+      .replace(/^### (.*)/gm, '<h3 style="font-size:14px;font-weight:600;margin:10px 0 4px;color:var(--text2);">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\|(.*)\|/g, (match) => {
+        const cells = match.split('|').filter(c => c.trim());
+        const isHeader = cells.some(c => c.trim().startsWith('---'));
+        if (isHeader) return '';
+        return '<tr>' + cells.map(c => `<td style="padding:6px 8px;border:0.5px solid var(--border);font-size:13px;">${c.trim()}</td>`).join('') + '</tr>';
+      })
+      .replace(/(<tr>.*<\/tr>)/gs, (match) => `<table style="width:100%;border-collapse:collapse;margin:8px 0;">${match}</table>`)
+      .replace(/\n\n/g, '<br>')
+      .replace(/\n/g, '<br>');
+
+    document.getElementById('rapport-text').innerHTML = html;
+
+    // Toon ook foto thumbnails bovenaan
+    if (allPhotos.length > 0) {
+      const photoHtml = `<div style="margin-bottom:14px;"><div style="font-size:12px;color:var(--text3);margin-bottom:6px);">${allPhotos.length} foto's meegestuurd naar AI</div><div style="display:flex;gap:6px;flex-wrap:wrap;">${allPhotos.map(p=>`<img src="${p.dataUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:0.5px solid var(--border);" alt="${p.element}" />`).join('')}</div></div>`;
+      document.getElementById('rapport-text').insertAdjacentHTML('afterbegin', photoHtml);
+    }
+
     document.getElementById('rapport-content').style.display = 'block';
   } catch(e) {
     document.getElementById('rapport-loading').style.display = 'none';
@@ -1018,18 +1126,108 @@ Antwoord ALLEEN als JSON array, geen uitleg, geen backticks:
 
 function renderMJOP() {
   document.getElementById('mjop-loading').style.display = 'none';
-  const data = state.mjopData;
-  const total = data.reduce((s,r) => s+(r.kosten||0), 0);
-  const urgent = data.filter(r => r.prioriteit==='hoog').length;
+  document.getElementById('mjop-content').style.display = 'block';
+
+  // Stel startjaar in als nog niet ingevuld
   const thisYear = new Date().getFullYear();
-  let html = `<div class="mjop-summary">
-    <div class="stat-card"><div class="stat-label">Totaal 10 jaar</div><div class="stat-val">€${Math.round(total/1000)}k</div></div>
-    <div class="stat-card"><div class="stat-label">Hoog prio</div><div class="stat-val" style="color:var(--red-text);">${urgent}</div></div>
-    <div class="stat-card"><div class="stat-label">Acties</div><div class="stat-val">${data.length}</div></div>
-  </div>`;
-  data.sort((a,b)=>a.jaar-b.jaar).forEach(r => {
-    const pc = r.prioriteit==='hoog'?'badge-4':r.prioriteit==='midden'?'badge-2':'badge-1';
-    const urg = r.jaar <= thisYear+1;
+  if (!document.getElementById('res-startjaar').value) {
+    document.getElementById('res-startjaar').value = thisYear - 5;
+  }
+  if (!document.getElementById('res-rente').value) {
+    document.getElementById('res-rente').value = '1.5';
+  }
+
+  herbereken();
+}
+
+function herbereken() {
+  const data = state.mjopData;
+  if (!data || data.length === 0) return;
+
+  const thisYear = new Date().getFullYear();
+  const endYear = thisYear + 10;
+  const startJaar = parseInt(document.getElementById('res-startjaar').value) || thisYear - 5;
+  const huidigSaldo = parseFloat(document.getElementById('res-huidig').value) || 0;
+  const rente = parseFloat(document.getElementById('res-rente').value) || 1.5;
+
+  const totaal = data.reduce((s,r) => s + (r.kosten||0), 0);
+  const urgent = data.filter(r => r.prioriteit === 'hoog' || r.prioriteit === 'urgent').length;
+
+  // Bereken benodigde jaarlijkse dotatie over volledige looptijd
+  const looptijd = endYear - startJaar;
+  const jaarlijkseDotatie = Math.ceil(totaal / looptijd / 100) * 100;
+
+  // Bereken beginstand met terugwerkende kracht
+  const jarenTerug = thisYear - startJaar;
+  let beginStand = 0;
+  for (let j = 0; j < jarenTerug; j++) {
+    beginStand = (beginStand + jaarlijkseDotatie) * (1 + rente/100);
+  }
+  beginStand = Math.round(beginStand);
+
+  // Verschil huidig vs benodigde beginstand
+  const verschil = huidigSaldo - beginStand;
+  const tekortDekking = verschil < 0;
+
+  // Bouw saldo per jaar op
+  let saldo = huidigSaldo > 0 ? huidigSaldo : beginStand;
+  const saldoPerJaar = {};
+  for (let yr = thisYear; yr <= endYear; yr++) {
+    saldo = saldo * (1 + rente/100) + jaarlijkseDotatie;
+    const uitgaven = data.filter(r => r.jaar === yr).reduce((s,r) => s+(r.kosten||0), 0);
+    saldo -= uitgaven;
+    saldoPerJaar[yr] = Math.round(saldo);
+  }
+
+  // Resultaat tonen
+  const resEl = document.getElementById('res-resultaat');
+  resEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;border:0.5px solid var(--border);">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Benodigde jaarlijkse dotatie</div>
+        <div style="font-size:18px;font-weight:600;">€ ${jaarlijkseDotatie.toLocaleString('nl-NL')}</div>
+        <div style="font-size:11px;color:var(--text3);">per jaar vanaf ${startJaar}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;border:0.5px solid var(--border);">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Benodigde beginstand ${thisYear}</div>
+        <div style="font-size:18px;font-weight:600;">€ ${beginStand.toLocaleString('nl-NL')}</div>
+        <div style="font-size:11px;color:var(--text3);">${jarenTerug} jaar opgebouwd</div>
+      </div>
+    </div>
+    ${huidigSaldo > 0 ? `<div style="padding:8px 10px;border-radius:var(--radius-sm);background:${tekortDekking?'var(--red-bg)':'var(--green-bg)'};color:${tekortDekking?'var(--red-text)':'var(--green-text)'};font-size:13px;font-weight:500;">
+      ${tekortDekking ? `⚠ Tekort: € ${Math.abs(verschil).toLocaleString('nl-NL')} — inhaalslag nodig` : `✓ Overschot: € ${verschil.toLocaleString('nl-NL')} — fonds is toereikend`}
+    </div>` : ''}`;
+
+  // Render de MJOP tabel
+  let html = `
+  <div class="mjop-summary">
+    <div class="stat-card"><div class="stat-label">Totaal 10 jaar</div><div class="stat-val">€ ${Math.round(totaal/1000)}k</div></div>
+    <div class="stat-card"><div class="stat-label">Urgent / hoog</div><div class="stat-val" style="color:var(--red-text);">${urgent}</div></div>
+    <div class="stat-card"><div class="stat-label">Dotatie/jaar</div><div class="stat-val" style="font-size:15px;">€ ${jaarlijkseDotatie.toLocaleString('nl-NL')}</div></div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">Saldo reservefonds per jaar</div>
+  <div style="overflow-x:auto;margin-bottom:16px;">
+    <div style="display:flex;gap:6px;min-width:max-content;padding-bottom:4px;">
+      ${Object.entries(saldoPerJaar).map(([yr, sal]) => {
+        const uitgaven = data.filter(r => r.jaar === parseInt(yr)).reduce((s,r) => s+(r.kosten||0), 0);
+        const isNeg = sal < 0;
+        const isLow = sal < jaarlijkseDotatie * 2 && !isNeg;
+        return `<div style="min-width:70px;text-align:center;">
+          <div style="font-size:11px;font-weight:500;color:${parseInt(yr)===thisYear?'var(--text)':'var(--text3)'};margin-bottom:4px;">${yr}</div>
+          ${uitgaven > 0 ? `<div style="font-size:10px;color:var(--red-text);margin-bottom:2px;">-€${Math.round(uitgaven/1000)}k</div>` : ''}
+          <div style="font-size:12px;font-weight:600;color:${isNeg?'var(--red-text)':isLow?'var(--amber-text)':'var(--green-text)'};">€ ${Math.abs(sal) >= 1000 ? Math.round(sal/1000)+'k' : sal}</div>
+          <div style="height:4px;border-radius:2px;margin-top:3px;background:${isNeg?'var(--red-bg)':isLow?'var(--amber-bg)':'var(--green-bg)'};"></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="section-title">Geplande werkzaamheden</div>`;
+
+  data.sort((a,b) => a.jaar - b.jaar).forEach(r => {
+    const pc = r.prioriteit==='hoog'||r.prioriteit==='urgent' ? 'badge-4' : r.prioriteit==='midden'||r.prioriteit==='gemiddeld' ? 'badge-2' : 'badge-1';
+    const urg = r.jaar <= thisYear + 1;
     html += `<div class="mjop-item">
       <div class="mjop-item-top">
         <span class="mjop-item-name">${r.element}</span>
@@ -1042,11 +1240,13 @@ function renderMJOP() {
       </div>
     </div>`;
   });
-  html += `<div style="margin-top:16px;">
-    <button class="btn btn-light btn-full btn-sm" onclick="copyMJOP()">Kopieer MJOP als tekst</button>
+
+  html += `<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-light btn-full btn-sm" onclick="downloadMJOPExcel()">⬇ Download als Excel</button>
+    <button class="btn btn-light btn-full btn-sm" onclick="copyMJOP()">Kopieer als tekst</button>
   </div>`;
-  document.getElementById('mjop-content').innerHTML = html;
-  document.getElementById('mjop-content').style.display = 'block';
+
+  document.getElementById('mjop-inner').innerHTML = html;
 }
 
 function copyMJOP() {
@@ -1054,7 +1254,223 @@ function copyMJOP() {
   navigator.clipboard.writeText('MJOP\n' + lines).then(() => showToast('MJOP gekopieerd'));
 }
 
-// API CALL
+// EXPORT FUNCTIES
+
+function downloadRapportPDF() {
+  // Maak een print-vriendelijke versie
+  const rapportHtml = document.getElementById('rapport-text').innerHTML;
+  const obj = getCurrentObject();
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html><html lang="nl"><head>
+    <meta charset="UTF-8">
+    <title>Inspectierapport ${obj?.naam||''}</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 12pt; color: #000; margin: 2cm; }
+      h1 { font-size: 18pt; margin-bottom: 6pt; }
+      h2 { font-size: 14pt; margin: 14pt 0 6pt; border-bottom: 1px solid #ccc; padding-bottom: 3pt; }
+      h3 { font-size: 12pt; margin: 10pt 0 4pt; }
+      table { width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 10pt; }
+      td, th { border: 1px solid #ccc; padding: 4pt 6pt; }
+      th { background: #f0f0f0; font-weight: bold; }
+      img { max-width: 80px; max-height: 80px; margin: 2px; }
+      @media print { body { margin: 1.5cm; } }
+    </style>
+  </head><body>${rapportHtml}</body></html>`);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => { printWin.print(); }, 500);
+}
+
+async function downloadRapportWord() {
+  const obj = getCurrentObject();
+  if (!state.reportText) { showToast('Genereer eerst een rapport'); return; }
+  showToast('Word document aanmaken...');
+
+  try {
+    // Laad docx library via CDN
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/docx@8.5.0/build/index.js';
+    document.head.appendChild(script);
+    await new Promise((res, rej) => { script.onload = res; script.onerror = rej; });
+
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+            HeadingLevel, AlignmentType, BorderStyle, WidthType, ShadingType } = docx;
+
+    const datum = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const border = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
+    const borders = { top: border, bottom: border, left: border, right: border };
+
+    // Parse rapport tekst naar secties
+    const lines = state.reportText.split('\n');
+    const children = [];
+
+    // Titelblad
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'ONDERHOUDSINSPECTIE RAPPORT', bold: true, size: 40, font: 'Arial' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 }
+    }));
+    children.push(new Paragraph({
+      children: [new TextRun({ text: obj?.naam || '', size: 28, font: 'Arial' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 100 }
+    }));
+    children.push(new Paragraph({
+      children: [new TextRun({ text: `Datum: ${datum}`, size: 22, color: '666666', font: 'Arial' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 600 }
+    }));
+
+    // Verwerk rapport tekst
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+        return;
+      }
+      if (trimmed.startsWith('# ')) {
+        children.push(new Paragraph({
+          heading: HeadingLevel.HEADING_1,
+          children: [new TextRun({ text: trimmed.replace(/^#+ /, '').replace(/\*\*/g,''), font: 'Arial', bold: true, size: 32 })],
+          spacing: { before: 300, after: 150 }
+        }));
+      } else if (trimmed.startsWith('## ')) {
+        children.push(new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: trimmed.replace(/^#+ /, '').replace(/\*\*/g,''), font: 'Arial', bold: true, size: 26 })],
+          spacing: { before: 240, after: 120 }
+        }));
+      } else if (trimmed.startsWith('### ')) {
+        children.push(new Paragraph({
+          heading: HeadingLevel.HEADING_3,
+          children: [new TextRun({ text: trimmed.replace(/^#+ /, '').replace(/\*\*/g,''), font: 'Arial', bold: true, size: 22 })],
+          spacing: { before: 180, after: 80 }
+        }));
+      } else if (trimmed.startsWith('- ')) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: trimmed.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '$1'), font: 'Arial', size: 22 })],
+          indent: { left: 360 },
+          spacing: { after: 80 }
+        }));
+      } else {
+        const parts = trimmed.split(/\*\*(.*?)\*\*/g);
+        const runs = parts.map((p, idx) => new TextRun({ text: p, bold: idx % 2 === 1, font: 'Arial', size: 22 }));
+        children.push(new Paragraph({ children: runs, spacing: { after: 100 } }));
+      }
+    });
+
+    // Disclaimer onderaan
+    children.push(new Paragraph({ spacing: { before: 400 } }));
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'Dit rapport vervangt geen professioneel bouwkundig keuringsrapport.', italics: true, size: 18, color: '888888', font: 'Arial' })]
+    }));
+
+    const doc = new Document({
+      styles: {
+        default: { document: { run: { font: 'Arial', size: 22 } } }
+      },
+      sections: [{
+        properties: {
+          page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } }
+        },
+        children
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Inspectierapport_${(obj?.naam||'rapport').replace(/[^a-z0-9]/gi,'_')}.docx`;
+    a.click();
+    showToast('Word document gedownload');
+  } catch(e) {
+    showToast('Fout bij aanmaken Word: ' + e.message);
+    console.error(e);
+  }
+}
+
+async function downloadMJOPExcel() {
+  if (!state.mjopData || state.mjopData.length === 0) { showToast('Genereer eerst een MJOP'); return; }
+  showToast('Excel aanmaken...');
+
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    document.head.appendChild(script);
+    await new Promise((res, rej) => { script.onload = res; script.onerror = rej; });
+
+    const obj = getCurrentObject();
+    const thisYear = new Date().getFullYear();
+    const startJaar = parseInt(document.getElementById('res-startjaar')?.value) || thisYear - 5;
+    const rente = parseFloat(document.getElementById('res-rente')?.value) || 1.5;
+    const huidigSaldo = parseFloat(document.getElementById('res-huidig')?.value) || 0;
+    const totaal = state.mjopData.reduce((s,r) => s+(r.kosten||0), 0);
+    const looptijd = (thisYear + 10) - startJaar;
+    const jaarlijkseDotatie = Math.ceil(totaal / looptijd / 100) * 100;
+
+    const wb = XLSX.utils.book_new();
+
+    // === TAB 1: MJOP ===
+    const mjopData = [
+      ['MEERJARENONDERHOUDSPLAN'],
+      [`Object: ${obj?.naam||''}`, '', `Datum: ${new Date().toLocaleDateString('nl-NL')}`],
+      [],
+      ['Bouwdeel', 'Actie', 'Jaar', 'Prioriteit', 'Kosten (€)'],
+      ...state.mjopData.sort((a,b)=>a.jaar-b.jaar).map(r => [
+        r.element, r.actie, r.jaar, r.prioriteit.toUpperCase(), r.kosten||0
+      ]),
+      [],
+      ['TOTAAL', '', '', '', totaal],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(mjopData);
+    ws1['!cols'] = [{ wch: 28 }, { wch: 35 }, { wch: 8 }, { wch: 12 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'MJOP');
+
+    // === TAB 2: RESERVERING ===
+    const resRows = [
+      ['RESERVEFONDS BEREKENING'],
+      [`Object: ${obj?.naam||''}`],
+      [],
+      ['Parameter', 'Waarde'],
+      ['Startjaar dotatie', startJaar],
+      ['Jaarlijkse dotatie (€)', jaarlijkseDotatie],
+      ['Rente (%)', rente],
+      ['Huidige stand fonds (€)', huidigSaldo],
+      ['Totale onderhoudskosten 10jr (€)', totaal],
+      [],
+      ['Jaar', 'Dotatie (€)', 'Rente (€)', 'Uitgaven (€)', 'Eindsaldo (€)', 'Status'],
+    ];
+
+    let saldo = huidigSaldo || (() => {
+      let s = 0;
+      for (let j = 0; j < thisYear - startJaar; j++) s = (s + jaarlijkseDotatie) * (1 + rente/100);
+      return Math.round(s);
+    })();
+
+    for (let yr = thisYear; yr <= thisYear + 10; yr++) {
+      const renteInk = Math.round(saldo * rente / 100);
+      saldo = saldo + renteInk + jaarlijkseDotatie;
+      const uitgaven = state.mjopData.filter(r => r.jaar === yr).reduce((s,r) => s+(r.kosten||0), 0);
+      saldo -= uitgaven;
+      const status = saldo < 0 ? 'TEKORT' : saldo < jaarlijkseDotatie ? 'LAAG' : 'VOLDOENDE';
+      resRows.push([yr, jaarlijkseDotatie, renteInk, uitgaven || 0, Math.round(saldo), status]);
+    }
+
+    const ws2 = XLSX.utils.aoa_to_sheet(resRows);
+    ws2['!cols'] = [{ wch: 10 }, { wch: 16 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Reservefonds');
+
+    // Download
+    const naam = (obj?.naam||'mjop').replace(/[^a-z0-9]/gi,'_');
+    XLSX.writeFile(wb, `MJOP_${naam}.xlsx`);
+    showToast('Excel gedownload');
+  } catch(e) {
+    showToast('Fout bij aanmaken Excel: ' + e.message);
+    console.error(e);
+  }
+}
 async function callClaude(content) {
   const key = getApiKey();
   if (!key) throw new Error('Geen API-sleutel');
@@ -1063,7 +1479,7 @@ async function callClaude(content) {
   const resp = await fetch(workerUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key },
-    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, messages: [{ role: 'user', content }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, messages: [{ role: 'user', content }] })
   });
   if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || resp.status); }
   const data = await resp.json();
