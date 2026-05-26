@@ -721,6 +721,8 @@ function hideAddModal(event) {
   if (event && event.target !== document.getElementById('add-modal')) return;
   document.getElementById('add-modal').style.display = 'none';
 }
+
+function renderInspectie() {
   const hasObj = !!state.currentObjectId;
   document.getElementById('inspectie-no-object').style.display = hasObj ? 'none' : 'block';
   document.getElementById('inspectie-form').style.display = hasObj ? 'block' : 'none';
@@ -1259,6 +1261,4 @@ if (state.mjopData && state.mjopData.length > 0) {
 updateTopbar();
 </script>
 </body>
-</html>
-
 </html>
