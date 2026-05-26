@@ -198,6 +198,33 @@
   .bag-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 9px; border-radius: 99px; background: var(--green-bg); color: var(--green-text); margin-top: 6px; font-weight: 500; }
   .bag-badge.fail { background: var(--amber-bg); color: var(--amber-text); }
 
+  /* INSPECTIE STRUCTUUR PANEL */
+  .hoofdcat { margin-bottom: 12px; }
+  .hoofdcat-title { font-size: 13px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .subcat { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+  .subcat-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; cursor: pointer; }
+  .subcat-header:active { background: var(--bg2); }
+  .subcat-name { font-size: 14px; font-weight: 600; }
+  .subcat-arrow { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+  .subcat-arrow.open { transform: rotate(90deg); }
+  .subcat-items { display: none; padding: 4px 8px 8px; border-top: 0.5px solid var(--border); }
+  .subcat-items.open { display: block; }
+  .subitem-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 6px; border-radius: var(--radius-sm); }
+  .subitem-row:active { background: var(--bg2); }
+  .subitem-name { font-size: 13px; color: var(--text); }
+  .subitem-add { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); cursor: pointer; font-size: 16px; color: var(--text2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .subitem-add:active { background: var(--bg3); }
+  .subcat-add-all { width: 100%; padding: 7px; border: none; background: none; cursor: pointer; font-size: 12px; color: var(--blue-text); text-align: center; font-family: inherit; }
+
+  /* MODAL ITEMS */
+  .modal-preset-item { display:flex;align-items:center;justify-content:space-between;padding:13px 4px;border-bottom:0.5px solid var(--border);cursor:pointer; }
+  .modal-preset-item:active { background:var(--bg2); }
+  .modal-preset-name { font-size:15px;font-weight:500; }
+  .modal-preset-arr { color:var(--text3);font-size:18px; }
+  .modal-subitem { display:flex;align-items:center;justify-content:space-between;padding:11px 4px;border-bottom:0.5px solid var(--border); }
+  .modal-subitem-name { font-size:14px;color:var(--text); }
+  .modal-back { display:flex;align-items:center;gap:6px;font-size:14px;color:var(--blue-text);cursor:pointer;margin-bottom:12px;background:none;border:none;font-family:inherit;padding:0; }
+
   /* TOAST */
   .toast { position: fixed; bottom: calc(20px + var(--safe-bot)); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: var(--accent-text); padding: 10px 18px; border-radius: 99px; font-size: 13px; font-weight: 500; transition: transform 0.3s; z-index: 999; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
@@ -332,10 +359,21 @@
       </div>
       <div id="inspectie-form" style="display:none;">
         <div id="elements-container"></div>
-        <button class="btn btn-light btn-full" style="margin-bottom:10px;" onclick="addElement()">+ Bouwdeel toevoegen</button>
+        <button class="btn btn-light btn-full" style="margin-bottom:14px;" onclick="showAddModal()">+ Bouwdeel toevoegen</button>
         <div class="section-title">Snelle toevoeging</div>
         <div class="chip-row" id="preset-chips"></div>
         <button class="btn btn-dark btn-full" style="margin-top:6px;" onclick="generateReport()">↑ Rapport genereren met AI</button>
+      </div>
+    </div>
+
+    <!-- BOUWDEEL MODAL -->
+    <div id="add-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);" onclick="hideAddModal(event)">
+      <div style="position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bot));max-height:80vh;overflow-y:auto;" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div id="modal-title" style="font-size:17px;font-weight:700;">Kies hoofdonderdeel</div>
+          <button onclick="hideAddModal()" style="background:var(--bg2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--text2);">×</button>
+        </div>
+        <div id="modal-body"></div>
       </div>
     </div>
 
@@ -421,9 +459,26 @@ let state = {
   mjopData: []
 };
 
-// PRESETS
-const PRESETS = ['Dak','Gevel','Kozijnen','CV-installatie','Electra','Riool/afvoer','Lift','Fundering','Beglazing','Dakgoten'];
-const PRESET_LIFE = { 'Dak':25,'Gevel':30,'Kozijnen':20,'CV-installatie':10,'Electra':15,'Riool/afvoer':20,'Lift':20,'Fundering':50,'Beglazing':20,'Dakgoten':15 };
+// PRESETS met sub-onderdelen
+const PRESETS = ['Dak','Gevels','Kozijnen en ramen','Balkons / galerijen','Algemene ruimtes','Installaties','Sanitaire ruimtes','Fundering','Buitenruimte'];
+
+const PRESET_SUBITEMS = {
+  'Dak': ['Dakbedekking','Hemelwaterafvoer','Dakranden','Lichtkoepels','Schoorstenen','Installaties op dak'],
+  'Gevels': ['Voegwerk','Scheurvorming','Vervuiling','Dilataties','Geveldragers'],
+  'Kozijnen en ramen': ['Schilderwerk','Houtrot','Hang- en sluitwerk','Beglazing','Kitnaden'],
+  'Balkons / galerijen': ['Betonkwaliteit','Scheurvorming','Coating','Hekwerken','Afwatering'],
+  'Algemene ruimtes': ['Vloeren','Plafonds','Wanden','Verlichting','Brandveiligheid'],
+  'Installaties': ['CV-installatie','Ventilatie','Elektra','Brandmeldinstallatie','Liften'],
+  'Sanitaire ruimtes': ['Tegelwerk','Kitwerk','Ventilatie','Lekkages'],
+  'Fundering': ['Zettingen','Scheurvorming','Grondwaterpeil','Funderingsherstel'],
+  'Buitenruimte': ['Verharding','Groen','Afrastering','Verlichting','Parkeren'],
+};
+
+const PRESET_LIFE = {
+  'Dak':25,'Gevels':30,'Kozijnen en ramen':20,'Balkons / galerijen':25,
+  'Algemene ruimtes':20,'Installaties':15,'Sanitaire ruimtes':20,
+  'Fundering':50,'Buitenruimte':20,
+};
 
 function loadState() {
   try {
@@ -602,19 +657,116 @@ function selectObject(id) {
 // INSPECTIE
 const COND_LABELS = ['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
 
-function renderInspectie() {
+function showAddModal() {
+  document.getElementById('modal-title').textContent = 'Kies hoofdonderdeel';
+  const body = document.getElementById('modal-body');
+  body.innerHTML = PRESETS.map(p => `
+    <div class="modal-preset-item" onclick="showSubModal('${p}')">
+      <span class="modal-preset-name">${p}</span>
+      <span class="modal-preset-arr">›</span>
+    </div>`).join('') +
+    `<div class="modal-preset-item" onclick="addElementBlank();hideAddModal()">
+      <span class="modal-preset-name" style="color:var(--text2);">Leeg bouwdeel (handmatig)</span>
+      <span class="modal-preset-arr">+</span>
+    </div>`;
+  document.getElementById('add-modal').style.display = 'block';
+}
+
+function showSubModal(preset) {
+  const subitems = PRESET_SUBITEMS[preset] || [];
+  document.getElementById('modal-title').textContent = preset;
+  const body = document.getElementById('modal-body');
+
+  if (subitems.length === 0) {
+    addPreset(preset);
+    hideAddModal();
+    return;
+  }
+
+  body.innerHTML = `
+    <button class="modal-back" onclick="showAddModal()">‹ Terug</button>
+    <div class="modal-preset-item" onclick="addPreset('${preset}');hideAddModal();" style="background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:8px;">
+      <span class="modal-preset-name">+ Heel ${preset} toevoegen</span>
+      <span class="modal-preset-arr">+</span>
+    </div>
+    ${subitems.map(s => `
+      <div class="modal-subitem">
+        <span class="modal-subitem-name">${s}</span>
+        <button class="subitem-add" onclick="addPresetWithSub('${preset}','${s}');hideAddModal();">+</button>
+      </div>`).join('')}`;
+}
+
+function addPresetWithSub(preset, sub) {
+  state.elements.push({
+    name: preset, cond: 1,
+    life: PRESET_LIFE[preset] || 20,
+    kosten: '', notes: '',
+    subItems: [sub],
+    photos: [], aiResult: '', analyzing: false
+  });
+  saveState();
+  renderElements();
+  document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
+  showToast(preset + ' — ' + sub + ' toegevoegd');
+}
+
+function addElementBlank() {
+  state.elements.push({ name: 'Nieuw bouwdeel', cond: 1, life: '', kosten: '', notes: '', photos: [], aiResult: '', analyzing: false });
+  saveState();
+  renderElements();
+  document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideAddModal(event) {
+  if (event && event.target !== document.getElementById('add-modal')) return;
+  document.getElementById('add-modal').style.display = 'none';
+}
   const hasObj = !!state.currentObjectId;
   document.getElementById('inspectie-no-object').style.display = hasObj ? 'none' : 'block';
   document.getElementById('inspectie-form').style.display = hasObj ? 'block' : 'none';
   if (!hasObj) return;
 
-  // Render preset chips
+  // Eenvoudige preset chips
   const chips = document.getElementById('preset-chips');
   chips.innerHTML = PRESETS.map(p =>
     `<button class="chip" onclick="addPreset('${p}')">${p}</button>`
   ).join('');
 
   renderElements();
+}
+
+function toggleSubcat(id) {
+  const el = document.getElementById(id);
+  const arr = document.getElementById('arr-' + id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.subcat-items.open').forEach(e => e.classList.remove('open'));
+  document.querySelectorAll('.subcat-arrow.open').forEach(e => e.classList.remove('open'));
+  if (!isOpen) { el.classList.add('open'); arr.classList.add('open'); }
+}
+
+function addSubItem(elIdx, item) {
+  const el = state.elements[elIdx];
+  if (!el.subItems) el.subItems = [];
+  if (!el.subItems.includes(item)) el.subItems.push(item);
+  saveState();
+  renderElements();
+  showToast(item + ' toegevoegd');
+}
+
+function removeSubItem(elIdx, item) {
+  const el = state.elements[elIdx];
+  if (el.subItems) el.subItems = el.subItems.filter(s => s !== item);
+  saveState();
+  renderElements();
+}
+
+function addSubcat(elIdx) {
+  const el = state.elements[elIdx];
+  const items = PRESET_SUBITEMS[el.name] || [];
+  el.subItems = [...new Set([...(el.subItems||[]), ...items])];
+  saveState();
+  renderElements();
+  showToast('Alle onderdelen toegevoegd');
 }
 
 function renderElements() {
@@ -640,12 +792,42 @@ function renderElements() {
       ? `<div class="ai-box"><div class="loading-row" style="margin:0"><div class="dots"><span></span><span></span><span></span></div><span style="font-size:12px;">Analyseren...</span></div></div>`
       : ai ? `<div class="ai-box"><div class="ai-box-label">AI foto-analyse</div>${ai.replace(/\n/g,'<br>')}</div>` : '';
 
+    const subItems = el.subItems || [];
+    const availableSubItems = PRESET_SUBITEMS[el.name] || [];
+    const subcatId = 'sub-' + i;
+
+    const subItemsHtml = availableSubItems.length > 0 ? `
+      <div class="field">
+        <label>Onderdelen</label>
+        ${subItems.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+          ${subItems.map(s => `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:99px;padding:3px 10px;font-size:12px;">
+            ${s}<button onclick="removeSubItem(${i},'${s}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;line-height:1;padding:0 0 0 2px;">×</button>
+          </span>`).join('')}
+        </div>` : ''}
+        <div class="subcat" style="margin-bottom:0;">
+          <div class="subcat-header" onclick="toggleSubcat('${subcatId}')">
+            <span style="font-size:13px;color:var(--text2);">+ Onderdeel toevoegen</span>
+            <span class="subcat-arrow" id="arr-${subcatId}">›</span>
+          </div>
+          <div class="subcat-items" id="${subcatId}">
+            ${availableSubItems.filter(s => !subItems.includes(s)).map(s => `
+              <div class="subitem-row">
+                <span class="subitem-name">${s}</span>
+                <button class="subitem-add" onclick="addSubItem(${i},'${s}')">+</button>
+              </div>`).join('')}
+            ${availableSubItems.every(s => subItems.includes(s)) ? '<div style="font-size:12px;color:var(--text3);padding:6px;">Alle onderdelen toegevoegd</div>' : ''}
+            <button class="subcat-add-all" onclick="addSubcat(${i})">+ Alle onderdelen toevoegen</button>
+          </div>
+        </div>
+      </div>` : '';
+
     return `<div class="card">
       <div class="card-header">
         <input class="card-name-input" value="${el.name}" onchange="state.elements[${i}].name=this.value;saveState()" />
         <span class="badge badge-${cond}">${COND_LABELS[cond]}</span>
         <button class="del-btn" onclick="removeEl(${i})">×</button>
       </div>
+      ${subItemsHtml}
       <div class="field">
         <label>Conditiescore (1=goed, 5=slecht)</label>
         <div class="rating-row">
@@ -670,8 +852,8 @@ function renderElements() {
         <label>Foto's ${photos.length}/4</label>
         ${photos.length < 4 ? `<div class="photo-drop" onclick="triggerUpload(${i})">
           <div style="font-size:24px;margin-bottom:4px;">📷</div>
-          <div style="font-size:12px;color:var(--text3);">Tik om foto te kiezen of te maken</div>
-          <input type="file" id="fu-${i}" accept="image/*" multiple capture="environment" style="display:none;" onchange="handleUpload(event,${i})" />
+          <div style="font-size:12px;color:var(--text3);">Tik om foto te kiezen uit bibliotheek of te maken</div>
+          <input type="file" id="fu-${i}" accept="image/*" multiple style="display:none;" onchange="handleUpload(event,${i})" />
         </div>` : ''}
         ${thumbs ? `<div class="photo-grid">${thumbs}</div>` : ''}
         ${photos.length > 0 && !ai && !analyzing
@@ -682,11 +864,7 @@ function renderElements() {
   }).join('');
 }
 
-function addElement() {
-  state.elements.push({ name: 'Nieuw bouwdeel', cond: 1, life: '', kosten: '', notes: '', photos: [], aiResult: '', analyzing: false });
-  saveState();
-  renderElements();
-}
+function addElement() { addElementBlank(); }
 
 function addPreset(name) {
   state.elements.push({ name, cond: 1, life: PRESET_LIFE[name]||20, kosten: '', notes: '', photos: [], aiResult: '', analyzing: false });
