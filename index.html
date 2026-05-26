@@ -1656,9 +1656,23 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.bag-wrap')) hideBagDropdown();
 });
 
-// SERVICE WORKER
+// SERVICE WORKER met auto-update
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // Controleer op updates
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Nieuwe versie beschikbaar — automatisch herladen
+          showToast('App bijgewerkt — pagina wordt ververst...');
+          setTimeout(() => window.location.reload(), 1500);
+        }
+      });
+    });
+    // Check direct op update bij elke start
+    reg.update();
+  }).catch(() => {});
 }
 
 // BOOT
