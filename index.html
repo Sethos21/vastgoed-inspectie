@@ -475,14 +475,34 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// STATE
+// STATE — elementen en rapporten worden per object opgeslagen
 let state = {
   objects: [],
   currentObjectId: null,
-  elements: [],
-  reportText: '',
-  mjopData: []
+  inspections: {},  // { objectId: { elements, reportText, mjopData } }
 };
+
+// Hulpfuncties voor per-object data
+function getInspection(id) {
+  const oid = id || state.currentObjectId;
+  if (!oid) return { elements: [], reportText: '', mjopData: [] };
+  if (!state.inspections[oid]) state.inspections[oid] = { elements: [], reportText: '', mjopData: [] };
+  return state.inspections[oid];
+}
+
+// Proxy getters/setters zodat bestaande code blijft werken
+Object.defineProperty(state, 'elements', {
+  get() { return getInspection().elements; },
+  set(v) { getInspection().elements = v; }
+});
+Object.defineProperty(state, 'reportText', {
+  get() { return getInspection().reportText; },
+  set(v) { getInspection().reportText = v; }
+});
+Object.defineProperty(state, 'mjopData', {
+  get() { return getInspection().mjopData; },
+  set(v) { getInspection().mjopData = v; }
+});
 
 // PRESETS met sub-onderdelen
 const PRESETS = ['Dak','Gevels','Kozijnen en ramen','Balkons / galerijen','Algemene ruimtes','Installaties','Sanitaire ruimtes','Fundering','Buitenruimte'];
@@ -508,12 +528,33 @@ const PRESET_LIFE = {
 function loadState() {
   try {
     const s = localStorage.getItem('vi-state');
-    if (s) state = { ...state, ...JSON.parse(s) };
-  } catch(e) {}
+    if (!s) return;
+    const saved = JSON.parse(s);
+    state.objects = saved.objects || [];
+    state.currentObjectId = saved.currentObjectId || null;
+    // Nieuw formaat met inspections per object
+    if (saved.inspections) {
+      state.inspections = saved.inspections;
+    } else if (saved.elements && state.currentObjectId) {
+      // Migreer oud formaat
+      state.inspections = {};
+      state.inspections[state.currentObjectId] = {
+        elements: saved.elements || [],
+        reportText: saved.reportText || '',
+        mjopData: saved.mjopData || []
+      };
+    }
+  } catch(e) { console.error('loadState error:', e); }
 }
 
 function saveState() {
-  try { localStorage.setItem('vi-state', JSON.stringify(state)); } catch(e) {}
+  try {
+    localStorage.setItem('vi-state', JSON.stringify({
+      objects: state.objects,
+      currentObjectId: state.currentObjectId,
+      inspections: state.inspections
+    }));
+  } catch(e) { console.error('saveState error:', e); }
 }
 
 function getApiKey() { return localStorage.getItem('vi-apikey') || ''; }
@@ -668,14 +709,33 @@ function saveObject() {
 
 function selectObject(id) {
   state.currentObjectId = id;
-  state.elements = [];
-  state.reportText = '';
-  state.mjopData = [];
+  // Maak inspectie aan als die nog niet bestaat, maar reset NIET als die al bestaat
+  if (!state.inspections[id]) {
+    state.inspections[id] = { elements: [], reportText: '', mjopData: [] };
+  }
   saveState();
   updateTopbar();
   renderInspectie();
-  resetRapport();
-  resetMJOP();
+  // Herstel rapport als dat al gegenereerd was
+  const insp = getInspection(id);
+  if (insp.reportText) {
+    const html = insp.reportText
+      .replace(/^# (.*)/gm, '<h1 style="font-size:18px;font-weight:700;margin:16px 0 8px;">$1</h1>')
+      .replace(/^## (.*)/gm, '<h2 style="font-size:15px;font-weight:700;margin:14px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
+      .replace(/^### (.*)/gm, '<h3 style="font-size:14px;font-weight:600;margin:10px 0 4px;">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '<br>').replace(/\n/g, '<br>');
+    document.getElementById('rapport-text').innerHTML = html;
+    document.getElementById('rapport-content').style.display = 'block';
+    document.getElementById('rapport-empty').style.display = 'none';
+  } else {
+    resetRapport();
+  }
+  if (insp.mjopData?.length > 0) {
+    renderMJOP();
+  } else {
+    resetMJOP();
+  }
   showPage('inspectie');
 }
 
@@ -1004,47 +1064,52 @@ async function generateReport() {
     });
   });
 
-  const prompt = `Je bent een professioneel vastgoedinspecteur. Schrijf een uitgebreid inspectierapport in het Nederlands op basis van de onderstaande inspectiedata${allPhotos.length > 0 ? ' en bijgevoegde foto\'s' : ''}.
+  const prompt = `Je bent een professioneel vastgoedinspecteur. Schrijf een beknopt maar volledig inspectierapport in het Nederlands. Houd het compact — maximaal 600 woorden totaal.
 
-**OBJECTGEGEVENS:**
-- Adres: ${obj.naam}
-- Type: ${obj.type}
-- Bouwjaar: ${obj.jaar||'onbekend'}
-- Oppervlakte: ${obj.opp||'?'} m²
-- Eenheden: ${obj.eenheden||'?'}
-- Gemeente: ${obj.context||'-'}
-- Inspectiedatum: ${datum}
+OBJECTGEGEVENS:
+Adres: ${obj.naam} | Type: ${obj.type} | Bouwjaar: ${obj.jaar||'?'} | Oppervlakte: ${obj.opp||'?'} m² | Eenheden: ${obj.eenheden||'?'} | Gemeente: ${obj.postcode||obj.context||'-'} | Datum: ${datum}
 
-**GEÏNSPECTEERDE BOUWDELEN:**
+GEÏNSPECTEERDE BOUWDELEN:
 ${elStr || 'Geen bouwdelen geregistreerd.'}
 
-Schrijf het rapport EXACT in dit format:
+Schrijf het rapport EXACT in onderstaand formaat. Gebruik Markdown. Wees beknopt per bevinding (max 1 zin beschrijving).
 
 # ONDERHOUDSINSPECTIE RAPPORT
-## [Adres]
-Datum: [datum]
+## ${obj.naam}
+Visuele inspectie | Datum: ${datum}
 
-## 1. ALGEMENE INFORMATIE
-Tabel met adres, type, bouwjaar, oppervlakte, inspectiedatum.
+## 1. Algemene informatie
+| Gegeven | Waarde |
+|---|---|
+| Adres | ${obj.naam} |
+| Type object | ${obj.type} |
+| Bouwjaar | ${obj.jaar||'onbekend'} |
+| Oppervlakte | ${obj.opp||'?'} m² |
+| Aantal eenheden | ${obj.eenheden||'?'} |
+| Inspectiedatum | ${datum} |
+| Inspectiemethode | Visuele inspectie${allPhotos.length > 0 ? ' met fotodocumentatie' : ''} |
 
-## 2. PRIORITEITENLEGENDA
-Tabel met URGENT / HOOG / GEMIDDELD / LAAG en omschrijving.
+## 2. Prioriteitenlegenda
+| Prioriteit | Actie |
+|---|---|
+| URGENT | Direct actie vereist |
+| HOOG | Binnen 1-3 maanden |
+| GEMIDDELD | Binnen 6-12 maanden |
+| LAAG | Planmatig onderhoud |
 
-## 3. BEVINDINGEN PER ONDERDEEL
-Per bouwdeel een sectie met tabel: Bevinding | Beschrijving | Prioriteit.
-Wijs per bevinding een prioriteit toe (URGENT/HOOG/GEMIDDELD/LAAG) op basis van de conditiescore en notities.
-Conditie 5 = mogelijke URGENT bevindingen, 4 = HOOG, 3 = GEMIDDELD, 1-2 = LAAG.
+## 3. Bevindingen per onderdeel
+[Schrijf per bouwdeel een subsectie ### met een tabel: Bevinding | Beschrijving | Prioriteit. Bepaal prioriteit op basis van conditiescore: 5=URGENT/HOOG, 4=HOOG, 3=GEMIDDELD, 1-2=LAAG. Maximaal 3 bevindingen per bouwdeel.]
 
-## 4. SAMENVATTING EN ACTIEPLAN
-### 4.1 Urgente punten
-### 4.2 Hoge prioriteit (binnen 3 maanden)
-### 4.3 Gemiddelde prioriteit (6-12 maanden)
-### 4.4 Lage prioriteit / planmatig onderhoud
+## 4. Actieplan
+### Urgent (direct)
+[bullet per urgent punt]
+### Hoog (1-3 maanden)
+[bullet per hoog punt]
+### Gemiddeld (6-12 maanden)
+[bullet per gemiddeld punt]
 
-## 5. DISCLAIMER
-Standaard disclaimer over visuele inspectie.
-
-Schrijf professioneel en concreet. Gebruik de foto-analyses waar beschikbaar voor specifieke bevindingen.`;
+## 5. Disclaimer
+Dit rapport is opgesteld op basis van visuele inspectie. Het vervangt geen professioneel bouwkundig keuringsrapport.`;
 
   try {
     // Bouw content array op met eventuele foto's
@@ -1678,17 +1743,29 @@ if ('serviceWorker' in navigator) {
 // BOOT
 loadState();
 renderObjects();
-renderInspectie();
 initSettings();
-if (state.reportText) {
-  document.getElementById('rapport-empty').style.display = 'none';
-  document.getElementById('rapport-text').innerHTML = state.reportText.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-  document.getElementById('rapport-content').style.display = 'block';
+
+// Herstel laatste sessie
+if (state.currentObjectId) {
+  updateTopbar();
+  renderInspectie();
+  const insp = getInspection(state.currentObjectId);
+  if (insp.reportText) {
+    const html = insp.reportText
+      .replace(/^# (.*)/gm, '<h1 style="font-size:18px;font-weight:700;margin:16px 0 8px;">$1</h1>')
+      .replace(/^## (.*)/gm, '<h2 style="font-size:15px;font-weight:700;margin:14px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
+      .replace(/^### (.*)/gm, '<h3 style="font-size:14px;font-weight:600;margin:10px 0 4px;">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '<br>').replace(/\n/g, '<br>');
+    document.getElementById('rapport-text').innerHTML = html;
+    document.getElementById('rapport-content').style.display = 'block';
+    document.getElementById('rapport-empty').style.display = 'none';
+  }
+  if (insp.mjopData?.length > 0) renderMJOP();
+} else {
+  updateTopbar();
+  renderInspectie();
 }
-if (state.mjopData && state.mjopData.length > 0) {
-  renderMJOP();
-}
-updateTopbar();
 </script>
 </body>
 </html>
