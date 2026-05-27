@@ -224,8 +224,11 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         <div id="photo-count" style="text-align:center;margin-top:10px;"></div>
         <div id="photo-grid" class="photo-grid"></div>
         <div id="fotos-actions" style="display:none;margin-top:14px;">
-          <button class="btn btn-dark btn-full" onclick="generateRapport()">✦ Rapport genereren met AI</button>
-          <button class="btn btn-light btn-full btn-sm" style="margin-top:8px;" onclick="clearPhotos()">Alle foto's verwijderen</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport</button>
+            <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport</button>
+          </div>
+          <button class="btn btn-light btn-full btn-sm" onclick="clearPhotos()">Alle foto's verwijderen</button>
         </div>
       </div>
     </div>
@@ -242,14 +245,17 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         <div id="loading-detail" style="font-size:12px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div id="rapport-content" style="display:none;">
+        <div id="rapport-type-badge" style="margin-bottom:8px;"></div>
         <div id="rapport-text" class="result-card"></div>
         <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn btn-dark" onclick="generateRapport()">↺ Opnieuw</button>
-          <button class="btn btn-light" onclick="copyRapport()">Kopieer</button>
+          <button class="btn btn-dark btn-sm" onclick="generateRapport('kort')">↺ Kort</button>
+          <button class="btn btn-dark btn-sm" onclick="generateRapport('uitgebreid')">↺ Uitgebreid</button>
+          <button class="btn btn-light btn-sm" onclick="copyRapport()">Kopieer</button>
         </div>
         <div class="btn-row">
           <button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>
           <button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>
+          <button class="btn btn-light btn-sm" onclick="downloadExcel()">⬇ Excel</button>
         </div>
       </div>
     </div>
@@ -596,7 +602,131 @@ window.clearPhotos = async () => {
 };
 
 // RAPPORT
-window.generateRapport = async () => {
+window.generateRapport = async (type = 'uitgebreid') => {
+  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
+  if (!currentObjectId) { showToast('Selecteer eerst een object'); return; }
+  if (!currentPhotos.length) { showToast('Upload eerst foto\'s'); showPage('fotos'); return; }
+  showPage('rapport');
+  document.getElementById('rapport-empty').style.display = 'none';
+  document.getElementById('rapport-content').style.display = 'none';
+  document.getElementById('rapport-loading').style.display = 'block';
+  const obj = objects.find(o => o.id === currentObjectId);
+  const datum = new Date().toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('loading-status').textContent = 'Foto\'s analyseren...';
+  document.getElementById('progress-bar').style.width = '5%';
+  const BATCH = 8;
+  const batches = [];
+  for (let i=0; i<currentPhotos.length; i+=BATCH) batches.push(currentPhotos.slice(i,i+BATCH));
+  const analyses = [];
+  for (let b=0; b<batches.length; b++) {
+    const pct = 10 + Math.round((b/batches.length)*65);
+    document.getElementById('progress-bar').style.width = pct+'%';
+    document.getElementById('loading-status').textContent = `Batch ${b+1} van ${batches.length} analyseren...`;
+    document.getElementById('loading-detail').textContent = `Foto's ${b*BATCH+1}–${Math.min((b+1)*BATCH,currentPhotos.length)} van ${currentPhotos.length}`;
+    const content = batches[b].map(p => ({type:'image',source:{type:'base64',media_type:'image/jpeg',data:p.dataUrl.split(',')[1]}}));
+    const labels = batches[b].map((p,i) => `Foto ${b*BATCH+i+1}${p.label?': '+p.label:''}`).join(', ');
+    content.push({type:'text',text:`Analyseer deze vastgoedinspectiefoto's (${labels}). Per zichtbaar bouwdeel: naam, conditie, gebreken. ALLEEN JSON:\n[{"bouwdeel":"naam","conditie":"Matig","bevinding":"omschrijving","foto_nr":${b*BATCH+1}}]`});
+    try {
+      const raw = await callClaude(content);
+      const clean = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+      const s=clean.indexOf('['), e=clean.lastIndexOf(']');
+      if(s>=0&&e>s) analyses.push(...JSON.parse(clean.substring(s,e+1)));
+    } catch(e) { console.error('Batch '+(b+1)+' fout:', e); }
+  }
+  document.getElementById('progress-bar').style.width = '80%';
+  document.getElementById('loading-status').textContent = type === 'kort' ? 'Kort rapport opstellen...' : 'Uitgebreid rapport opstellen...';
+  document.getElementById('loading-detail').textContent = analyses.length+' bevindingen verwerken';
+  const analyseStr = analyses.map(a => `- ${a.bouwdeel}: ${a.conditie} — ${a.bevinding}${a.foto_nr?' (foto '+a.foto_nr+')':''}`).join('\n');
+
+  const kortPrompt = `Je bent een vastgoedinspecteur. Schrijf een BEKNOPT inspectierapport (max 1 pagina) in het Nederlands.
+
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
+
+Bevindingen uit ${currentPhotos.length} foto's:
+${analyseStr}
+
+Schrijf ALLEEN dit:
+
+**SAMENVATTING**
+[3 zinnen: algehele staat, belangrijkste punten, totale kostenindicatie]
+
+**OVERZICHT**
+| Onderdeel | Conditie | Prioriteit | Kosten indicatief |
+|---|---|---|---|
+[max 8 rijen, één regel per onderdeel]
+**Totaal indicatief: € [som]**
+
+**URGENT / HOOG PRIORITEIT**
+[alleen de meest urgente acties als bullets, max 5]
+
+**DISCLAIMER**
+Visuele inspectie op basis van fotodocumentatie. Vervangt geen professioneel bouwkundig keuringsrapport.`;
+
+  const uitgebreidPrompt = `Je bent een vastgoedinspecteur. Schrijf een uitgebreid professioneel inspectierapport in het Nederlands.
+
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
+
+Bevindingen uit ${currentPhotos.length} foto's (met fotonummers):
+${analyseStr}
+
+Schrijf het rapport in dit format. Max 2 niveaus diep, max 8 hoofdonderdelen.
+
+**SAMENVATTING**
+[2-3 zinnen algehele staat]
+
+**OVERZICHTSTABEL**
+| Onderdeel | Conditie | Prioriteit | Kosten indicatief |
+|---|---|---|---|
+[max 10 rijen]
+**Totaal: € [som]**
+
+**BEVINDINGEN PER ONDERDEEL**
+### [Onderdeel] — [Conditie]
+- [bevinding (foto X)]
+Prioriteit: [URGENT/HOOG/GEMIDDELD/LAAG]
+
+**KOSTENRAMING**
+| Onderdeel | Maatregel | Kosten | Onderbouwing |
+|---|---|---|---|
+**Totaal indicatief: € [som]**
+
+**AANBEVELINGEN**
+Urgent: [bullets]
+Hoog (1-3 mnd): [bullets]
+Gemiddeld (6-12 mnd): [bullets]
+Laag: [bullets]
+
+**DISCLAIMER**
+Dit rapport is opgesteld op basis van visuele analyse van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.`;
+
+  try {
+    const rapportText = await callClaude([{type:'text',text: type === 'kort' ? kortPrompt : uitgebreidPrompt}]);
+    // Sla beide versies op
+    const bestaand = {};
+    try { const s = await getDoc(dataDoc(currentObjectId,'rapport')); if(s.exists()) Object.assign(bestaand, s.data()); } catch(e){}
+    await setDoc(dataDoc(currentObjectId,'rapport'), {
+      ...bestaand,
+      [type === 'kort' ? 'tekstKort' : 'tekstUitgebreid']: rapportText,
+      tekst: rapportText, // ook als standaard opslaan
+      aangemaaktOp: serverTimestamp(),
+      aangemaaktDoor: currentUser?.displayName || currentUser?.email || ''
+    });
+    await setDoc(objDoc(currentObjectId), {heeftRapport:true}, {merge:true});
+    document.getElementById('progress-bar').style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('rapport-loading').style.display = 'none';
+      document.getElementById('rapport-type-badge').innerHTML = type === 'kort'
+        ? '<span class="badge badge-blue">Korte versie</span>'
+        : '<span class="badge badge-green">Uitgebreide versie</span>';
+      document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportText) + renderFotoBijlage();
+      document.getElementById('rapport-content').style.display = 'block';
+    }, 400);
+  } catch(e) {
+    document.getElementById('rapport-loading').style.display = 'none';
+    document.getElementById('rapport-empty').style.display = 'block';
+    showToast('Fout: '+e.message);
+  }
+};
   if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
   if (!currentObjectId) { showToast('Selecteer eerst een object'); return; }
   if (!currentPhotos.length) { showToast('Upload eerst foto\'s'); showPage('fotos'); return; }
@@ -721,6 +851,55 @@ window.renderFotoBijlage = () => {
 };
 
 // EXPORT
+window.downloadExcel = async () => {
+  const rapportEl = document.getElementById('rapport-text');
+  if (!rapportEl || !rapportEl.innerText) { showToast('Genereer eerst een rapport'); return; }
+  showToast('Excel aanmaken...');
+  try {
+    if (!window.XLSX) {
+      await new Promise((res,rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    const obj = objects.find(o => o.id === currentObjectId);
+    const wb = XLSX.utils.book_new();
+
+    // Haal tabellen op uit de rapport HTML
+    const tables = rapportEl.querySelectorAll('table');
+    let tabIdx = 1;
+    const tabNames = ['Overzicht', 'Kostenraming', 'Extra'];
+
+    tables.forEach((table, idx) => {
+      const rows = [];
+      // Header rij
+      table.querySelectorAll('tr').forEach(tr => {
+        const row = [];
+        tr.querySelectorAll('td, th').forEach(td => row.push(td.innerText.trim()));
+        if (row.some(c => c)) rows.push(row);
+      });
+      if (rows.length > 1) {
+        const ws = XLSX.utils.aoa_to_sheet([
+          [`${obj?.naam || 'Object'} — ${tabNames[idx] || 'Tabel ' + (idx+1)}`],
+          [`Datum: ${new Date().toLocaleDateString('nl-NL')}`],
+          [],
+          ...rows
+        ]);
+        ws['!cols'] = rows[0]?.map(() => ({ wch: 25 }));
+        XLSX.utils.book_append_sheet(wb, ws, tabNames[idx] || 'Tabel ' + (idx+1));
+      }
+    });
+
+    if (wb.SheetNames.length === 0) { showToast('Geen tabellen gevonden in rapport'); return; }
+
+    const naam = (obj?.naam || 'rapport').replace(/[^a-z0-9]/gi, '_');
+    XLSX.writeFile(wb, `Inspectie_${naam}.xlsx`);
+    showToast('Excel gedownload');
+  } catch(e) { showToast('Fout: ' + e.message); }
+};
+
 window.copyRapport = () => {
   const el = document.getElementById('rapport-text');
   navigator.clipboard.writeText(el.innerText||el.textContent||'').then(()=>showToast('Rapport gekopieerd'));
