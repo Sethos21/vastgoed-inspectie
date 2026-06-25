@@ -18,6 +18,7 @@
   --accent:#1a1a1a;--accent-text:#fff;
   --green-bg:#eaf3de;--green-text:#3b6d11;
   --amber-bg:#faeeda;--amber-text:#854f0b;
+  --orange-bg:#faece7;--orange-text:#993c1d;
   --red-bg:#fcebeb;--red-text:#a32d2d;
   --blue-bg:#e6f1fb;--blue-text:#185fa5;
   --radius:12px;--radius-sm:8px;
@@ -25,7 +26,7 @@
   --safe-bot:env(safe-area-inset-bottom,0px);
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#1a1a1a;--bg2:#252525;--bg3:#2f2f2f;--text:#f0f0f0;--text2:#aaa;--text3:#666;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--accent:#f0f0f0;--accent-text:#1a1a1a;--green-bg:#1a2e0a;--green-text:#8ecf50;--amber-bg:#2e1f00;--amber-text:#f5b942;--red-bg:#2e0a0a;--red-text:#f07070;--blue-bg:#0a1e35;--blue-text:#6aadee;}
+  :root{--bg:#1a1a1a;--bg2:#252525;--bg3:#2f2f2f;--text:#f0f0f0;--text2:#aaa;--text3:#666;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--accent:#f0f0f0;--accent-text:#1a1a1a;--green-bg:#1a2e0a;--green-text:#8ecf50;--amber-bg:#2e1f00;--amber-text:#f5b942;--orange-bg:#2e1208;--orange-text:#f09060;--red-bg:#2e0a0a;--red-text:#f07070;--blue-bg:#0a1e35;--blue-text:#6aadee;}
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
@@ -35,8 +36,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .topbar-sub{font-size:12px;color:var(--text3);margin-top:1px;}
 .topbar-right{display:flex;align-items:center;gap:8px;}
 .icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
-.tabbar{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
-.tabbar-btn{flex:1;padding:10px 4px 8px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;font-family:inherit;}
+.tabbar{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabbar::-webkit-scrollbar{display:none;}
+.tabbar-btn{flex:0 0 auto;padding:10px 12px 8px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;font-family:inherit;white-space:nowrap;}
 .tabbar-btn.active{color:var(--text);border-bottom-color:var(--text);}
 .tabbar-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;}
@@ -61,45 +63,25 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 .section-title:first-child{margin-top:0;}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
 .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;font-weight:500;}
-.badge-green{background:var(--green-bg);color:var(--green-text);}
-.badge-amber{background:var(--amber-bg);color:var(--amber-text);}
-.badge-red{background:var(--red-bg);color:var(--red-text);}
+.badge-1{background:var(--green-bg);color:var(--green-text);}
+.badge-2{background:var(--amber-bg);color:var(--amber-text);}
+.badge-3{background:var(--orange-bg);color:var(--orange-text);}
+.badge-4{background:var(--red-bg);color:var(--red-text);}
+.badge-5{background:var(--red-bg);color:#501313;}
 .badge-blue{background:var(--blue-bg);color:var(--blue-text);}
-.loading-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:14px;padding:8px 0;}
+.badge-green{background:var(--green-bg);color:var(--green-text);}
 .dots{display:flex;gap:4px;}
 .dots span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:blink 1.2s infinite;}
 .dots span:nth-child(2){animation-delay:.25s;}
 .dots span:nth-child(3){animation-delay:.5s;}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.loading-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:14px;padding:8px 0;}
 .empty{text-align:center;padding:40px 20px;color:var(--text3);}
 .empty svg{width:48px;height:48px;stroke:var(--text3);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px;display:block;}
 .toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--accent-text);padding:10px 18px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:999;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-.bag-wrap{position:relative;}
-.bag-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:100;max-height:220px;overflow-y:auto;margin-top:3px;}
-.bag-item{padding:10px 13px;font-size:14px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
-.bag-item:active{background:var(--bg2);}
-.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:6px;font-weight:500;}
-.bag-badge.fail{background:var(--amber-bg);color:var(--amber-text);}
-.photo-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 16px;text-align:center;cursor:pointer;background:var(--bg2);}
-.photo-upload-zone .icon{font-size:40px;margin-bottom:8px;}
-.photo-upload-zone .title{font-size:16px;font-weight:600;margin-bottom:4px;}
-.photo-upload-zone .sub{font-size:13px;color:var(--text3);}
-.photo-count-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-bg);color:var(--blue-text);padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;margin-top:10px;}
-.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
-.photo-item{position:relative;aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;border:0.5px solid var(--border);}
-.photo-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.photo-item-overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:3px 4px;}
-.photo-label-input{width:100%;background:none;border:none;color:#fff;font-size:10px;font-family:inherit;outline:none;padding:0;}
-.photo-label-input::placeholder{color:rgba(255,255,255,0.5);}
-.photo-del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
 .progress-bar-wrap{background:var(--bg2);border-radius:99px;height:6px;margin:10px 0;overflow:hidden;}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
-.result-card{background:var(--bg2);border-radius:var(--radius);padding:14px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
-.obj-item{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
-.obj-item:active{background:var(--bg2);}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-text);display:inline-block;margin-right:4px;}
-.sync-dot.offline{background:var(--amber-text);}
 
 /* LOGIN */
 .login-logo{text-align:center;margin-bottom:32px;}
@@ -110,6 +92,81 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 .login-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;}
 .login-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;border-radius:6px;font-family:inherit;color:var(--text2);}
 .login-tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+
+/* BAG */
+.bag-wrap{position:relative;}
+.bag-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:100;max-height:220px;overflow-y:auto;margin-top:3px;}
+.bag-item{padding:10px 13px;font-size:14px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
+.bag-item:active{background:var(--bg2);}
+.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:6px;font-weight:500;}
+.bag-badge.fail{background:var(--amber-bg);color:var(--amber-text);}
+
+/* GEVEL UPLOAD */
+.gevel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.gevel-card{border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;}
+.gevel-card.heeft-fotos{border-color:var(--green-text);}
+.gevel-card.analysed{border-color:var(--blue-text);}
+.gevel-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
+.gevel-naam{font-size:13px;font-weight:600;}
+.gevel-count{font-size:11px;color:var(--text3);}
+.gevel-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;max-height:80px;overflow:hidden;}
+.gevel-preview img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.gevel-placeholder{background:var(--bg2);display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;font-size:24px;color:var(--text3);}
+
+/* ELEMENT CARDS */
+.element-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+.element-header{padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-bottom:0.5px solid var(--border);}
+.element-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.element-info{flex:1;}
+.element-naam{font-size:14px;font-weight:600;margin-bottom:2px;}
+.element-meta{font-size:12px;color:var(--text3);}
+.element-body{padding:12px 14px;}
+.element-body textarea{font-size:13px;min-height:60px;}
+.conditie-row{display:flex;gap:6px;margin-bottom:10px;}
+.conditie-btn{flex:1;padding:6px 4px;border:0.5px solid var(--border2);border-radius:6px;background:none;cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;text-align:center;color:var(--text2);}
+.conditie-btn.sel-1{background:var(--green-bg);color:var(--green-text);border-color:transparent;}
+.conditie-btn.sel-2{background:var(--amber-bg);color:var(--amber-text);border-color:transparent;}
+.conditie-btn.sel-3{background:var(--orange-bg);color:var(--orange-text);border-color:transparent;}
+.conditie-btn.sel-4{background:var(--red-bg);color:var(--red-text);border-color:transparent;}
+.conditie-btn.sel-5{background:var(--red-bg);color:#501313;border-color:var(--red-text);}
+.kosten-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.kosten-row input{font-size:14px;}
+.foto-mini-grid{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
+.foto-mini{width:48px;height:48px;border-radius:6px;object-fit:cover;border:0.5px solid var(--border);}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--blue-bg);color:var(--blue-text);padding:2px 8px;border-radius:99px;margin-bottom:6px;}
+
+/* ISOLATIE */
+.isolatie-card{background:var(--bg2);border-radius:var(--radius-sm);padding:12px;margin-top:8px;}
+.isolatie-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.isolatie-label{font-size:13px;color:var(--text2);}
+.isolatie-val{font-size:13px;font-weight:500;}
+
+/* KOSTENRAMING */
+.kosten-totaal-card{background:var(--accent);color:var(--accent-text);border-radius:var(--radius);padding:16px;margin-bottom:16px;text-align:center;}
+.kosten-totaal-label{font-size:13px;opacity:.7;margin-bottom:4px;}
+.kosten-totaal-bedrag{font-size:32px;font-weight:700;}
+.kosten-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.kosten-item-naam{color:var(--text2);}
+.kosten-item-bedrag{font-weight:600;}
+
+/* RAPPORT */
+.rapport-card{background:var(--bg2);border-radius:var(--radius);padding:14px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
+
+/* OBJECTS */
+.obj-item{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
+.obj-item:active{background:var(--bg2);}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-text);display:inline-block;margin-right:4px;}
+.sync-dot.offline{background:var(--amber-text);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);}
+.modal-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bot));max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;}
+.photo-grid-modal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.photo-item-modal{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:0.5px solid var(--border);}
+.photo-item-modal img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;background:var(--bg2);margin-bottom:12px;}
 </style>
 </head>
 <body>
@@ -117,11 +174,10 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
   <div class="topbar" id="topbar" style="display:none;">
     <div>
       <div class="topbar-title" id="topbar-title">VastgoedInspectie</div>
-      <div class="topbar-sub" id="topbar-sub">Laden...</div>
+      <div class="topbar-sub" id="topbar-sub"></div>
     </div>
     <div class="topbar-right">
       <span id="sync-status" style="font-size:11px;color:var(--text3);"></span>
-      <button class="icon-btn" onclick="showPage('settings')" title="Instellingen">⚙</button>
       <button class="icon-btn" onclick="uitloggen()" title="Uitloggen" style="font-size:13px;">↩</button>
     </div>
   </div>
@@ -130,11 +186,17 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
     <button class="tabbar-btn active" data-page="objects" onclick="showPage('objects')">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>Objecten
     </button>
-    <button class="tabbar-btn" data-page="fotos" onclick="showPage('fotos')">
-      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto's
+    <button class="tabbar-btn" data-page="opname" onclick="showPage('opname')">
+      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Opname
+    </button>
+    <button class="tabbar-btn" data-page="elementen" onclick="showPage('elementen')">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>Bevindingen
+    </button>
+    <button class="tabbar-btn" data-page="kosten" onclick="showPage('kosten')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Kosten
     </button>
     <button class="tabbar-btn" data-page="rapport" onclick="showPage('rapport')">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Rapport
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Rapport
     </button>
     <button class="tabbar-btn" data-page="settings" onclick="showPage('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Instellingen
@@ -144,11 +206,11 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
   <div class="content">
 
     <!-- LOGIN -->
-    <div id="page-login" class="page active" style="min-height:100vh;">
+    <div id="page-login" class="page active">
       <div class="login-logo">
         <div class="icon">🏢</div>
         <h1>VastgoedInspectie</h1>
-        <p>Professionele inspectietool met AI</p>
+        <p>Professionele bouwkundige opnametool</p>
       </div>
       <div class="login-card">
         <div class="login-tabs">
@@ -163,15 +225,15 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         </div>
         <div id="register-form" style="display:none;">
           <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
-          <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
-          <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens" autocomplete="new-password"/></div>
+          <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl"/></div>
+          <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens"/></div>
           <button class="btn btn-dark btn-full" onclick="registreren()">Account aanmaken</button>
           <div id="reg-error" style="font-size:13px;color:var(--red-text);margin-top:10px;text-align:center;"></div>
         </div>
       </div>
     </div>
 
-    <!-- OBJECTS -->
+    <!-- OBJECTEN -->
     <div id="page-objects" class="page">
       <div class="section-title">Mijn objecten</div>
       <div id="objects-list"></div>
@@ -189,7 +251,7 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         </div>
         <div id="bag-status"></div>
       </div>
-      <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Wordt automatisch ingevuld"/></div>
+      <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Automatisch ingevuld"/></div>
       <div class="grid2">
         <div class="field"><label>Type</label>
           <select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select>
@@ -201,34 +263,57 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         <div class="field"><label>Eenheden</label><input type="number" id="f-eenheden" placeholder="12"/></div>
       </div>
       <div class="field"><label>Postcode &amp; plaats</label><input type="text" id="f-postcode" placeholder="Uit BAG"/></div>
-      <div class="field"><label>Context</label><textarea id="f-context" placeholder="VvE, monumentaal, recent dak vervangen..."></textarea></div>
+      <div class="field"><label>Context / bijzonderheden</label><textarea id="f-context" placeholder="VvE, monumentaal, recent dak vervangen..."></textarea></div>
       <div class="btn-row">
         <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
         <button class="btn btn-light" onclick="showPage('objects')">Annuleren</button>
       </div>
     </div>
 
-    <!-- FOTO'S -->
-    <div id="page-fotos" class="page">
-      <div id="fotos-no-object" class="empty">
+    <!-- OPNAME (FOTO'S PER GEVEL) -->
+    <div id="page-opname" class="page">
+      <div id="opname-no-object" class="empty">
         <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <p>Selecteer eerst een object</p>
       </div>
-      <div id="fotos-content" style="display:none;">
-        <div class="photo-upload-zone" onclick="document.getElementById('photo-input').click()">
-          <div class="icon">📷</div>
-          <div class="title">Foto's toevoegen</div>
-          <div class="sub">Tik om te kiezen of te maken · Max 100</div>
-          <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(event)"/>
+      <div id="opname-content" style="display:none;">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">Upload per gevel overzichtsfoto's. De AI analyseert materialen, hoeveelheden en gebreken per gevel.</p>
+        <div class="gevel-grid" id="gevel-grid"></div>
+        <button class="btn btn-dark btn-full" id="analyseer-btn" onclick="analyseerAlleGevels()" style="display:none;">✦ Analyseer alle gevels met AI</button>
+      </div>
+    </div>
+
+    <!-- BEVINDINGEN -->
+    <div id="page-elementen" class="page">
+      <div id="elementen-no-object" class="empty">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        <p>Analyseer eerst de gevels<br>via het Opname tabblad</p>
+      </div>
+      <div id="elementen-content" style="display:none;">
+        <div id="elementen-loading" style="display:none;">
+          <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="el-loading-status">Analyseren...</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="el-progress" style="width:0%"></div></div>
         </div>
-        <div id="photo-count" style="text-align:center;margin-top:10px;"></div>
-        <div id="photo-grid" class="photo-grid"></div>
-        <div id="fotos-actions" style="display:none;margin-top:14px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-            <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport</button>
-            <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport</button>
-          </div>
-          <button class="btn btn-light btn-full btn-sm" onclick="clearPhotos()">Alle foto's verwijderen</button>
+        <div id="elementen-list"></div>
+        <button class="btn btn-light btn-full btn-sm" onclick="voegElementToe()" style="margin-top:8px;">+ Bevinding handmatig toevoegen</button>
+      </div>
+    </div>
+
+    <!-- KOSTEN -->
+    <div id="page-kosten" class="page">
+      <div id="kosten-no-object" class="empty">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <p>Voeg eerst bevindingen toe</p>
+      </div>
+      <div id="kosten-content" style="display:none;">
+        <div class="kosten-totaal-card">
+          <div class="kosten-totaal-label">Totale kostenraming indicatief</div>
+          <div class="kosten-totaal-bedrag" id="kosten-totaal">€ 0</div>
+        </div>
+        <div class="section-title">Per bevinding</div>
+        <div id="kosten-lijst"></div>
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button>
         </div>
       </div>
     </div>
@@ -237,16 +322,15 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
     <div id="page-rapport" class="page">
       <div id="rapport-empty" class="empty">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        <p>Upload foto's en genereer een rapport</p>
+        <p>Voeg bevindingen toe<br>om een rapport te genereren</p>
       </div>
       <div id="rapport-loading" style="display:none;">
-        <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="loading-status">Bezig...</span></div>
-        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
-        <div id="loading-detail" style="font-size:12px;color:var(--text3);margin-top:4px;"></div>
+        <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-status">Rapport genereren...</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="rapport-progress" style="width:0%"></div></div>
       </div>
       <div id="rapport-content" style="display:none;">
         <div id="rapport-type-badge" style="margin-bottom:8px;"></div>
-        <div id="rapport-text" class="result-card"></div>
+        <div id="rapport-text" class="rapport-card"></div>
         <div class="btn-row" style="margin-bottom:8px;">
           <button class="btn btn-dark btn-sm" onclick="generateRapport('kort')">↺ Kort</button>
           <button class="btn btn-dark btn-sm" onclick="generateRapport('uitgebreid')">↺ Uitgebreid</button>
@@ -255,22 +339,28 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
         <div class="btn-row">
           <button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>
           <button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>
-          <button class="btn btn-light btn-sm" onclick="downloadExcel()">⬇ Excel</button>
+          <button class="btn btn-light btn-sm" onclick="downloadRapportExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;" id="rapport-generate-btns">
+        <div class="grid2">
+          <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport</button>
+          <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport</button>
         </div>
       </div>
     </div>
 
     <!-- SETTINGS -->
     <div id="page-settings" class="page">
-      <div id="user-info" style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
         <div style="font-size:13px;color:var(--text2);">Ingelogd als</div>
         <div id="user-email" style="font-weight:600;margin-top:2px;"></div>
       </div>
-      <div class="section-title">Inspectie API</div>
-      <div class="field"><label>Anthropic API-sleutel</label><input type="password" id="api-key-input" placeholder="sk-ant-..."/></div>
+      <div class="section-title">Anthropic API-sleutel</div>
+      <div class="field"><input type="password" id="api-key-input" placeholder="sk-ant-..."/></div>
       <div class="btn-row" style="margin-bottom:8px;">
         <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
-        <button class="btn btn-light btn-sm" onclick="document.getElementById('api-key-input').type=document.getElementById('api-key-input').type==='password'?'text':'password'">Toon/verberg</button>
+        <button class="btn btn-light btn-sm" onclick="document.getElementById('api-key-input').type=document.getElementById('api-key-input').type==='password'?'text':'password'">Toon</button>
       </div>
       <div id="api-key-status" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></div>
       <div class="section-title">Worker URL</div>
@@ -285,13 +375,32 @@ textarea{resize:vertical;min-height:72px;line-height:1.5;}
 
   </div>
 </div>
+
+<!-- GEVEL MODAL -->
+<div id="gevel-modal" class="modal-overlay" style="display:none;" onclick="sluitGevelModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title" id="gevel-modal-title">Gevel foto's</div>
+      <button onclick="sluitGevelModal()" style="background:var(--bg2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;">×</button>
+    </div>
+    <div class="upload-zone" onclick="document.getElementById('gevel-foto-input').click()">
+      <div style="font-size:28px;margin-bottom:4px;">📷</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:2px;">Foto's toevoegen</div>
+      <div style="font-size:12px;color:var(--text3);">Tik om te kiezen of te maken</div>
+      <input type="file" id="gevel-foto-input" accept="image/*" multiple style="display:none;" onchange="handleGevelFotos(event)"/>
+    </div>
+    <div class="photo-grid-modal" id="gevel-modal-grid"></div>
+    <button class="btn btn-dark btn-full" onclick="analyseerGevel()" id="gevel-analyseer-btn" style="display:none;">✦ Analyseer deze gevel</button>
+    <button class="btn btn-light btn-full btn-sm" style="margin-top:8px;" onclick="sluitGevelModal()">Sluiten</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, orderBy, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",
@@ -302,17 +411,37 @@ const firebaseConfig = {
   appId: "1:668843955807:web:bd8437df3bf233d931edea"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+// GEVELS definitie
+const GEVELS = [
+  { id: 'voorgevel', naam: 'Voorgevel', icon: '🏠' },
+  { id: 'achtergevel', naam: 'Achtergevel', icon: '🏠' },
+  { id: 'linkergevel', naam: 'Linkerzijgevel', icon: '🏠' },
+  { id: 'rechtergevel', naam: 'Rechterzijgevel', icon: '🏠' },
+  { id: 'dak', naam: 'Dak', icon: '🏗' },
+  { id: 'interieur', naam: 'Interieur / overig', icon: '🏢' },
+];
+
+const CONDITIE_LABELS = ['', 'Goed', 'Redelijk', 'Matig', 'Slecht', 'Zeer slecht'];
 
 // STATE
 let currentUser = null;
 let currentObjectId = null;
-let currentPhotos = [];
 let objects = [];
+let gevelFotos = {}; // { gevelId: [{dataUrl, label}] }
+let elementen = []; // bevindingen
+let activeGevelId = null;
+let rapportTekst = '';
 
-// AUTH STATE
+// FIREBASE PADEN
+const objCol = () => collection(db, 'objects');
+const objDoc = (id) => doc(db, 'objects', id);
+const dataDoc = (objId, type) => doc(db, 'objects', objId, 'data', type);
+
+// AUTH
 onAuthStateChanged(auth, user => {
   if (user) {
     currentUser = user;
@@ -330,12 +459,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// HELPERS — gedeelde paden (niet per user)
-const objCol = () => collection(db, 'objects');
-const objDoc = (id) => doc(db, 'objects', id);
-const dataDoc = (objId, type) => doc(db, 'objects', objId, 'data', type);
-
-// LOGIN / REGISTREREN
 window.switchLoginTab = (tab) => {
   document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='inloggen')||(i===1&&tab==='registreren')));
   document.getElementById('login-form').style.display = tab==='inloggen'?'block':'none';
@@ -346,11 +469,8 @@ window.inloggen = async () => {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   document.getElementById('login-error').textContent = '';
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch(e) {
-    document.getElementById('login-error').textContent = vertaalFout(e.code);
-  }
+  try { await signInWithEmailAndPassword(auth, email, pass); }
+  catch(e) { document.getElementById('login-error').textContent = vertaalFout(e.code); }
 };
 
 window.registreren = async () => {
@@ -362,59 +482,39 @@ window.registreren = async () => {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: naam });
-    showToast('Account aangemaakt!');
-  } catch(e) {
-    document.getElementById('reg-error').textContent = vertaalFout(e.code);
-  }
+  } catch(e) { document.getElementById('reg-error').textContent = vertaalFout(e.code); }
 };
 
 window.uitloggen = async () => {
   await signOut(auth);
-  currentObjectId = null;
-  currentPhotos = [];
-  objects = [];
+  currentObjectId = null; gevelFotos = {}; elementen = []; objects = [];
 };
 
 function vertaalFout(code) {
-  const map = {
-    'auth/invalid-email': 'Ongeldig e-mailadres',
-    'auth/user-not-found': 'Geen account gevonden met dit e-mailadres',
-    'auth/wrong-password': 'Onjuist wachtwoord',
-    'auth/invalid-credential': 'E-mail of wachtwoord onjuist',
-    'auth/email-already-in-use': 'Dit e-mailadres is al in gebruik',
-    'auth/weak-password': 'Wachtwoord moet minimaal 6 tekens zijn',
-  };
-  return map[code] || 'Er ging iets mis. Probeer opnieuw.';
+  const map = {'auth/invalid-email':'Ongeldig e-mailadres','auth/user-not-found':'Geen account gevonden','auth/wrong-password':'Onjuist wachtwoord','auth/invalid-credential':'E-mail of wachtwoord onjuist','auth/email-already-in-use':'E-mailadres al in gebruik','auth/weak-password':'Wachtwoord minimaal 6 tekens'};
+  return map[code] || 'Er ging iets mis';
 }
 
 // OBJECTEN
 async function laadObjecten() {
-  if (!currentUser) return;
   document.getElementById('sync-status').innerHTML = '<span class="sync-dot offline"></span>Laden...';
   try {
-    const q = query(objCol(), orderBy('aangemaaktOp', 'desc'));
-    onSnapshot(q, snap => {
-      objects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    onSnapshot(query(objCol(), orderBy('aangemaaktOp','desc')), snap => {
+      objects = snap.docs.map(d => ({id:d.id,...d.data()}));
       renderObjects();
-      document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Gesynchroniseerd';
+      document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Sync';
     });
-  } catch(e) {
-    showToast('Fout bij laden objecten');
-    document.getElementById('sync-status').textContent = '⚠ Offline';
-  }
+  } catch(e) { document.getElementById('sync-status').textContent = '⚠ Offline'; }
 }
 
 function renderObjects() {
   const list = document.getElementById('objects-list');
-  if (!objects.length) {
-    list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.</p></div>';
-    return;
-  }
+  if (!objects.length) { list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.</p></div>'; return; }
   list.innerHTML = objects.map(o => `
     <div class="obj-item" onclick="selectObject('${o.id}')">
       <div style="flex:1;">
         <div style="font-weight:600;font-size:15px;">${o.naam||'Naamloos'}</div>
-        <div style="font-size:12px;color:var(--text3);">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.fotoCount?' · '+o.fotoCount+' foto\'s':''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
+        <div style="font-size:12px;color:var(--text3);">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
         ${o.heeftRapport?'<span class="badge badge-green" style="font-size:10px;">rapport</span>':''}
@@ -427,25 +527,24 @@ function renderObjects() {
 
 window.selectObject = async (id) => {
   currentObjectId = id;
+  gevelFotos = {};
+  elementen = [];
+  rapportTekst = '';
   updateTopbar();
-  document.getElementById('sync-status').textContent = 'Foto\'s laden...';
-  currentPhotos = await laadFotos(id);
-  renderFotos();
-  const obj = objects.find(o => o.id === id);
-  if (obj?.heeftRapport) {
-    const snap = await getDoc(dataDoc(id, 'rapport'));
-    if (snap.exists()) {
-      const text = snap.data().tekst || '';
-      document.getElementById('rapport-empty').style.display = 'none';
-      document.getElementById('rapport-text').innerHTML = renderRapportHtml(text) + renderFotoBijlage();
-      document.getElementById('rapport-content').style.display = 'block';
-    }
-  } else {
-    document.getElementById('rapport-empty').style.display = 'block';
-    document.getElementById('rapport-content').style.display = 'none';
-  }
-  document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Gesynchroniseerd';
-  showPage('fotos');
+  // Laad data
+  try {
+    const gSnap = await getDoc(dataDoc(id, 'gevels'));
+    if (gSnap.exists()) gevelFotos = gSnap.data().gevels || {};
+    const eSnap = await getDoc(dataDoc(id, 'elementen'));
+    if (eSnap.exists()) elementen = eSnap.data().lijst || [];
+    const rSnap = await getDoc(dataDoc(id, 'rapport'));
+    if (rSnap.exists()) rapportTekst = rSnap.data().tekst || '';
+  } catch(e) {}
+  renderOpname();
+  renderElementen();
+  renderKosten();
+  renderRapportPagina();
+  showPage('opname');
 };
 
 window.saveObject = async () => {
@@ -454,7 +553,7 @@ window.saveObject = async () => {
   const editId = document.getElementById('page-object-form').dataset.editId;
   const id = editId || Date.now().toString();
   const bestaand = objects.find(o => o.id === editId);
-  const obj = {
+  await setDoc(objDoc(id), {
     naam, type: document.getElementById('f-type').value,
     jaar: document.getElementById('f-jaar').value,
     opp: document.getElementById('f-opp').value,
@@ -464,9 +563,7 @@ window.saveObject = async () => {
     aangemaaktOp: bestaand?.aangemaaktOp || serverTimestamp(),
     aangemaaktDoor: bestaand?.aangemaaktDoor || (currentUser?.displayName || currentUser?.email || ''),
     heeftRapport: bestaand?.heeftRapport || false,
-    fotoCount: bestaand?.fotoCount || 0,
-  };
-  await setDoc(objDoc(id), obj);
+  });
   showToast('Object opgeslagen');
   showPage('objects');
 };
@@ -474,13 +571,8 @@ window.saveObject = async () => {
 window.editObject = (id) => {
   const o = objects.find(x => x.id === id);
   if (!o) return;
-  document.getElementById('f-naam').value = o.naam||'';
+  ['naam','jaar','opp','eenheden','postcode','context'].forEach(k => { const el = document.getElementById('f-'+k); if(el) el.value = o[k]||''; });
   document.getElementById('f-type').value = o.type||'';
-  document.getElementById('f-jaar').value = o.jaar||'';
-  document.getElementById('f-opp').value = o.opp||'';
-  document.getElementById('f-eenheden').value = o.eenheden||'';
-  document.getElementById('f-postcode').value = o.postcode||'';
-  document.getElementById('f-context').value = o.context||'';
   document.getElementById('f-bag-search').value = o.naam||'';
   document.getElementById('bag-status').innerHTML = '';
   document.getElementById('page-object-form').dataset.editId = id;
@@ -488,10 +580,10 @@ window.editObject = (id) => {
 };
 
 window.verwijderObject = async (id) => {
-  if (!confirm('Object en alle data verwijderen?')) return;
+  if (!confirm('Object verwijderen?')) return;
   await deleteDoc(objDoc(id));
-  if (currentObjectId === id) { currentObjectId = null; currentPhotos = []; }
-  showToast('Object verwijderd');
+  if (currentObjectId === id) currentObjectId = null;
+  showToast('Verwijderd');
 };
 
 window.clearForm = () => {
@@ -504,234 +596,416 @@ window.clearForm = () => {
   document.getElementById('page-object-form').dataset.editId = '';
 };
 
-// FOTO'S
-async function laadFotos(objectId) {
-  try {
-    const snap = await getDoc(dataDoc(objectId, 'fotos'));
-    if (snap.exists()) return snap.data().lijst || [];
-    return [];
-  } catch(e) { return []; }
-}
-
-async function slaFotosOp(objectId, fotos) {
-  await setDoc(dataDoc(objectId, 'fotos'), {
-    lijst: fotos.map(f => ({ label: f.label||'', dataUrl: f.dataUrl })),
-    bijgewerktOp: serverTimestamp(),
-    bijgewerktDoor: currentUser?.displayName || currentUser?.email || ''
-  });
-  await setDoc(objDoc(objectId), { fotoCount: fotos.length }, { merge: true });
-}
-
-function renderFotos() {
+// OPNAME
+function renderOpname() {
   const hasObj = !!currentObjectId;
-  document.getElementById('fotos-no-object').style.display = hasObj ? 'none' : 'block';
-  document.getElementById('fotos-content').style.display = hasObj ? 'block' : 'none';
+  document.getElementById('opname-no-object').style.display = hasObj ? 'none' : 'block';
+  document.getElementById('opname-content').style.display = hasObj ? 'block' : 'none';
   if (!hasObj) return;
-  renderPhotoGrid();
+  const grid = document.getElementById('gevel-grid');
+  grid.innerHTML = GEVELS.map(g => {
+    const fotos = gevelFotos[g.id] || [];
+    const hasF = fotos.length > 0;
+    return `<div class="gevel-card ${hasF?'heeft-fotos':''}" onclick="openGevelModal('${g.id}')">
+      <div class="gevel-header">
+        <span class="gevel-naam">${g.icon} ${g.naam}</span>
+        <span class="gevel-count">${hasF?fotos.length+' foto\'s':'Geen foto\'s'}</span>
+      </div>
+      ${hasF
+        ? `<div class="gevel-preview">${fotos.slice(0,3).map(f=>`<img src="${f.dataUrl}" alt=""/>`).join('')}</div>`
+        : `<div class="gevel-placeholder">📷</div>`
+      }
+    </div>`;
+  }).join('');
+  const heeftFotos = Object.values(gevelFotos).some(f => f.length > 0);
+  document.getElementById('analyseer-btn').style.display = heeftFotos ? 'block' : 'none';
 }
 
-function renderPhotoGrid() {
-  const grid = document.getElementById('photo-grid');
-  const countEl = document.getElementById('photo-count');
-  const actions = document.getElementById('fotos-actions');
-  if (!currentPhotos.length) { grid.innerHTML=''; countEl.innerHTML=''; actions.style.display='none'; return; }
-  countEl.innerHTML = `<span class="photo-count-badge">📷 ${currentPhotos.length} foto's</span>`;
-  actions.style.display = 'block';
-  grid.innerHTML = currentPhotos.map((p,i) => `
-    <div class="photo-item">
-      <img src="${p.dataUrl}" alt="Foto ${i+1}" loading="lazy"/>
-      <button class="photo-del" onclick="removePhoto(${i})">×</button>
-      <div class="photo-item-overlay">
-        <input class="photo-label-input" placeholder="Label (optioneel)" value="${p.label||''}" onchange="updateLabel(${i},this.value)"/>
+window.openGevelModal = (gevelId) => {
+  activeGevelId = gevelId;
+  const gevel = GEVELS.find(g => g.id === gevelId);
+  document.getElementById('gevel-modal-title').textContent = gevel.naam + ' — foto\'s';
+  renderGevelModalGrid();
+  document.getElementById('gevel-modal').style.display = 'block';
+};
+
+function renderGevelModalGrid() {
+  const fotos = gevelFotos[activeGevelId] || [];
+  const grid = document.getElementById('gevel-modal-grid');
+  grid.innerHTML = fotos.map((f,i) => `
+    <div class="photo-item-modal">
+      <img src="${f.dataUrl}" alt="Foto ${i+1}"/>
+      <button class="photo-del" onclick="verwijderGevelFoto(${i})">×</button>
+    </div>`).join('');
+  document.getElementById('gevel-analyseer-btn').style.display = fotos.length > 0 ? 'block' : 'none';
+}
+
+window.sluitGevelModal = (event) => {
+  if (event && event.target !== document.getElementById('gevel-modal')) return;
+  document.getElementById('gevel-modal').style.display = 'none';
+  activeGevelId = null;
+};
+
+window.handleGevelFotos = async (event) => {
+  const files = Array.from(event.target.files);
+  if (!gevelFotos[activeGevelId]) gevelFotos[activeGevelId] = [];
+  showToast(`${files.length} foto's verwerken...`);
+  for (const file of files) {
+    const dataUrl = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+    const compressed = await compressPhoto(dataUrl);
+    gevelFotos[activeGevelId].push({ dataUrl: compressed, label: '' });
+  }
+  await slaGevelFotosOp();
+  renderGevelModalGrid();
+  renderOpname();
+  event.target.value = '';
+  showToast('Foto\'s opgeslagen');
+};
+
+window.verwijderGevelFoto = async (idx) => {
+  gevelFotos[activeGevelId].splice(idx, 1);
+  await slaGevelFotosOp();
+  renderGevelModalGrid();
+  renderOpname();
+};
+
+async function slaGevelFotosOp() {
+  if (!currentObjectId) return;
+  await setDoc(dataDoc(currentObjectId, 'gevels'), { gevels: gevelFotos, bijgewerktOp: serverTimestamp() });
+}
+
+// ANALYSE
+window.analyseerGevel = async () => {
+  const fotos = gevelFotos[activeGevelId] || [];
+  if (!fotos.length) { showToast('Upload eerst foto\'s'); return; }
+  const gevel = GEVELS.find(g => g.id === activeGevelId);
+  showToast(`${gevel.naam} analyseren...`);
+  document.getElementById('gevel-analyseer-btn').textContent = '⏳ Analyseren...';
+  try {
+    const content = fotos.slice(0,8).map(f => ({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    content.push({type:'text',text:`Analyseer deze foto's van de ${gevel.naam} van een gebouw.
+
+Geef een gedetailleerde bouwkundige opname. Voor elk element dat je ziet:
+1. Naam van het element
+2. Materiaal en specificaties
+3. Hoeveelheid met eenheid (m², m¹, stuks, etc.)
+4. Conditie (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
+5. Geconstateerde gebreken
+6. Indicatieve kosten herstel met onderbouwing
+7. Voor gevelopeningen: geef ook isolatiewaarde indicatie
+
+Geef ook aan of er vermoedelijk spouwmuurisolatie aanwezig is op basis van het bouwjaar en visuele kenmerken.
+
+Reageer UITSLUITEND als JSON array:
+[{
+  "element": "Metselwerk voorgevel",
+  "gevel": "${activeGevelId}",
+  "materiaal": "Gebakken baksteen rood",
+  "hoeveelheid": "450",
+  "eenheid": "m²",
+  "conditie": 3,
+  "beschrijving": "Uitgebreide voegwerkschade op meerdere locaties, plaatselijk losliggend voegwerk",
+  "gebreken": "Voegwerk verweerd en uitgevallen",
+  "kosten_indicatief": 9000,
+  "kosten_onderbouwing": "450 m² × €20/m²",
+  "isolatie_notitie": "Vermoedelijk geen spouwmuurisolatie gezien bouwjaar"
+}]
+Alleen JSON, geen tekst eromheen.`});
+
+    const raw = await callClaude(content);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const s = clean.indexOf('['), e = clean.lastIndexOf(']');
+    if (s >= 0 && e > s) {
+      const nieuweElementen = JSON.parse(clean.substring(s, e+1));
+      // Voeg toe aan elementen, verwijder eerst die van deze gevel
+      elementen = elementen.filter(el => el.gevel !== activeGevelId);
+      elementen.push(...nieuweElementen.map((el,i) => ({
+        ...el,
+        id: `${activeGevelId}_${Date.now()}_${i}`,
+        bewerkt: false
+      })));
+      await slaElementenOp();
+      renderElementen();
+      renderKosten();
+      showToast(`${nieuweElementen.length} elementen gevonden in ${gevel.naam}`);
+    }
+  } catch(e) {
+    showToast('Analyse mislukt: ' + e.message);
+  }
+  document.getElementById('gevel-analyseer-btn').textContent = '✦ Analyseer deze gevel';
+};
+
+window.analyseerAlleGevels = async () => {
+  document.getElementById('elementen-loading').style.display = 'block';
+  document.getElementById('elementen-content').style.display = 'block';
+  document.getElementById('elementen-no-object').style.display = 'none';
+  showPage('elementen');
+  const gevelsMetFotos = GEVELS.filter(g => (gevelFotos[g.id]||[]).length > 0);
+  elementen = [];
+  for (let i = 0; i < gevelsMetFotos.length; i++) {
+    const g = gevelsMetFotos[i];
+    document.getElementById('el-loading-status').textContent = `${g.naam} analyseren (${i+1}/${gevelsMetFotos.length})...`;
+    document.getElementById('el-progress').style.width = Math.round((i/gevelsMetFotos.length)*100) + '%';
+    activeGevelId = g.id;
+    try { await analyseerGevel(); } catch(e) {}
+  }
+  document.getElementById('el-progress').style.width = '100%';
+  document.getElementById('elementen-loading').style.display = 'none';
+  activeGevelId = null;
+  renderElementen();
+  renderKosten();
+};
+
+async function slaElementenOp() {
+  if (!currentObjectId) return;
+  await setDoc(dataDoc(currentObjectId, 'elementen'), { lijst: elementen, bijgewerktOp: serverTimestamp() });
+}
+
+// BEVINDINGEN
+function renderElementen() {
+  const hasObj = !!currentObjectId;
+  const hasEl = elementen.length > 0;
+  document.getElementById('elementen-no-object').style.display = (!hasObj || !hasEl) ? 'block' : 'none';
+  document.getElementById('elementen-content').style.display = hasObj ? 'block' : 'none';
+  if (!hasObj) return;
+  const list = document.getElementById('elementen-list');
+  if (!elementen.length) { list.innerHTML = ''; return; }
+
+  // Groepeer per gevel
+  const groepen = {};
+  elementen.forEach(el => {
+    const gvl = el.gevel || 'overig';
+    if (!groepen[gvl]) groepen[gvl] = [];
+    groepen[gvl].push(el);
+  });
+
+  list.innerHTML = Object.entries(groepen).map(([gvelId, els]) => {
+    const gevel = GEVELS.find(g => g.id === gvelId);
+    return `<div class="section-title">${gevel?.icon||'📍'} ${gevel?.naam||gvelId}</div>
+    ${els.map(el => renderElementCard(el)).join('')}`;
+  }).join('');
+}
+
+function renderElementCard(el) {
+  const cond = el.conditie || 3;
+  const condLabel = CONDITIE_LABELS[cond] || 'Onbekend';
+  const fotos = (gevelFotos[el.gevel]||[]).slice(0,3);
+  return `<div class="element-card" id="el-${el.id}">
+    <div class="element-header">
+      <div class="element-info">
+        <div class="element-naam">${el.element}</div>
+        <div class="element-meta">${el.materiaal||''} ${el.hoeveelheid?'· '+el.hoeveelheid+' '+el.eenheid:''}</div>
       </div>
+      <span class="badge badge-${cond}">${condLabel}</span>
+      <button onclick="verwijderElement('${el.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
+    </div>
+    <div class="element-body">
+      ${el.beschrijving ? `<div class="ai-badge">✦ AI analyse</div>` : ''}
+      <div class="field" style="margin-bottom:8px;">
+        <label>Beschrijving / bevinding</label>
+        <textarea oninput="updateElement('${el.id}','beschrijving',this.value)">${el.beschrijving||''}</textarea>
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>Conditiescore</label>
+        <div class="conditie-row">
+          ${[1,2,3,4,5].map(n=>`<button class="conditie-btn ${cond==n?'sel-'+n:''}" onclick="updateElement('${el.id}','conditie',${n});renderElementen()">${n}<br><span style="font-size:9px;">${CONDITIE_LABELS[n]}</span></button>`).join('')}
+        </div>
+      </div>
+      <div class="grid3" style="margin-bottom:8px;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Hoeveelheid</label>
+          <input type="text" value="${el.hoeveelheid||''}" oninput="updateElement('${el.id}','hoeveelheid',this.value)" placeholder="450"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Eenheid</label>
+          <input type="text" value="${el.eenheid||''}" oninput="updateElement('${el.id}','eenheid',this.value)" placeholder="m²"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Kosten (€)</label>
+          <input type="number" value="${el.kosten_indicatief||''}" oninput="updateElement('${el.id}','kosten_indicatief',parseFloat(this.value)||0);renderKosten()" placeholder="0"/>
+        </div>
+      </div>
+      ${el.kosten_onderbouwing?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Indicatie: ${el.kosten_onderbouwing}</div>`:''}
+      ${el.isolatie_notitie?`<div class="isolatie-card"><div style="font-size:11px;font-weight:600;color:var(--blue-text);margin-bottom:4px;">🏠 Isolatie indicatie</div><div style="font-size:12px;">${el.isolatie_notitie}</div></div>`:''}
+      ${fotos.length?`<div class="foto-mini-grid">${fotos.map(f=>`<img class="foto-mini" src="${f.dataUrl}" alt=""/>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+
+window.updateElement = async (id, key, val) => {
+  const el = elementen.find(e => e.id === id);
+  if (el) { el[key] = val; el.bewerkt = true; await slaElementenOp(); }
+};
+
+window.verwijderElement = async (id) => {
+  elementen = elementen.filter(e => e.id !== id);
+  await slaElementenOp();
+  renderElementen();
+  renderKosten();
+};
+
+window.voegElementToe = async () => {
+  const nieuw = {
+    id: 'handmatig_' + Date.now(),
+    element: 'Nieuw element',
+    gevel: 'overig',
+    materiaal: '',
+    hoeveelheid: '',
+    eenheid: '',
+    conditie: 3,
+    beschrijving: '',
+    kosten_indicatief: 0,
+    kosten_onderbouwing: '',
+    isolatie_notitie: '',
+    bewerkt: false
+  };
+  elementen.push(nieuw);
+  await slaElementenOp();
+  renderElementen();
+};
+
+// KOSTEN
+function renderKosten() {
+  const hasEl = elementen.filter(e => (e.kosten_indicatief||0) > 0).length > 0;
+  document.getElementById('kosten-no-object').style.display = (!currentObjectId || !hasEl) ? 'block' : 'none';
+  document.getElementById('kosten-content').style.display = (currentObjectId && elementen.length > 0) ? 'block' : 'none';
+  if (!currentObjectId) return;
+  const totaal = elementen.reduce((s,e) => s + (parseFloat(e.kosten_indicatief)||0), 0);
+  document.getElementById('kosten-totaal').textContent = '€ ' + Math.round(totaal).toLocaleString('nl-NL');
+  const lijst = document.getElementById('kosten-lijst');
+  const metKosten = elementen.filter(e => (e.kosten_indicatief||0) > 0).sort((a,b) => (b.kosten_indicatief||0)-(a.kosten_indicatief||0));
+  lijst.innerHTML = metKosten.map(e => `
+    <div class="kosten-item">
+      <div>
+        <div style="font-weight:500;font-size:13px;">${e.element}</div>
+        <div style="font-size:11px;color:var(--text3);">${e.kosten_onderbouwing||'Handmatig ingevoerd'} · <span class="badge badge-${e.conditie}">${CONDITIE_LABELS[e.conditie]||''}</span></div>
+      </div>
+      <div class="kosten-item-bedrag">€ ${Math.round(e.kosten_indicatief||0).toLocaleString('nl-NL')}</div>
     </div>`).join('');
 }
 
-function compressPhoto(dataUrl, maxWidth=1024) {
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w=img.width, h=img.height;
-      if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      res(canvas.toDataURL('image/jpeg',0.75));
-    };
-    img.onerror = () => res(dataUrl);
-    img.src = dataUrl;
-  });
+// RAPPORT
+function renderRapportPagina() {
+  const hasEl = elementen.length > 0;
+  document.getElementById('rapport-empty').style.display = !hasEl && !rapportTekst ? 'block' : 'none';
+  document.getElementById('rapport-content').style.display = rapportTekst ? 'block' : 'none';
+  document.getElementById('rapport-generate-btns').style.display = hasEl ? 'block' : 'none';
+  if (rapportTekst) {
+    document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportTekst);
+  }
 }
 
-window.handlePhotoUpload = async (event) => {
-  const files = Array.from(event.target.files);
-  const remaining = 100 - currentPhotos.length;
-  const toAdd = files.slice(0, remaining);
-  if (files.length > remaining) showToast(`Max 100 foto's — ${files.length-remaining} overgeslagen`);
-  showToast(`${toAdd.length} foto's verwerken...`);
-  let loaded = 0;
-  for (const file of toAdd) {
-    const reader = new FileReader();
-    const dataUrl = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
-    const compressed = await compressPhoto(dataUrl);
-    currentPhotos.push({ dataUrl: compressed, label: '' });
-    loaded++;
-    if (loaded % 5 === 0 || loaded === toAdd.length) renderPhotoGrid();
-  }
-  await slaFotosOp(currentObjectId, currentPhotos);
-  showToast(`${toAdd.length} foto's opgeslagen`);
-  event.target.value = '';
-};
-
-window.updateLabel = async (i, val) => {
-  currentPhotos[i].label = val;
-  await slaFotosOp(currentObjectId, currentPhotos);
-};
-
-window.removePhoto = async (i) => {
-  currentPhotos.splice(i, 1);
-  renderPhotoGrid();
-  await slaFotosOp(currentObjectId, currentPhotos);
-};
-
-window.clearPhotos = async () => {
-  if (!confirm('Alle foto\'s verwijderen?')) return;
-  currentPhotos = [];
-  await slaFotosOp(currentObjectId, []);
-  renderPhotoGrid();
-};
-
-// RAPPORT
 window.generateRapport = async (type = 'uitgebreid') => {
   if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
-  if (!currentObjectId) { showToast('Selecteer eerst een object'); return; }
-  if (!currentPhotos.length) { showToast('Upload eerst foto\'s'); showPage('fotos'); return; }
-  showPage('rapport');
+  if (!elementen.length) { showToast('Voeg eerst bevindingen toe'); return; }
   document.getElementById('rapport-empty').style.display = 'none';
   document.getElementById('rapport-content').style.display = 'none';
   document.getElementById('rapport-loading').style.display = 'block';
+  document.getElementById('rapport-progress').style.width = '20%';
+  document.getElementById('rapport-status').textContent = 'Rapport genereren...';
   const obj = objects.find(o => o.id === currentObjectId);
   const datum = new Date().toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('loading-status').textContent = 'Foto\'s analyseren...';
-  document.getElementById('progress-bar').style.width = '5%';
-  const BATCH = 8;
-  const batches = [];
-  for (let i=0; i<currentPhotos.length; i+=BATCH) batches.push(currentPhotos.slice(i,i+BATCH));
-  const analyses = [];
-  for (let b=0; b<batches.length; b++) {
-    const pct = 10 + Math.round((b/batches.length)*65);
-    document.getElementById('progress-bar').style.width = pct+'%';
-    document.getElementById('loading-status').textContent = `Batch ${b+1} van ${batches.length} analyseren...`;
-    document.getElementById('loading-detail').textContent = `Foto's ${b*BATCH+1}–${Math.min((b+1)*BATCH,currentPhotos.length)} van ${currentPhotos.length}`;
-    const content = batches[b].map(p => ({type:'image',source:{type:'base64',media_type:'image/jpeg',data:p.dataUrl.split(',')[1]}}));
-    const labels = batches[b].map((p,i) => `Foto ${b*BATCH+i+1}${p.label?': '+p.label:''}`).join(', ');
-    content.push({type:'text',text:`Analyseer deze vastgoedinspectiefoto's (${labels}). Per zichtbaar bouwdeel: naam, conditie, gebreken. ALLEEN JSON:\n[{"bouwdeel":"naam","conditie":"Matig","bevinding":"omschrijving","foto_nr":${b*BATCH+1}}]`});
-    try {
-      const raw = await callClaude(content);
-      const clean = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
-      const s=clean.indexOf('['), e=clean.lastIndexOf(']');
-      if(s>=0&&e>s) analyses.push(...JSON.parse(clean.substring(s,e+1)));
-    } catch(e) { console.error('Batch '+(b+1)+' fout:', e); }
-  }
-  document.getElementById('progress-bar').style.width = '80%';
-  document.getElementById('loading-status').textContent = type === 'kort' ? 'Kort rapport opstellen...' : 'Uitgebreid rapport opstellen...';
-  document.getElementById('loading-detail').textContent = analyses.length+' bevindingen verwerken';
-  const analyseStr = analyses.map(a => `- ${a.bouwdeel}: ${a.conditie} — ${a.bevinding}${a.foto_nr?' (foto '+a.foto_nr+')':''}`).join('\n');
+  const totaal = elementen.reduce((s,e) => s+(parseFloat(e.kosten_indicatief)||0), 0);
+  const elementenStr = elementen.map(e =>
+    `- ${e.element} (${GEVELS.find(g=>g.id===e.gevel)?.naam||e.gevel}): ${CONDITIE_LABELS[e.conditie]||''} | ${e.hoeveelheid||'?'} ${e.eenheid||''} | €${e.kosten_indicatief||0} | ${e.beschrijving||''}`
+  ).join('\n');
+  const isolatieNotities = elementen.filter(e => e.isolatie_notitie).map(e => e.isolatie_notitie).join('\n');
 
-  const kortPrompt = `Je bent een vastgoedinspecteur. Schrijf een BEKNOPT inspectierapport (max 1 pagina) in het Nederlands.
+  const kortPrompt = `Schrijf een beknopt bouwkundig inspectierapport (max 1 pagina) in het Nederlands.
 
 Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
 
-Bevindingen uit ${currentPhotos.length} foto's:
-${analyseStr}
+Bevindingen:
+${elementenStr}
 
-Schrijf ALLEEN dit:
+Totale kostenraming: €${Math.round(totaal).toLocaleString('nl-NL')}
 
+Format:
 **SAMENVATTING**
-[3 zinnen: algehele staat, belangrijkste punten, totale kostenindicatie]
+[3 zinnen]
 
 **OVERZICHT**
-| Onderdeel | Conditie | Prioriteit | Kosten indicatief |
+| Onderdeel | Conditie | Prioriteit | Kosten |
 |---|---|---|---|
-[max 8 rijen, één regel per onderdeel]
-**Totaal indicatief: € [som]**
+[max 8 rijen]
+**Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
 
-**URGENT / HOOG PRIORITEIT**
-[alleen de meest urgente acties als bullets, max 5]
+**URGENTE ACTIES**
+[max 5 bullets]
 
 **DISCLAIMER**
-Visuele inspectie op basis van fotodocumentatie. Vervangt geen professioneel bouwkundig keuringsrapport.`;
+Visuele inspectie op basis van fotodocumentatie.`;
 
-  const uitgebreidPrompt = `Je bent een vastgoedinspecteur. Schrijf een uitgebreid professioneel inspectierapport in het Nederlands.
+  const uitgebreidPrompt = `Schrijf een professioneel bouwkundig inspectierapport in het Nederlands.
 
-Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Eenheden: ${obj?.eenheden||'?'} | Datum: ${datum}
 
-Bevindingen uit ${currentPhotos.length} foto's (met fotonummers):
-${analyseStr}
+Bevindingen per gevel/onderdeel:
+${elementenStr}
 
-Schrijf het rapport in dit format. Max 2 niveaus diep, max 8 hoofdonderdelen.
+Isolatie indicaties:
+${isolatieNotities || 'Geen specifieke isolatiegegevens beschikbaar'}
 
-**SAMENVATTING**
-[2-3 zinnen algehele staat]
+Totale kostenraming: €${Math.round(totaal).toLocaleString('nl-NL')}
 
-**OVERZICHTSTABEL**
+Schrijf rapport met hoofdstukken:
+
+**1. ALGEMENE INFORMATIE**
+[Objecttabel]
+
+**2. SAMENVATTING**
+[Algehele staat in 3-4 zinnen]
+
+**3. OVERZICHTSTABEL**
 | Onderdeel | Conditie | Prioriteit | Kosten indicatief |
 |---|---|---|---|
-[max 10 rijen]
-**Totaal: € [som]**
+**Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
 
-**BEVINDINGEN PER ONDERDEEL**
-### [Onderdeel] — [Conditie]
-- [bevinding (foto X)]
-Prioriteit: [URGENT/HOOG/GEMIDDELD/LAAG]
+**4. BEVINDINGEN PER ONDERDEEL**
+[Per gevel/onderdeel, met hoeveelheden en materialen]
 
-**KOSTENRAMING**
-| Onderdeel | Maatregel | Kosten | Onderbouwing |
-|---|---|---|---|
-**Totaal indicatief: € [som]**
+**5. CONSTRUCTIE & ISOLATIE**
+[Indicatieve isolatiewaarden, spouwmuur analyse]
 
-**AANBEVELINGEN**
+**6. KOSTENRAMING**
+| Onderdeel | Maatregel | Hoeveelheid | Kosten | Onderbouwing |
+|---|---|---|---|---|
+**Totaal indicatief: €${Math.round(totaal).toLocaleString('nl-NL')}**
+
+**7. AANBEVELINGEN**
 Urgent: [bullets]
 Hoog (1-3 mnd): [bullets]
 Gemiddeld (6-12 mnd): [bullets]
 Laag: [bullets]
 
 **DISCLAIMER**
-Dit rapport is opgesteld op basis van visuele analyse van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.`;
+Dit rapport is opgesteld op basis van visuele inspectie van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.`;
 
   try {
-    const rapportText = await callClaude([{type:'text',text: type === 'kort' ? kortPrompt : uitgebreidPrompt}]);
-    // Sla beide versies op
-    const bestaand = {};
-    try { const s = await getDoc(dataDoc(currentObjectId,'rapport')); if(s.exists()) Object.assign(bestaand, s.data()); } catch(e){}
-    await setDoc(dataDoc(currentObjectId,'rapport'), {
-      ...bestaand,
-      [type === 'kort' ? 'tekstKort' : 'tekstUitgebreid']: rapportText,
-      tekst: rapportText, // ook als standaard opslaan
-      aangemaaktOp: serverTimestamp(),
-      aangemaaktDoor: currentUser?.displayName || currentUser?.email || ''
-    });
+    document.getElementById('rapport-progress').style.width = '60%';
+    const tekst = await callClaude([{type:'text',text: type==='kort' ? kortPrompt : uitgebreidPrompt}]);
+    rapportTekst = tekst;
+    await setDoc(dataDoc(currentObjectId,'rapport'), {tekst, aangemaaktOp:serverTimestamp(), aangemaaktDoor:currentUser?.displayName||currentUser?.email||''});
     await setDoc(objDoc(currentObjectId), {heeftRapport:true}, {merge:true});
-    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('rapport-progress').style.width = '100%';
     setTimeout(() => {
       document.getElementById('rapport-loading').style.display = 'none';
-      document.getElementById('rapport-type-badge').innerHTML = type === 'kort'
-        ? '<span class="badge badge-blue">Korte versie</span>'
-        : '<span class="badge badge-green">Uitgebreide versie</span>';
-      document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportText) + renderFotoBijlage();
+      document.getElementById('rapport-type-badge').innerHTML = type==='kort' ? '<span class="badge badge-blue">Korte versie</span>' : '<span class="badge badge-green">Uitgebreide versie</span>';
+      document.getElementById('rapport-text').innerHTML = renderRapportHtml(tekst);
       document.getElementById('rapport-content').style.display = 'block';
     }, 400);
   } catch(e) {
     document.getElementById('rapport-loading').style.display = 'none';
-    document.getElementById('rapport-empty').style.display = 'block';
-    showToast('Fout: '+e.message);
+    showToast('Fout: ' + e.message);
   }
 };
-// RENDER HELPERS
-window.renderRapportHtml = (text) => {
+
+function renderRapportHtml(text) {
   let html = text
     .replace(/^### (.*)/gm,'<h3 style="font-size:14px;font-weight:700;margin:14px 0 5px;">$1</h3>')
     .replace(/^## (.*)/gm,'<h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
+    .replace(/^# (.*)/gm,'<h1 style="font-size:17px;font-weight:700;margin:16px 0 8px;">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     .replace(/\|(.+)\|/g, match => {
       const cells = match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
       if(cells.every(c=>/^[-:]+$/.test(c))) return '';
@@ -739,112 +1013,42 @@ window.renderRapportHtml = (text) => {
     });
   html = html.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g, m=>`<table style="width:100%;border-collapse:collapse;margin:8px 0;">${m}</table>`);
   html = html
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     .replace(/^- (.*)/gm,'<div style="padding:3px 0 3px 14px;font-size:13px;">• $1</div>')
     .replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
   return html;
-};
-
-window.renderFotoBijlage = () => {
-  if (!currentPhotos.length) return '';
-  let html = '<br><h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">FOTOBIJLAGE</h2>';
-  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">';
-  currentPhotos.forEach((p,i) => {
-    html += `<div style="position:relative;">
-      <div style="position:absolute;top:3px;left:3px;background:rgba(0,0,0,0.65);color:#fff;font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;">${i+1}</div>
-      <img src="${p.dataUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:0.5px solid var(--border);" loading="lazy"/>
-      ${p.label?`<div style="font-size:10px;color:var(--text3);margin-top:2px;text-align:center;">${p.label}</div>`:''}
-    </div>`;
-  });
-  return html + '</div>';
-};
+}
 
 // EXPORT
-window.downloadExcel = async () => {
-  const rapportEl = document.getElementById('rapport-text');
-  if (!rapportEl || !rapportEl.innerText) { showToast('Genereer eerst een rapport'); return; }
-  showToast('Excel aanmaken...');
-  try {
-    if (!window.XLSX) {
-      await new Promise((res,rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-    const obj = objects.find(o => o.id === currentObjectId);
-    const wb = XLSX.utils.book_new();
-
-    // Haal tabellen op uit de rapport HTML
-    const tables = rapportEl.querySelectorAll('table');
-    let tabIdx = 1;
-    const tabNames = ['Overzicht', 'Kostenraming', 'Extra'];
-
-    tables.forEach((table, idx) => {
-      const rows = [];
-      // Header rij
-      table.querySelectorAll('tr').forEach(tr => {
-        const row = [];
-        tr.querySelectorAll('td, th').forEach(td => row.push(td.innerText.trim()));
-        if (row.some(c => c)) rows.push(row);
-      });
-      if (rows.length > 1) {
-        const ws = XLSX.utils.aoa_to_sheet([
-          [`${obj?.naam || 'Object'} — ${tabNames[idx] || 'Tabel ' + (idx+1)}`],
-          [`Datum: ${new Date().toLocaleDateString('nl-NL')}`],
-          [],
-          ...rows
-        ]);
-        ws['!cols'] = rows[0]?.map(() => ({ wch: 25 }));
-        XLSX.utils.book_append_sheet(wb, ws, tabNames[idx] || 'Tabel ' + (idx+1));
-      }
-    });
-
-    if (wb.SheetNames.length === 0) { showToast('Geen tabellen gevonden in rapport'); return; }
-
-    const naam = (obj?.naam || 'rapport').replace(/[^a-z0-9]/gi, '_');
-    XLSX.writeFile(wb, `Inspectie_${naam}.xlsx`);
-    showToast('Excel gedownload');
-  } catch(e) { showToast('Fout: ' + e.message); }
-};
-
 window.copyRapport = () => {
-  const el = document.getElementById('rapport-text');
-  navigator.clipboard.writeText(el.innerText||el.textContent||'').then(()=>showToast('Rapport gekopieerd'));
+  navigator.clipboard.writeText(rapportTekst||'').then(()=>showToast('Gekopieerd'));
 };
 
 window.downloadPDF = () => {
   const obj = objects.find(o=>o.id===currentObjectId);
-  const rapportHtml = document.getElementById('rapport-text').innerHTML;
   const win = window.open('','_blank');
   win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Rapport ${obj?.naam||''}</title>
-  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h2{font-size:13pt;font-weight:bold;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;font-weight:bold;margin:12pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}strong{font-weight:bold;}@media print{body{margin:1.5cm;}}</style>
-  </head><body><h1 style="font-size:16pt;text-align:center;">${obj?.naam||''}</h1><p style="text-align:center;color:#666;font-size:10pt;">${new Date().toLocaleDateString('nl-NL')}</p>${rapportHtml}</body></html>`);
+  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h1{font-size:16pt;}h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;margin:12pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}strong{font-weight:bold;}@media print{body{margin:1.5cm;}}</style>
+  </head><body>${renderRapportHtml(rapportTekst||'')}</body></html>`);
   win.document.close(); setTimeout(()=>win.print(),600);
 };
 
 window.downloadWord = async () => {
-  showToast('Word document aanmaken...');
+  showToast('Word aanmaken...');
   try {
-    if(!window.docx){
-      await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
-    }
+    if(!window.docx){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
     const {Document,Packer,Paragraph,TextRun,AlignmentType} = docx;
     const obj = objects.find(o=>o.id===currentObjectId);
-    const snap = await getDoc(dataDoc(currentObjectId, 'rapport'));
-    const text = snap.exists() ? snap.data().tekst||'' : '';
     const children = [];
-    children.push(new Paragraph({children:[new TextRun({text:'ONDERHOUDSINSPECTIE RAPPORT',bold:true,size:40,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:200}}));
+    children.push(new Paragraph({children:[new TextRun({text:'BOUWKUNDIGE INSPECTIERAPPORTAGE',bold:true,size:40,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:200}}));
     children.push(new Paragraph({children:[new TextRun({text:obj?.naam||'',size:28,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
     children.push(new Paragraph({children:[new TextRun({text:`Datum: ${new Date().toLocaleDateString('nl-NL')}`,size:22,color:'666666',font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:600}}));
-    text.split('\n').forEach(line=>{
+    (rapportTekst||'').split('\n').forEach(line=>{
       const t=line.trim(); if(!t){children.push(new Paragraph({spacing:{after:80}}));return;}
       const parts=t.split(/\*\*(.*?)\*\*/g);
       children.push(new Paragraph({children:parts.map((p,i)=>new TextRun({text:p,bold:i%2===1,font:'Arial',size:22})),spacing:{after:100}}));
     });
-    const docFile = new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
-    const buffer = await Packer.toBuffer(docFile);
+    const docFile=new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
+    const buffer=await Packer.toBuffer(docFile);
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
     a.download=`Rapport_${(obj?.naam||'rapport').replace(/[^a-z0-9]/gi,'_')}.docx`;
@@ -852,116 +1056,132 @@ window.downloadWord = async () => {
   } catch(e){showToast('Fout: '+e.message);}
 };
 
+window.downloadKostenExcel = async () => {
+  await loadXLSX();
+  const obj = objects.find(o=>o.id===currentObjectId);
+  const wb = XLSX.utils.book_new();
+  const totaal = elementen.reduce((s,e)=>s+(parseFloat(e.kosten_indicatief)||0),0);
+  const rows = [
+    [`Kostenraming — ${obj?.naam||''}`],
+    [`Datum: ${new Date().toLocaleDateString('nl-NL')}`],
+    [],
+    ['Onderdeel','Gevel/Locatie','Conditie','Hoeveelheid','Eenheid','Kosten (€)','Onderbouwing'],
+    ...elementen.map(e=>[e.element, GEVELS.find(g=>g.id===e.gevel)?.naam||e.gevel, CONDITIE_LABELS[e.conditie]||'', e.hoeveelheid||'', e.eenheid||'', e.kosten_indicatief||0, e.kosten_onderbouwing||'']),
+    [],['Totaal indicatief','','','','',totaal,'']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:16},{wch:12},{wch:12},{wch:8},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Kostenraming');
+  XLSX.writeFile(wb, `Kosten_${(obj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
+  showToast('Excel gedownload');
+};
+
+window.downloadRapportExcel = async () => {
+  await loadXLSX();
+  const obj = objects.find(o=>o.id===currentObjectId);
+  const wb = XLSX.utils.book_new();
+  const rapportEl = document.getElementById('rapport-text');
+  const tables = rapportEl.querySelectorAll('table');
+  const namen = ['Overzicht','Kostenraming','Extra'];
+  tables.forEach((table,idx)=>{
+    const rows = [];
+    table.querySelectorAll('tr').forEach(tr=>{
+      const row=[]; tr.querySelectorAll('td,th').forEach(td=>row.push(td.innerText.trim()));
+      if(row.some(c=>c)) rows.push(row);
+    });
+    if(rows.length>1){
+      const ws=XLSX.utils.aoa_to_sheet([[`${obj?.naam||''} — ${namen[idx]||'Tabel'}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],...rows]);
+      ws['!cols']=rows[0]?.map(()=>({wch:22}));
+      XLSX.utils.book_append_sheet(wb,ws,namen[idx]||'Tabel '+(idx+1));
+    }
+  });
+  if(wb.SheetNames.length===0){showToast('Geen tabellen gevonden');return;}
+  XLSX.writeFile(wb,`Rapport_${(obj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
+  showToast('Excel gedownload');
+};
+
+async function loadXLSX(){
+  if(window.XLSX) return;
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+}
+
 // API
 function getApiKey(){ return localStorage.getItem('vi-apikey')||''; }
-window.saveApiKey = ()=>{
-  const v=document.getElementById('api-key-input').value.trim();
-  if(!v){showToast('Vul een sleutel in');return;}
-  localStorage.setItem('vi-apikey',v);
-  document.getElementById('api-key-status').textContent='Actief: '+v.substring(0,16)+'...';
-  showToast('Opgeslagen');
-};
-window.saveWorkerUrl = ()=>{
-  const v=document.getElementById('worker-url-input').value.trim();
-  if(!v){showToast('Vul een URL in');return;}
-  localStorage.setItem('vi-worker',v);
-  document.getElementById('worker-status').textContent='✓ Opgeslagen';
-  showToast('Opgeslagen');
-};
-window.testWorker = async ()=>{
-  const url=localStorage.getItem('vi-worker')||'';
-  const key=getApiKey();
-  const s=document.getElementById('worker-status');
-  if(!url||!key){s.textContent='Vul URL en sleutel in';return;}
-  s.textContent='Testen...';
-  try{
-    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'OK'}]})});
-    s.textContent=r.ok?'✓ Verbinding werkt!':'✗ Fout: '+r.status;
-    s.style.color=r.ok?'var(--green-text)':'var(--red-text)';
-  }catch(e){s.textContent='✗ '+e.message;s.style.color='var(--red-text)';}
+window.saveApiKey=()=>{const v=document.getElementById('api-key-input').value.trim();if(!v){showToast('Vul een sleutel in');return;}localStorage.setItem('vi-apikey',v);document.getElementById('api-key-status').textContent='Actief: '+v.substring(0,16)+'...';showToast('Opgeslagen');};
+window.saveWorkerUrl=()=>{const v=document.getElementById('worker-url-input').value.trim();if(!v){showToast('Vul een URL in');return;}localStorage.setItem('vi-worker',v);document.getElementById('worker-status').textContent='✓ Opgeslagen';showToast('Opgeslagen');};
+window.testWorker=async()=>{
+  const url=localStorage.getItem('vi-worker')||'';const key=getApiKey();const s=document.getElementById('worker-status');
+  if(!url||!key){s.textContent='Vul URL en sleutel in';return;}s.textContent='Testen...';
+  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'OK'}]})});s.textContent=r.ok?'✓ Werkt!':'✗ Fout: '+r.status;s.style.color=r.ok?'var(--green-text)':'var(--red-text)';}
+  catch(e){s.textContent='✗ '+e.message;s.style.color='var(--red-text)';}
 };
 
 async function callClaude(content){
-  const key=getApiKey();
-  if(!key) throw new Error('Geen API-sleutel');
-  const workerUrl=localStorage.getItem('vi-worker')||'';
-  if(!workerUrl) throw new Error('Geen Worker URL');
-  const resp=await fetch(workerUrl,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content}]})});
+  const key=getApiKey();if(!key) throw new Error('Geen API-sleutel');
+  const url=localStorage.getItem('vi-worker')||'';if(!url) throw new Error('Geen Worker URL');
+  const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content}]})});
   if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||resp.status);}
   const data=await resp.json();
   return data.content?.map(b=>b.text||'').join('')||'';
 }
 
 function initSettings(){
-  const key=getApiKey();
-  if(key){document.getElementById('api-key-input').value=key;document.getElementById('api-key-status').textContent='Actief: '+key.substring(0,16)+'...';}
-  const w=localStorage.getItem('vi-worker');
-  if(w){document.getElementById('worker-url-input').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
+  const key=getApiKey();if(key){document.getElementById('api-key-input').value=key;document.getElementById('api-key-status').textContent='Actief: '+key.substring(0,16)+'...';}
+  const w=localStorage.getItem('vi-worker');if(w){document.getElementById('worker-url-input').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
+}
+
+// FOTO COMPRESSIE
+function compressPhoto(dataUrl,maxWidth=1024){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{const canvas=document.createElement('canvas');let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);res(canvas.toDataURL('image/jpeg',.75));};
+    img.onerror=()=>res(dataUrl);img.src=dataUrl;
+  });
 }
 
 // NAVIGATIE
-window.showPage = (name) => {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tabbar-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
-  const page = document.getElementById('page-' + name);
-  if (page) page.classList.add('active');
-  // Verberg tabbar en topbar op loginpagina
-  const isLogin = name === 'login';
-  document.getElementById('topbar').style.display = isLogin ? 'none' : 'flex';
-  document.getElementById('tabbar').style.display = isLogin ? 'none' : 'flex';
+window.showPage=(name)=>{
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tabbar-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  const page=document.getElementById('page-'+name);if(page) page.classList.add('active');
+  const isLogin=name==='login';
+  document.getElementById('topbar').style.display=isLogin?'none':'flex';
+  document.getElementById('tabbar').style.display=isLogin?'none':'flex';
   updateTopbar();
 };
 
 function updateTopbar(){
-  const obj = objects.find(o=>o.id===currentObjectId);
-  if(obj){
-    document.getElementById('topbar-title').textContent=obj.naam||'Object';
-    document.getElementById('topbar-sub').textContent=obj.type+(obj.jaar?', '+obj.jaar:'');
-  } else {
-    document.getElementById('topbar-title').textContent='VastgoedInspectie';
-    document.getElementById('topbar-sub').textContent=currentUser?currentUser.email:'';
-  }
+  const obj=objects.find(o=>o.id===currentObjectId);
+  if(obj){document.getElementById('topbar-title').textContent=obj.naam||'Object';document.getElementById('topbar-sub').textContent=obj.type+(obj.jaar?', '+obj.jaar:'');}
+  else{document.getElementById('topbar-title').textContent='VastgoedInspectie';document.getElementById('topbar-sub').textContent=currentUser?.email||'';}
 }
 
 // BAG
 let bagTimer=null;
 window.bagSuggest=(q)=>{clearTimeout(bagTimer);if(!q||q.length<3){hideBagDropdown();return;}bagTimer=setTimeout(()=>_bagFetch(q),280);};
 async function _bagFetch(q){
-  const dd=document.getElementById('bag-dropdown');
-  dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
-  const wUrl=localStorage.getItem('vi-worker')||'';
-  if(!wUrl){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
-  try{
-    const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam,postcode,woonplaatsnaam');
-    const data=await r.json();
-    const docs=data?.response?.docs||[];
-    if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
-    dd.innerHTML=docs.map(d=>`<div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">${escHtml(d.weergavenaam)}</div>`).join('');
-  }catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout bij zoeken</div>';}
+  const dd=document.getElementById('bag-dropdown');dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
+  const wUrl=localStorage.getItem('vi-worker')||'';if(!wUrl){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
+  try{const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam');const data=await r.json();const docs=data?.response?.docs||[];
+  if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
+  dd.innerHTML=docs.map(d=>`<div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">${escHtml(d.weergavenaam)}</div>`).join('');}
+  catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout</div>';}
 }
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 window.bagSelect=async(id,naam)=>{
-  hideBagDropdown();
-  document.getElementById('f-bag-search').value=naam;
-  document.getElementById('f-naam').value=naam;
-  const status=document.getElementById('bag-status');
-  status.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG gegevens ophalen...</div>';
-  const wUrl=localStorage.getItem('vi-worker')||'';
-  if(!wUrl) return;
-  try{
-    const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/lookup?id='+id);
-    const data=await r.json();
-    const d=data?.response?.docs?.[0];
-    if(!d){status.innerHTML='<div class="bag-badge fail">Geen BAG data</div>';return;}
-    const gevonden=[];
-    if(d.postcode&&d.woonplaatsnaam) document.getElementById('f-postcode').value=d.postcode+' '+d.woonplaatsnaam;
-    if(d.bouwjaar){document.getElementById('f-jaar').value=d.bouwjaar;document.getElementById('f-jaar-badge').textContent='✓ BAG';gevonden.push('bouwjaar '+d.bouwjaar);}
-    if(d.oppervlakte_min){document.getElementById('f-opp').value=d.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';gevonden.push('opp. '+d.oppervlakte_min+'m²');}
-    if(d.aantal_eenheden) document.getElementById('f-eenheden').value=d.aantal_eenheden;
-    if(d.gebruiksdoel){const gd=Array.isArray(d.gebruiksdoel)?d.gebruiksdoel[0]:d.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
-    if(d.gemeente&&!document.getElementById('f-context').value) document.getElementById('f-context').value='Gemeente: '+d.gemeente;
-    status.innerHTML=gevonden.length?`<div class="bag-badge">✓ BAG: ${gevonden.join(' · ')}</div>`:'<div class="bag-badge fail">Adres gevonden, beperkte data</div>';
-  }catch(e){status.innerHTML='<div class="bag-badge fail">BAG lookup mislukt</div>';}
+  hideBagDropdown();document.getElementById('f-bag-search').value=naam;document.getElementById('f-naam').value=naam;
+  const status=document.getElementById('bag-status');status.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG data ophalen...</div>';
+  const wUrl=localStorage.getItem('vi-worker')||'';if(!wUrl) return;
+  try{const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/lookup?id='+id);const data=await r.json();const d=data?.response?.docs?.[0];
+  if(!d){status.innerHTML='<div class="bag-badge fail">Geen BAG data</div>';return;}
+  const gevonden=[];
+  if(d.postcode&&d.woonplaatsnaam) document.getElementById('f-postcode').value=d.postcode+' '+d.woonplaatsnaam;
+  if(d.bouwjaar){document.getElementById('f-jaar').value=d.bouwjaar;document.getElementById('f-jaar-badge').textContent='✓ BAG';gevonden.push('bouwjaar '+d.bouwjaar);}
+  if(d.oppervlakte_min){document.getElementById('f-opp').value=d.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';gevonden.push('opp. '+d.oppervlakte_min+'m²');}
+  if(d.aantal_eenheden) document.getElementById('f-eenheden').value=d.aantal_eenheden;
+  if(d.gebruiksdoel){const gd=Array.isArray(d.gebruiksdoel)?d.gebruiksdoel[0]:d.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
+  status.innerHTML=gevonden.length?`<div class="bag-badge">✓ BAG: ${gevonden.join(' · ')}</div>`:'<div class="bag-badge fail">Beperkte BAG data</div>';}
+  catch(e){status.innerHTML='<div class="bag-badge fail">BAG mislukt</div>';}
 };
 function hideBagDropdown(){const dd=document.getElementById('bag-dropdown');if(dd){dd.style.display='none';dd.innerHTML='';}}
 document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagDropdown();});
