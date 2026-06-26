@@ -304,20 +304,20 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
         <div class="login-card">
           <div class="login-tabs">
-            <button class="login-tab active" onclick="switchLoginTab('in')">Inloggen</button>
-            <button class="login-tab" onclick="switchLoginTab('reg')">Registreren</button>
+            <button class="login-tab active" id="tab-in">Inloggen</button>
+            <button class="login-tab" id="tab-reg">Registreren</button>
           </div>
           <div id="login-in">
             <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
             <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password"/></div>
-            <button class="btn btn-dark btn-full" onclick="inloggen()">Inloggen</button>
+            <button class="btn btn-dark btn-full" id="btn-inloggen">Inloggen</button>
             <div id="login-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
           </div>
           <div id="login-reg" style="display:none;">
             <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
             <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl"/></div>
             <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens"/></div>
-            <button class="btn btn-dark btn-full" onclick="registreren()">Account aanmaken</button>
+            <button class="btn btn-dark btn-full" id="btn-registreren">Account aanmaken</button>
             <div id="reg-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
           </div>
         </div>
@@ -1306,6 +1306,17 @@ window.closeSidebar=()=>{
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
 window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
+
+// EVENT LISTENERS (module scope — werkt betrouwbaarder dan inline onclick)
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('btn-inloggen')?.addEventListener('click',()=>window.inloggen());
+  document.getElementById('btn-registreren')?.addEventListener('click',()=>window.registreren());
+  document.getElementById('tab-in')?.addEventListener('click',()=>window.switchLoginTab('in'));
+  document.getElementById('tab-reg')?.addEventListener('click',()=>window.switchLoginTab('reg'));
+  // Enter key in login
+  document.getElementById('login-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')window.inloggen();});
+  document.getElementById('reg-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')window.registreren();});
+});
 
 // SERVICE WORKER
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
