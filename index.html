@@ -765,38 +765,54 @@ function renderObjectgegevens(container){
       </div>
     </div>
 
-    <!-- Documenten upload -->
+    <!-- Documenten upload per type -->
     <div class="card" style="margin-bottom:14px;">
       <div class="card-header">
         <div class="card-icon" style="background:var(--amber-bg);">📄</div>
         <div>
           <div style="font-weight:600;font-size:14px;">Documenten & tekeningen</div>
-          <div style="font-size:12px;color:var(--text3);">Kadaster, plattegronden, bouwtekeningen, luchtfoto's</div>
+          <div style="font-size:12px;color:var(--text3);">Per type een apart uploadveld</div>
         </div>
       </div>
       <div class="card-body">
-        <div class="foto-zone" id="fotozone-objectgegevens_docs"
-          onclick="document.getElementById('foto-input-objectgegevens_docs').click()"
-          ondragover="event.preventDefault();document.getElementById('fotozone-objectgegevens_docs').classList.add('drag-over')"
-          ondragleave="document.getElementById('fotozone-objectgegevens_docs').classList.remove('drag-over')"
-          ondrop="handleDrop(event,'objectgegevens_docs')">
-          <div class="foto-zone-icon">📎</div>
-          <div class="foto-zone-title">${docFotos.length?docFotos.length+' bestand(en) geladen':'Documenten toevoegen'}</div>
-          <div class="foto-zone-sub">Kadasterdocument · Plattegrond · Luchtfoto · Bouwtekening<br>Tik om te kiezen of sleep hierheen</div>
-          <input type="file" id="foto-input-objectgegevens_docs" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleFotoUpload(event,'objectgegevens_docs')"/>
-        </div>
-        ${docFotos.length?`
-        <div class="foto-grid-groot">
-          ${docFotos.map((f,i)=>`
-            <div class="foto-groot-item">
-              <img src="${f.dataUrl}" alt="${f.label||'Document '+( i+1)}" loading="lazy"/>
-              <span class="foto-nr">${i+1}</span>
-              <button class="foto-groot-del" onclick="verwijderFoto('objectgegevens_docs',${i})">×</button>
-              <div class="foto-groot-overlay">
-                <input class="foto-groot-label" placeholder="Bijv. Kadasterdocument, Plattegrond..." value="${f.label||''}" onchange="updateFotoLabel('objectgegevens_docs',${i},this.value)"/>
+        ${[
+          {key:'objectgegevens_kadaster', icon:'📋', naam:'Kadasterdocument', sub:'Eigendomsakte, uittreksel kadaster'},
+          {key:'objectgegevens_plattegrond', icon:'📐', naam:'Plattegrond', sub:'Plattegrond begane grond, verdieping'},
+          {key:'objectgegevens_bouwtekening', icon:'📏', naam:'Bouwtekeningen', sub:'Constructietekeningen, details'},
+          {key:'objectgegevens_luchtfoto', icon:'🛰️', naam:'Luchtfoto / situatietekening', sub:'Luchtfoto, situatieschets, bestemmingsplan'},
+          {key:'objectgegevens_energielabel', icon:'⚡', naam:'Energielabel', sub:'EPA rapport, energiecertificaat'},
+          {key:'objectgegevens_overig', icon:'📎', naam:'Overige documenten', sub:'Rapporten, inspecties, VvE documenten'},
+        ].map(({key,icon,naam,sub})=>{
+          const fotos=opn.fotos[key]||[];
+          return `<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden;">
+            <div style="padding:10px 12px;background:var(--bg1);display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);">
+              <span style="font-size:18px;">${icon}</span>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;">${naam}</div>
+                <div style="font-size:11px;color:var(--text3);">${sub}</div>
               </div>
-            </div>`).join('')}
-        </div>`:''}
+              ${fotos.length?`<span class="badge badge-green">${fotos.length} bestand${fotos.length>1?'en':''}</span>`:''}
+            </div>
+            <div style="padding:10px 12px;">
+              <div class="foto-zone" id="fotozone-${key}" style="padding:12px;margin-bottom:0;"
+                onclick="document.getElementById('foto-input-${key}').click()"
+                ondragover="event.preventDefault();document.getElementById('fotozone-${key}').classList.add('drag-over')"
+                ondragleave="document.getElementById('fotozone-${key}').classList.remove('drag-over')"
+                ondrop="handleDrop(event,'${key}')">
+                <div style="font-size:13px;">${fotos.length?'+ Meer toevoegen':'📎 Toevoegen of slepen'}</div>
+                <input type="file" id="foto-input-${key}" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleFotoUpload(event,'${key}')"/>
+              </div>
+              ${fotos.length?`<div class="foto-grid-groot" style="margin-top:8px;">
+                ${fotos.map((f,i)=>`<div class="foto-groot-item">
+                  <img src="${f.dataUrl}" alt="${f.label||naam+' '+(i+1)}" loading="lazy"/>
+                  <span class="foto-nr">${i+1}</span>
+                  <button class="foto-groot-del" onclick="verwijderFoto('${key}',${i})">×</button>
+                  <div class="foto-groot-overlay"><input class="foto-groot-label" placeholder="Label..." value="${f.label||''}" onchange="updateFotoLabel('${key}',${i},this.value)"/></div>
+                </div>`).join('')}
+              </div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     </div>
 
@@ -967,9 +983,19 @@ function getFotoNr(chId,subTab,idx){
 
 function renderBevindingCard(el){
   const cond=el.conditie||3;
+  // Bepaal fotonummers voor dit element
+  const opn=getOpname();
+  const fotoKey=el.subTab?el.chapterId+'_'+el.subTab:el.chapterId;
+  const fotos=opn.fotos[fotoKey]||[];
+  const startNr=getFotoNr(el.chapterId,el.subTab,0);
+  const fotoRefs=fotos.length?`(foto ${startNr}${fotos.length>1?'–'+(startNr+fotos.length-1):''})`:'';
+
   return `<div class="bevinding-card" id="bev-${el.id}">
     <div class="bev-header">
-      <input class="bev-element-input" value="${escHtml(el.element||'')}" placeholder="Naam element" oninput="updateBev('${el.id}','element',this.value)"/>
+      <div style="flex:1;">
+        <input class="bev-element-input" value="${escHtml(el.element||'')}" placeholder="Naam element" oninput="updateBev('${el.id}','element',this.value)"/>
+        ${fotoRefs?`<div style="font-size:11px;color:var(--blue-text);margin-top:2px;">📷 ${fotoRefs}</div>`:''}
+      </div>
       <span class="badge badge-${cond}">${CONDITIE[cond]}</span>
       <button onclick="verwijderBev('${el.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
     </div>
@@ -985,10 +1011,23 @@ function renderBevindingCard(el){
       <div class="bev-meta-row">
         <div class="field"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="450" oninput="updateBev('${el.id}','hoeveelheid',this.value)"/></div>
         <div class="field"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" oninput="updateBev('${el.id}','eenheid',this.value)"/></div>
-        <div class="field"><label>Kosten € indicatief</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
+        <div class="field"><label>Herstelkosten € indicatief</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
       </div>
-      ${el.kosten_onderbouwing?`<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Indicatie: ${escHtml(el.kosten_onderbouwing)}</div>`:''}
-      ${el.isolatie?`<div class="isolatie-block"><strong>🏠 Isolatie indicatie</strong>${escHtml(el.isolatie)}</div>`:''}
+      <div class="field" style="margin-bottom:8px;">
+        <label>Onderbouwing herstelkosten</label>
+        <textarea rows="2" style="font-size:13px;" placeholder="Bijv. 450 m² × €20/m² (hervoegen) = €9.000" oninput="updateBev('${el.id}','kosten_onderbouwing',this.value)">${escHtml(el.kosten_onderbouwing||'')}</textarea>
+      </div>
+      <div class="bev-meta-row" style="grid-template-columns:1fr 1fr;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Vervangingskosten € indicatief</label>
+          <input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0)"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Onderbouwing vervanging</label>
+          <input type="text" value="${escHtml(el.kosten_vervanging_onderbouwing||'')}" placeholder="Bijv. 450 m² × €80/m² = €36.000" oninput="updateBev('${el.id}','kosten_vervanging_onderbouwing',this.value)"/>
+        </div>
+      </div>
+      ${el.isolatie?`<div class="isolatie-block" style="margin-top:8px;"><strong>🏠 Isolatie indicatie</strong>${escHtml(el.isolatie)}</div>`:''}
     </div>
   </div>`;
 }
@@ -1059,17 +1098,19 @@ window.analyseerFotos=async(chId,subTab)=>{
   const analyzeBtn=container.querySelector('button[onclick*="analyseerFotos"]');
   if(analyzeBtn){analyzeBtn.textContent='⏳ Analyseren...';analyzeBtn.disabled=true;}
   try{
-    const content=fotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    const content=fotos.slice(0,8).map((f,i)=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
     content.push({type:'text',text:`Analyseer deze foto's van de ${tabNaam} (${ch.naam}) van een gebouw (bouwjaar ${currentObj?.jaar||'onbekend'}).
 
 Geef een gedetailleerde bouwkundige opname. Per zichtbaar element:
 1. Naam element
-2. Materiaal en specificaties  
+2. Materiaal en specificaties
 3. Hoeveelheid met eenheid (m², m¹, stuks, etc.) — wees specifiek
 4. Conditiescore 1-5 (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
 5. Beschrijving toestand en gebreken
-6. Indicatieve herstelkosten met onderbouwing (bijv. "450 m² × €20/m² = €9.000")
-7. Voor gevels: geef spouwmuur/isolatie analyse met indicatieve R-waarde
+6. Foto label — korte omschrijving wat er op de foto te zien is (bijv. "Voorgevel overzicht", "Detail voegwerk scheur")
+7. Indicatieve HERSTELKOSTEN met onderbouwing (bijv. "450 m² × €20/m² = €9.000")
+8. Indicatieve VERVANGINGSKOSTEN met onderbouwing (bijv. "450 m² × €80/m² = €36.000")
+9. Voor gevels: spouwmuur/isolatie analyse met R-waarde
 
 Reageer ALLEEN als JSON array:
 [{
@@ -1079,9 +1120,12 @@ Reageer ALLEEN als JSON array:
   "eenheid": "m²",
   "conditie": 3,
   "beschrijving": "Uitgebreide voegwerkschade, plaatselijk losliggend voegwerk",
+  "foto_labels": ["Voorgevel overzicht", "Detail voegwerk scheur links"],
   "kosten": 9000,
-  "kosten_onderbouwing": "450 m² × €20/m¹ = €9.000",
-  "isolatie": "Vermoedelijk geen spouwmuurisolatie. Indicatieve R-waarde gevel ≈ 0.35 m²K/W"
+  "kosten_onderbouwing": "450 m² × €20/m² (hervoegen) = €9.000",
+  "kosten_vervanging": 36000,
+  "kosten_vervanging_onderbouwing": "450 m² × €80/m² (nieuw metselwerk) = €36.000",
+  "isolatie": "Vermoedelijk geen spouwmuurisolatie. R-waarde ≈ 0.35 m²K/W"
 }]
 Alleen JSON, niets anders.`});
     const raw=await callClaude(content);
@@ -1089,6 +1133,13 @@ Alleen JSON, niets anders.`});
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
     if(s>=0&&e>s){
       const items=JSON.parse(clean.substring(s,e+1));
+      // Auto-label foto's op basis van AI analyse
+      if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
+      items.forEach((item,i)=>{
+        if(item.foto_labels&&opn.fotos[fotoKey][i]&&!opn.fotos[fotoKey][i].label){
+          opn.fotos[fotoKey][i].label=item.foto_labels[0]||'';
+        }
+      });
       // Verwijder bestaande AI-elementen van deze subtab
       opn.elementen=opn.elementen.filter(el=>!(el.chapterId===chId&&el.subTab===(subTab||null)&&el.aiAnalyse));
       items.forEach((item,i)=>{
@@ -1105,6 +1156,8 @@ Alleen JSON, niets anders.`});
           beschrijving:item.beschrijving||'',
           kosten:item.kosten||0,
           kosten_onderbouwing:item.kosten_onderbouwing||'',
+          kosten_vervanging:item.kosten_vervanging||0,
+          kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||'',
           isolatie:item.isolatie||'',
         });
       });
@@ -1151,18 +1204,28 @@ function renderKostenTotaal(){
 function renderKosten(){
   const opn=getOpname();
   const container=document.getElementById('page-chapter');
-  const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totaalHerstel=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totaalVervanging=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+
   let html=`
-    <div class="kosten-totaal-banner">
-      <div><div class="kosten-totaal-label">Totale kostenraming indicatief</div>
-      <div class="kosten-totaal-amt" id="kosten-totaal-amt">€ ${Math.round(totaal).toLocaleString('nl-NL')}</div></div>
-      <div style="font-size:12px;opacity:.7;">${opn.elementen.filter(e=>e.kosten>0).length} posten</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div class="kosten-totaal-banner">
+        <div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div>
+        <div class="kosten-totaal-amt" id="kosten-totaal-amt">€ ${Math.round(totaalHerstel).toLocaleString('nl-NL')}</div></div>
+        <div style="font-size:20px;opacity:.4;">🔧</div>
+      </div>
+      <div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);">
+        <div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div>
+        <div style="font-size:26px;font-weight:600;">€ ${Math.round(totaalVervanging).toLocaleString('nl-NL')}</div></div>
+        <div style="font-size:20px;opacity:.4;">🏗</div>
+      </div>
     </div>`;
-  // Per hoofdstuk uitklapbaar
+
   CHAPTERS.forEach(ch=>{
-    const els=opn.elementen.filter(e=>e.chapterId===ch.id&&(parseFloat(e.kosten)||0)>0);
+    const els=opn.elementen.filter(e=>e.chapterId===ch.id&&((parseFloat(e.kosten)||0)>0||(parseFloat(e.kosten_vervanging)||0)>0));
     if(!els.length)return;
-    const subtotaal=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const subtotaalH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const subtotaalV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
     const maxCond=Math.max(...els.map(e=>e.conditie||1));
     const accId='acc-'+ch.id;
     html+=`<div class="kosten-accordion">
@@ -1170,18 +1233,34 @@ function renderKosten(){
         <span class="kosten-acc-icon">${ch.icon}</span>
         <span class="kosten-acc-naam">${ch.naam}</span>
         <span class="badge badge-${maxCond}">${CONDITIE[maxCond]}</span>
-        <span class="kosten-acc-amt">€ ${Math.round(subtotaal).toLocaleString('nl-NL')}</span>
+        <span style="font-size:12px;color:var(--text2);">🔧 € ${Math.round(subtotaalH).toLocaleString('nl-NL')}</span>
+        ${subtotaalV>0?`<span style="font-size:12px;color:var(--orange-text);">🏗 € ${Math.round(subtotaalV).toLocaleString('nl-NL')}</span>`:''}
         <span class="kosten-acc-arrow" id="arrow-${accId}">›</span>
       </div>
       <div class="kosten-acc-body" id="${accId}">
-        ${els.map(e=>`<div class="kosten-sub-row">
-          <div class="kosten-sub-naam">${escHtml(e.element)}<br><span class="kosten-sub-onderbouwing">${escHtml(e.kosten_onderbouwing||'')}</span></div>
-          <div class="kosten-sub-amt">€ ${Math.round(parseFloat(e.kosten)||0).toLocaleString('nl-NL')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);padding:4px 0;border-bottom:0.5px solid var(--border);">🔧 Herstel / onderhoud</div>
+          <div style="font-size:11px;font-weight:600;color:var(--orange-text);padding:4px 0;border-bottom:0.5px solid var(--border);">🏗 Vervanging</div>
+        </div>
+        ${els.map(e=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:500;">${escHtml(e.element)}</div>
+            <div style="font-size:11px;color:var(--text3);">${escHtml(e.kosten_onderbouwing||'—')}</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;">€ ${Math.round(parseFloat(e.kosten)||0).toLocaleString('nl-NL')}</div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:var(--text3);">${escHtml(e.kosten_vervanging_onderbouwing||'—')}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--orange-text);margin-top:2px;">${e.kosten_vervanging?'€ '+Math.round(parseFloat(e.kosten_vervanging)).toLocaleString('nl-NL'):'—'}</div>
+          </div>
         </div>`).join('')}
-        <div class="kosten-sub-row"><div class="kosten-sub-naam">Subtotaal ${ch.naam}</div><div class="kosten-sub-amt">€ ${Math.round(subtotaal).toLocaleString('nl-NL')}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;font-weight:600;font-size:13px;">
+          <div>Subtotaal herstel: € ${Math.round(subtotaalH).toLocaleString('nl-NL')}</div>
+          <div style="color:var(--orange-text);">Subtotaal vervanging: € ${Math.round(subtotaalV).toLocaleString('nl-NL')}</div>
+        </div>
       </div>
     </div>`;
   });
+
   html+=`<div class="btn-row" style="margin-top:16px;">
     <button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button>
     <button class="btn btn-dark btn-sm" onclick="navToChapter('rapport')">→ Rapport genereren</button>
@@ -1305,19 +1384,69 @@ Hoofdstukken:
 };
 
 function renderRapportHtml(text){
-  let h=text
-    .replace(/^### (.*)/gm,'<h3>$1</h3>')
-    .replace(/^## (.*)/gm,'<h2>$1</h2>')
-    .replace(/^# (.*)/gm,'<h2>$1</h2>')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\|(.+)\|/g,match=>{
-      const cells=match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
-      if(cells.every(c=>/^[-:]+$/.test(c)))return'';
-      return'<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>';
-    });
-  h=h.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g,m=>`<table>${m}</table>`);
-  h=h.replace(/^- (.*)/gm,'<div style="padding:2px 0 2px 12px;font-size:13px;">• $1</div>');
-  h=h.replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
+  // Verwerk tabellen eerst — groepeer tabelrijen
+  let h = text;
+
+  // Verwijder --- separator lijnen
+  h = h.replace(/^[-]{3,}$/gm, '');
+
+  // Koppen
+  h = h.replace(/^### (.*)/gm, '<h3>$1</h3>');
+  h = h.replace(/^## (.*)/gm, '<h2>$1</h2>');
+  h = h.replace(/^# (.*)/gm, '<h2>$1</h2>');
+
+  // Vet
+  h = h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Bullets
+  h = h.replace(/^- (.*)/gm, '<li>$1</li>');
+  h = h.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul style="padding-left:18px;margin:6px 0;">${m}</ul>`);
+
+  // Tabellen — verwerk per blok
+  const lines = h.split('\n');
+  const result = [];
+  let tableLines = [];
+  let inTable = false;
+
+  for (const line of lines) {
+    const isTableRow = /^\|.+\|/.test(line.trim());
+    const isSeparator = /^\|[\s\-|:]+\|/.test(line.trim());
+
+    if (isTableRow && !isSeparator) {
+      inTable = true;
+      const cells = line.trim().split('|').filter((c,i,a) => i>0 && i<a.length-1).map(c=>c.trim());
+      tableLines.push('<tr>' + cells.map(c=>`<td style="padding:7px 10px;border:0.5px solid var(--border);font-size:13px;">${c}</td>`).join('') + '</tr>');
+    } else if (isSeparator) {
+      // Maak header van vorige rij
+      if (tableLines.length > 0) {
+        const last = tableLines[tableLines.length-1];
+        tableLines[tableLines.length-1] = last.replace(/<td/g,'<th style="padding:7px 10px;border:0.5px solid var(--border);font-size:12px;font-weight:600;background:var(--bg2);text-align:left;"').replace(/<\/td>/g,'</th>');
+      }
+    } else {
+      if (inTable && tableLines.length > 0) {
+        result.push(`<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">${tableLines.join('')}</table>`);
+        tableLines = [];
+        inTable = false;
+      }
+      result.push(line);
+    }
+  }
+
+  if (tableLines.length > 0) {
+    result.push(`<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">${tableLines.join('')}</table>`);
+  }
+
+  h = result.join('\n');
+
+  // Regeleinden opruimen
+  h = h.replace(/\n{3,}/g, '\n\n');
+  h = h.replace(/\n\n/g, '<br>');
+  h = h.replace(/\n/g, '<br>');
+
+  // Dubbele <br> voor en na tabellen verwijderen
+  h = h.replace(/<br>\s*(<table)/g, '$1');
+  h = h.replace(/<\/table>\s*<br>/g, '</table>');
+
   return h;
 }
 
