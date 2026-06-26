@@ -845,10 +845,12 @@ function renderInfoRij(label, waarde, volleBreedte=false){
 
 window.saveObjExtra=async(key,val)=>{
   if(!currentObjId)return;
-  const update={[key]:val};
-  await objDoc(currentObjId).set(update,{merge:true});
+  await objDoc(currentObjId).set({[key]:val},{merge:true});
   if(currentObj)currentObj[key]=val;
 };
+
+// CHAPTER RENDER
+function renderChapter(chId){
   const container=document.getElementById('page-chapter');
 
   // Speciaal geval: Objectgegevens
@@ -856,12 +858,12 @@ window.saveObjExtra=async(key,val)=>{
     renderObjectgegevens(container);
     return;
   }
+
   const ch=CHAPTERS.find(c=>c.id===chId);
   if(!ch){return;}
   const opn=getOpname();
-  const container=document.getElementById('page-chapter');
   const subTabs=ch.gevels||null;
-  const activeTab=currentSubTab||( subTabs?subTabs[0]:null);
+  const activeTab=currentSubTab||(subTabs?subTabs[0]:null);
   currentSubTab=activeTab;
 
   let html=`<div class="section-title">${ch.icon} Hoofdstuk ${ch.nr} — ${ch.naam}</div>`;
@@ -883,7 +885,6 @@ window.saveObjExtra=async(key,val)=>{
     html+=renderSubTabContent(chId,null,opn);
   }
 
-  // Nav knoppen
   const chIdx=CHAPTERS.findIndex(c=>c.id===chId);
   html+=`<div class="btn-row" style="margin-top:20px;">`;
   if(chIdx>0)html+=`<button class="btn btn-light" onclick="navToChapter('${CHAPTERS[chIdx-1].id}')">← ${CHAPTERS[chIdx-1].naam}</button>`;
