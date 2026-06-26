@@ -704,8 +704,130 @@ function updateTopbar(page){
   }
 }
 
-// CHAPTER RENDER
-function renderChapter(chId){
+// OBJECTGEGEVENS HOOFDSTUK
+function renderObjectgegevens(container){
+  const obj=currentObj||{};
+  const opn=getOpname();
+  const docFotos=opn.fotos['objectgegevens_docs']||[];
+
+  container.innerHTML=`
+    <div class="section-title">🏢 Hoofdstuk 1 — Objectgegevens</div>
+
+    <!-- BAG Gegevens -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <div class="card-icon" style="background:var(--blue-bg);">🏢</div>
+        <div>
+          <div style="font-weight:600;font-size:14px;">BAG Objectgegevens</div>
+          <div style="font-size:12px;color:var(--text3);">Basisregistratie Adressen en Gebouwen</div>
+        </div>
+        <button class="btn btn-light btn-sm" style="margin-left:auto;" onclick="editObject('${obj.id}')">✎ Bewerken</button>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          ${renderInfoRij('Adres',obj.naam||'—')}
+          ${renderInfoRij('Type object',obj.type||'—')}
+          ${renderInfoRij('Bouwjaar',obj.jaar||'—')}
+          ${renderInfoRij('Oppervlakte',obj.opp?obj.opp+' m²':'—')}
+          ${renderInfoRij('Aantal eenheden',obj.eenheden||'—')}
+          ${renderInfoRij('Postcode & plaats',obj.postcode||'—')}
+          ${renderInfoRij('Aangemaakt door',obj.aangemaaktDoor||'—')}
+          ${renderInfoRij('Context',obj.context||'—',true)}
+        </div>
+      </div>
+    </div>
+
+    <!-- Documenten upload -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <div class="card-icon" style="background:var(--amber-bg);">📄</div>
+        <div>
+          <div style="font-weight:600;font-size:14px;">Documenten & tekeningen</div>
+          <div style="font-size:12px;color:var(--text3);">Kadaster, plattegronden, bouwtekeningen, luchtfoto's</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="foto-zone" id="fotozone-objectgegevens_docs"
+          onclick="document.getElementById('foto-input-objectgegevens_docs').click()"
+          ondragover="event.preventDefault();document.getElementById('fotozone-objectgegevens_docs').classList.add('drag-over')"
+          ondragleave="document.getElementById('fotozone-objectgegevens_docs').classList.remove('drag-over')"
+          ondrop="handleDrop(event,'objectgegevens_docs')">
+          <div class="foto-zone-icon">📎</div>
+          <div class="foto-zone-title">${docFotos.length?docFotos.length+' bestand(en) geladen':'Documenten toevoegen'}</div>
+          <div class="foto-zone-sub">Kadasterdocument · Plattegrond · Luchtfoto · Bouwtekening<br>Tik om te kiezen of sleep hierheen</div>
+          <input type="file" id="foto-input-objectgegevens_docs" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleFotoUpload(event,'objectgegevens_docs')"/>
+        </div>
+        ${docFotos.length?`
+        <div class="foto-grid-groot">
+          ${docFotos.map((f,i)=>`
+            <div class="foto-groot-item">
+              <img src="${f.dataUrl}" alt="${f.label||'Document '+( i+1)}" loading="lazy"/>
+              <span class="foto-nr">${i+1}</span>
+              <button class="foto-groot-del" onclick="verwijderFoto('objectgegevens_docs',${i})">×</button>
+              <div class="foto-groot-overlay">
+                <input class="foto-groot-label" placeholder="Bijv. Kadasterdocument, Plattegrond..." value="${f.label||''}" onchange="updateFotoLabel('objectgegevens_docs',${i},this.value)"/>
+              </div>
+            </div>`).join('')}
+        </div>`:''}
+      </div>
+    </div>
+
+    <!-- Luchtfoto / ligging -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <div class="card-icon" style="background:var(--green-bg);">🗺️</div>
+        <div>
+          <div style="font-weight:600;font-size:14px;">Ligging & omgeving</div>
+          <div style="font-size:12px;color:var(--text3);">Omschrijving locatie en directe omgeving</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Ligging en omgeving</label>
+          <textarea id="obj-ligging" rows="3" placeholder="Bijv. Vrijstaande woning gelegen aan een rustige woonstraat, omringd door soortgelijke bebouwing uit dezelfde periode..." oninput="saveObjExtra('ligging',this.value)">${escHtml(obj.ligging||'')}</textarea>
+        </div>
+        <div class="field">
+          <label>Bijzonderheden / aandachtspunten</label>
+          <textarea id="obj-bijzonderheden" rows="2" placeholder="Monumentenstatus, VvE, erfpacht, recente verbouwingen..." oninput="saveObjExtra('bijzonderheden',this.value)">${escHtml(obj.bijzonderheden||obj.context||'')}</textarea>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label>Perceeloppervlakte m²</label>
+            <input type="number" id="obj-perceel" placeholder="350" value="${obj.perceel||''}" oninput="saveObjExtra('perceel',this.value)"/>
+          </div>
+          <div class="field">
+            <label>Kadastrale aanduiding</label>
+            <input type="text" id="obj-kadaster" placeholder="MEPPEL A 1234" value="${escHtml(obj.kadaster||'')}" oninput="saveObjExtra('kadaster',this.value)"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-dark" onclick="navToChapter('gevels')">Volgende: Gevels & exterieur →</button>
+    </div>`;
+}
+
+function renderInfoRij(label, waarde, volleBreedte=false){
+  return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);${volleBreedte?'grid-column:1/-1;':''}">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">${label}</div>
+    <div style="font-size:13px;font-weight:500;">${waarde}</div>
+  </div>`;
+}
+
+window.saveObjExtra=async(key,val)=>{
+  if(!currentObjId)return;
+  const update={[key]:val};
+  await objDoc(currentObjId).set(update,{merge:true});
+  if(currentObj)currentObj[key]=val;
+};
+  const container=document.getElementById('page-chapter');
+
+  // Speciaal geval: Objectgegevens
+  if(chId==='objectgegevens'){
+    renderObjectgegevens(container);
+    return;
+  }
   const ch=CHAPTERS.find(c=>c.id===chId);
   if(!ch){return;}
   const opn=getOpname();
