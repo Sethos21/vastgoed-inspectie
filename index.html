@@ -12,929 +12,1087 @@
 <title>VastgoedInspectie</title>
 <style>
 :root{
-  --bg:#fff;--bg2:#f5f5f5;--bg3:#ebebeb;
-  --text:#1a1a1a;--text2:#555;--text3:#999;
-  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);
+  --bg:#fff;--bg1:#fafafa;--bg2:#f5f5f5;--bg3:#ebebeb;
+  --text:#1a1a1a;--text2:#555;--text3:#888;--text4:#bbb;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
   --accent:#1a1a1a;--accent-text:#fff;
-  --green-bg:#eaf3de;--green-text:#3b6d11;
-  --amber-bg:#faeeda;--amber-text:#854f0b;
-  --orange-bg:#faece7;--orange-text:#993c1d;
-  --red-bg:#fcebeb;--red-text:#a32d2d;
-  --blue-bg:#e6f1fb;--blue-text:#185fa5;
-  --radius:12px;--radius-sm:8px;
+  --blue:#185fa5;--blue-bg:#e6f1fb;--blue-text:#185fa5;
+  --green:#3b6d11;--green-bg:#eaf3de;--green-text:#3b6d11;
+  --amber:#854f0b;--amber-bg:#faeeda;--amber-text:#854f0b;
+  --orange:#993c1d;--orange-bg:#faece7;--orange-text:#993c1d;
+  --red:#a32d2d;--red-bg:#fcebeb;--red-text:#a32d2d;
+  --red2:#501313;
+  --radius:10px;--radius-sm:6px;
+  --sidebar:240px;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bot:env(safe-area-inset-bottom,0px);
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#1a1a1a;--bg2:#252525;--bg3:#2f2f2f;--text:#f0f0f0;--text2:#aaa;--text3:#666;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--accent:#f0f0f0;--accent-text:#1a1a1a;--green-bg:#1a2e0a;--green-text:#8ecf50;--amber-bg:#2e1f00;--amber-text:#f5b942;--orange-bg:#2e1208;--orange-text:#f09060;--red-bg:#2e0a0a;--red-text:#f07070;--blue-bg:#0a1e35;--blue-text:#6aadee;}
+  :root{
+    --bg:#181818;--bg1:#1e1e1e;--bg2:#242424;--bg3:#2a2a2a;
+    --text:#f0f0f0;--text2:#aaa;--text3:#666;--text4:#444;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+    --accent:#f0f0f0;--accent-text:#1a1a1a;
+    --blue:#6aadee;--blue-bg:#0a1e35;--blue-text:#6aadee;
+    --green:#8ecf50;--green-bg:#1a2e0a;--green-text:#8ecf50;
+    --amber:#f5b942;--amber-bg:#2e1f00;--amber-text:#f5b942;
+    --orange:#f09060;--orange-bg:#2e1208;--orange-text:#f09060;
+    --red:#f07070;--red-bg:#2e0a0a;--red-text:#f07070;
+    --red2:#f9a0a0;
+  }
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
-#app{display:flex;flex-direction:column;height:100%;height:100dvh;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top)+12px) 16px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
-.topbar-title{font-size:17px;font-weight:600;letter-spacing:-0.3px;}
-.topbar-sub{font-size:12px;color:var(--text3);margin-top:1px;}
-.topbar-right{display:flex;align-items:center;gap:8px;}
-.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
-.tabbar{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
-.tabbar::-webkit-scrollbar{display:none;}
-.tabbar-btn{flex:0 0 auto;padding:10px 12px 8px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;font-family:inherit;white-space:nowrap;}
-.tabbar-btn.active{color:var(--text);border-bottom-color:var(--text);}
-.tabbar-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;}
-.page{display:none;padding:16px;padding-bottom:calc(16px + var(--safe-bot));}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* APP SHELL */
+#app{display:flex;height:100%;height:100dvh;}
+#sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s;}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* SIDEBAR */
+.sb-header{padding:16px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.sb-object-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-object-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.sb-opname-select{width:100%;padding:6px 8px;font-size:12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-family:inherit;margin-top:10px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0;}
+.sb-section-label{font-size:10px;font-weight:600;color:var(--text3);padding:8px 16px 4px;text-transform:uppercase;letter-spacing:.5px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-left:2px solid transparent;user-select:none;}
+.sb-item:hover{background:var(--bg2);}
+.sb-item.active{color:var(--text);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-num{width:20px;height:20px;border-radius:50%;background:var(--bg3);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);}
+.sb-item.active .sb-num{background:var(--blue);color:#fff;}
+.sb-item.done .sb-num{background:var(--green-bg);color:var(--green-text);}
+.sb-item.done .sb-num::after{content:'✓';}
+.sb-footer{padding:12px 16px;border-top:0.5px solid var(--border);flex-shrink:0;}
+.sb-user{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* TOPBAR */
+#topbar{padding:calc(var(--safe-top)+10px) 16px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
+.topbar-menu-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;padding:2px;flex-shrink:0;}
+.topbar-chapter{flex:1;}
+.topbar-chapter-title{font-size:15px;font-weight:600;}
+.topbar-chapter-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.topbar-nav{display:flex;gap:6px;flex-shrink:0;}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page{display:none;padding:20px;padding-bottom:calc(20px + var(--safe-bot));max-width:900px;}
 .page.active{display:block;}
-#page-login.active{display:flex;flex-direction:column;justify-content:center;min-height:100%;}
+
+/* LOGIN PAGE */
+#page-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;max-width:400px;margin:0 auto;padding:40px 20px;}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo-icon{width:64px;height:64px;background:var(--accent);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;}
+.login-logo h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.login-logo p{font-size:14px;color:var(--text3);}
+.login-card{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;}
+.login-tabs{display:flex;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px;}
+.login-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;border-radius:5px;font-family:inherit;color:var(--text3);}
+.login-tab.active{background:var(--bg);color:var(--text);}
+
+/* FORMS */
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500;}
-input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;padding:11px 13px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;-webkit-appearance:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--text);}
-textarea{resize:vertical;min-height:72px;line-height:1.5;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;padding:10px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.btn{padding:12px 18px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s,transform .1s;}
+
+/* BUTTONS */
+.btn{padding:10px 18px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:14px;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity .1s,transform .1s;}
 .btn:active{transform:scale(.97);opacity:.85;}
 .btn-dark{background:var(--accent);color:var(--accent-text);}
 .btn-light{background:var(--bg2);color:var(--text);border:0.5px solid var(--border2);}
+.btn-blue{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--border2);}
 .btn-full{width:100%;justify-content:center;}
-.btn-sm{padding:8px 14px;font-size:13px;}
+.btn-sm{padding:7px 14px;font-size:13px;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-.section-title{font-size:13px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:18px;}
+
+/* SECTION TITLES */
+.section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:20px;}
 .section-title:first-child{margin-top:0;}
-.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
-.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;font-weight:500;}
+
+/* CARDS */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.card-header{padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--bg1);border-bottom:0.5px solid var(--border);}
+.card-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.card-body{padding:14px 16px;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;}
 .badge-1{background:var(--green-bg);color:var(--green-text);}
 .badge-2{background:var(--amber-bg);color:var(--amber-text);}
 .badge-3{background:var(--orange-bg);color:var(--orange-text);}
 .badge-4{background:var(--red-bg);color:var(--red-text);}
-.badge-5{background:var(--red-bg);color:#501313;}
+.badge-5{background:var(--red-bg);color:var(--red2);}
 .badge-blue{background:var(--blue-bg);color:var(--blue-text);}
 .badge-green{background:var(--green-bg);color:var(--green-text);}
+.badge-gray{background:var(--bg3);color:var(--text3);}
+
+/* OBJECTS LIST */
+.obj-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
+.obj-item:active{background:var(--bg2);}
+.obj-avatar{width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+
+/* CHAPTER TABS (gevels) */
+.chapter-tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;}
+.chapter-tabs::-webkit-scrollbar{display:none;}
+.chapter-tab{padding:6px 14px;border-radius:99px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.chapter-tab.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
+.chapter-tab.has-data{border-color:var(--blue);color:var(--blue);}
+.chapter-tab.active.has-data{background:var(--accent);color:var(--accent-text);}
+
+/* FOTO ZONE */
+.foto-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;background:var(--bg1);transition:all .15s;margin-bottom:12px;}
+.foto-zone.drag-over{background:var(--blue-bg);border-color:var(--blue);}
+.foto-zone-icon{font-size:28px;margin-bottom:6px;}
+.foto-zone-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.foto-zone-sub{font-size:12px;color:var(--text3);}
+
+/* FOTO GRID (groot) */
+.foto-grid-groot{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px;}
+.foto-groot-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;cursor:default;}
+.foto-groot-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.foto-groot-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.5));padding:6px 8px;}
+.foto-groot-label{color:#fff;font-size:11px;font-family:inherit;background:none;border:none;outline:none;width:100%;padding:0;}
+.foto-groot-label::placeholder{color:rgba(255,255,255,.6);}
+.foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+
+/* BEVINDINGEN */
+.bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+.bev-header{padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);background:var(--bg1);}
+.bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);font-family:inherit;outline:none;}
+.bev-body{padding:12px 14px;}
+.conditie-bar{display:flex;gap:5px;margin-bottom:10px;}
+.conditie-opt{flex:1;padding:6px 2px;border:0.5px solid var(--border2);border-radius:5px;background:none;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;text-align:center;color:var(--text3);}
+.conditie-opt.sel-1{background:var(--green-bg);color:var(--green-text);border-color:transparent;}
+.conditie-opt.sel-2{background:var(--amber-bg);color:var(--amber-text);border-color:transparent;}
+.conditie-opt.sel-3{background:var(--orange-bg);color:var(--orange-text);border-color:transparent;}
+.conditie-opt.sel-4{background:var(--red-bg);color:var(--red-text);border-color:transparent;}
+.conditie-opt.sel-5{background:var(--red-bg);color:var(--red2);border-color:var(--red-text);}
+.bev-meta-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.bev-meta-row .field{margin-bottom:0;}
+.bev-meta-row .field label{font-size:11px;}
+.bev-meta-row input{font-size:13px;padding:7px 10px;}
+.ai-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--blue-bg);color:var(--blue-text);padding:2px 8px;border-radius:99px;margin-bottom:6px;}
+.isolatie-block{background:var(--blue-bg);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;font-size:12px;color:var(--blue-text);line-height:1.6;}
+.isolatie-block strong{display:block;margin-bottom:2px;}
+
+/* KOSTEN */
+.kosten-totaal-banner{background:var(--accent);color:var(--accent-text);border-radius:var(--radius);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.kosten-totaal-label{font-size:12px;opacity:.7;}
+.kosten-totaal-amt{font-size:26px;font-weight:600;}
+.kosten-accordion{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
+.kosten-acc-header{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg1);}
+.kosten-acc-header:active{background:var(--bg2);}
+.kosten-acc-icon{font-size:16px;flex-shrink:0;}
+.kosten-acc-naam{flex:1;font-size:13px;font-weight:500;}
+.kosten-acc-amt{font-size:13px;font-weight:600;}
+.kosten-acc-arrow{font-size:12px;color:var(--text3);margin-left:6px;transition:transform .2s;}
+.kosten-acc-arrow.open{transform:rotate(90deg);}
+.kosten-acc-body{display:none;padding:10px 14px;border-top:0.5px solid var(--border);}
+.kosten-acc-body.open{display:block;}
+.kosten-sub-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;font-size:12px;border-bottom:0.5px solid var(--border);}
+.kosten-sub-row:last-child{border:none;font-weight:500;padding-top:8px;font-size:13px;}
+.kosten-sub-naam{color:var(--text2);flex:1;padding-right:8px;}
+.kosten-sub-onderbouwing{font-size:11px;color:var(--text3);}
+.kosten-sub-amt{font-weight:500;flex-shrink:0;}
+
+/* LOADING */
+.loading-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:13px;padding:8px 0;}
 .dots{display:flex;gap:4px;}
-.dots span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:blink 1.2s infinite;}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:blink 1.2s infinite;}
 .dots span:nth-child(2){animation-delay:.25s;}
 .dots span:nth-child(3){animation-delay:.5s;}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.loading-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:14px;padding:8px 0;}
-.empty{text-align:center;padding:40px 20px;color:var(--text3);}
-.empty svg{width:48px;height:48px;stroke:var(--text3);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px;display:block;}
-.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--accent-text);padding:10px 18px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:999;white-space:nowrap;}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.progress-bar-wrap{background:var(--bg2);border-radius:99px;height:6px;margin:10px 0;overflow:hidden;}
+.progress-wrap{background:var(--bg2);border-radius:99px;height:4px;margin:8px 0;overflow:hidden;}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
 
-/* LOGIN */
-.login-logo{text-align:center;margin-bottom:32px;}
-.login-logo .icon{font-size:48px;margin-bottom:8px;}
-.login-logo h1{font-size:22px;font-weight:700;}
-.login-logo p{font-size:14px;color:var(--text3);margin-top:4px;}
-.login-card{background:var(--bg2);border-radius:var(--radius);padding:20px;}
-.login-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;}
-.login-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;border-radius:6px;font-family:inherit;color:var(--text2);}
-.login-tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty p{font-size:13px;line-height:1.6;}
+
+/* RAPPORT */
+.rapport-card{background:var(--bg1);border-radius:var(--radius);padding:16px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
+.rapport-card h2{font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;}
+.rapport-card h3{font-size:14px;font-weight:600;margin:12px 0 4px;}
+.rapport-card table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
+.rapport-card td{border:0.5px solid var(--border);padding:6px 8px;}
 
 /* BAG */
 .bag-wrap{position:relative;}
-.bag-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:100;max-height:220px;overflow-y:auto;margin-top:3px;}
-.bag-item{padding:10px 13px;font-size:14px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
-.bag-item:active{background:var(--bg2);}
-.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:6px;font-weight:500;}
+.bag-dd{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:200;max-height:200px;overflow-y:auto;margin-top:2px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.bag-dd-item{padding:10px 13px;font-size:13px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
+.bag-dd-item:active{background:var(--bg2);}
+.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:5px;font-weight:500;}
 .bag-badge.fail{background:var(--amber-bg);color:var(--amber-text);}
 
-/* GEVEL UPLOAD */
-.gevel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.gevel-card{border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;}
-.gevel-card.heeft-fotos{border-color:var(--green-text);}
-.gevel-card.analysed{border-color:var(--blue-text);}
-.gevel-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
-.gevel-naam{font-size:13px;font-weight:600;}
-.gevel-count{font-size:11px;color:var(--text3);}
-.gevel-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;max-height:80px;overflow:hidden;}
-.gevel-preview img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
-.gevel-placeholder{background:var(--bg2);display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;font-size:24px;color:var(--text3);}
+/* TOAST */
+.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:var(--accent-text);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
 
-/* ELEMENT CARDS */
-.element-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
-.element-header{padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-bottom:0.5px solid var(--border);}
-.element-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
-.element-info{flex:1;}
-.element-naam{font-size:14px;font-weight:600;margin-bottom:2px;}
-.element-meta{font-size:12px;color:var(--text3);}
-.element-body{padding:12px 14px;}
-.element-body textarea{font-size:13px;min-height:60px;}
-.conditie-row{display:flex;gap:6px;margin-bottom:10px;}
-.conditie-btn{flex:1;padding:6px 4px;border:0.5px solid var(--border2);border-radius:6px;background:none;cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;text-align:center;color:var(--text2);}
-.conditie-btn.sel-1{background:var(--green-bg);color:var(--green-text);border-color:transparent;}
-.conditie-btn.sel-2{background:var(--amber-bg);color:var(--amber-text);border-color:transparent;}
-.conditie-btn.sel-3{background:var(--orange-bg);color:var(--orange-text);border-color:transparent;}
-.conditie-btn.sel-4{background:var(--red-bg);color:var(--red-text);border-color:transparent;}
-.conditie-btn.sel-5{background:var(--red-bg);color:#501313;border-color:var(--red-text);}
-.kosten-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
-.kosten-row input{font-size:14px;}
-.foto-mini-grid{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
-.foto-mini{width:48px;height:48px;border-radius:6px;object-fit:cover;border:0.5px solid var(--border);}
-.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--blue-bg);color:var(--blue-text);padding:2px 8px;border-radius:99px;margin-bottom:6px;}
+/* SYNC */
+.sync-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ISOLATIE */
-.isolatie-card{background:var(--bg2);border-radius:var(--radius-sm);padding:12px;margin-top:8px;}
-.isolatie-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
-.isolatie-label{font-size:13px;color:var(--text2);}
-.isolatie-val{font-size:13px;font-weight:500;}
-
-/* KOSTENRAMING */
-.kosten-totaal-card{background:var(--accent);color:var(--accent-text);border-radius:var(--radius);padding:16px;margin-bottom:16px;text-align:center;}
-.kosten-totaal-label{font-size:13px;opacity:.7;margin-bottom:4px;}
-.kosten-totaal-bedrag{font-size:32px;font-weight:700;}
-.kosten-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
-.kosten-item-naam{color:var(--text2);}
-.kosten-item-bedrag{font-weight:600;}
-
-/* RAPPORT */
-.rapport-card{background:var(--bg2);border-radius:var(--radius);padding:14px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
-
-/* OBJECTS */
-.obj-item{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
-.obj-item:active{background:var(--bg2);}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-text);display:inline-block;margin-right:4px;}
-.sync-dot.offline{background:var(--amber-text);}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);}
-.modal-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bot));max-height:85vh;overflow-y:auto;}
-.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;}
-.photo-grid-modal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
-.photo-item-modal{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:0.5px solid var(--border);}
-.photo-item-modal img{width:100%;height:100%;object-fit:cover;}
-.photo-del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;background:var(--bg2);margin-bottom:12px;transition:background .15s,border-color .15s;}
-.upload-zone.drag-over{background:var(--blue-bg);border-color:var(--blue-text);}
+/* RESPONSIVE - mobile */
+@media(max-width:700px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);width:260px;}
+  #sidebar.open{transform:translateX(0);}
+  .topbar-menu-btn{display:flex;}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
+  .sidebar-overlay.show{display:block;}
+}
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="topbar" id="topbar" style="display:none;">
-    <div>
-      <div class="topbar-title" id="topbar-title">VastgoedInspectie</div>
-      <div class="topbar-sub" id="topbar-sub"></div>
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-header">
+      <div class="sb-object-name" id="sb-object-name">VastgoedInspectie</div>
+      <div class="sb-object-sub" id="sb-object-sub">Selecteer een object</div>
+      <select class="sb-opname-select" id="sb-opname-select" onchange="switchOpname(this.value)" style="display:none;"></select>
     </div>
-    <div class="topbar-right">
-      <span id="sync-status" style="font-size:11px;color:var(--text3);"></span>
-      <button class="icon-btn" onclick="uitloggen()" title="Uitloggen" style="font-size:13px;">↩</button>
+    <nav class="sb-nav" id="sb-nav">
+      <div class="sb-section-label">Navigatie</div>
+      <div class="sb-item active" onclick="navTo('objects')" data-page="objects">
+        <div class="sb-num">🏢</div>Objecten
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sync-indicator" id="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-text">Niet verbonden</span>
+      </div>
+      <div class="sb-user" id="sb-user" style="margin-top:6px;"></div>
+      <button onclick="uitloggen()" style="margin-top:8px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:0;">Uitloggen</button>
     </div>
   </div>
 
-  <div class="tabbar" id="tabbar" style="display:none;">
-    <button class="tabbar-btn active" data-page="objects" onclick="showPage('objects')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>Objecten
-    </button>
-    <button class="tabbar-btn" data-page="opname" onclick="showPage('opname')">
-      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Opname
-    </button>
-    <button class="tabbar-btn" data-page="elementen" onclick="showPage('elementen')">
-      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>Bevindingen
-    </button>
-    <button class="tabbar-btn" data-page="kosten" onclick="showPage('kosten')">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Kosten
-    </button>
-    <button class="tabbar-btn" data-page="rapport" onclick="showPage('rapport')">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Rapport
-    </button>
-    <button class="tabbar-btn" data-page="settings" onclick="showPage('settings')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Instellingen
-    </button>
-  </div>
-
-  <div class="content">
-
-    <!-- LOGIN -->
-    <div id="page-login" class="page active">
-      <div class="login-logo">
-        <div class="icon">🏢</div>
-        <h1>VastgoedInspectie</h1>
-        <p>Professionele bouwkundige opnametool</p>
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-chapter">
+        <div class="topbar-chapter-title" id="topbar-title">VastgoedInspectie</div>
+        <div class="topbar-chapter-sub" id="topbar-sub">Professionele bouwkundige inspectietool</div>
       </div>
-      <div class="login-card">
-        <div class="login-tabs">
-          <button class="login-tab active" onclick="switchLoginTab('inloggen')">Inloggen</button>
-          <button class="login-tab" onclick="switchLoginTab('registreren')">Registreren</button>
-        </div>
-        <div id="login-form">
-          <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
-          <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password"/></div>
-          <button class="btn btn-dark btn-full" onclick="inloggen()">Inloggen</button>
-          <div id="login-error" style="font-size:13px;color:var(--red-text);margin-top:10px;text-align:center;"></div>
-        </div>
-        <div id="register-form" style="display:none;">
-          <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
-          <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl"/></div>
-          <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens"/></div>
-          <button class="btn btn-dark btn-full" onclick="registreren()">Account aanmaken</button>
-          <div id="reg-error" style="font-size:13px;color:var(--red-text);margin-top:10px;text-align:center;"></div>
-        </div>
+      <div class="topbar-nav">
+        <button class="icon-btn" onclick="navTo('settings')" title="Instellingen">⚙</button>
       </div>
     </div>
 
-    <!-- OBJECTEN -->
-    <div id="page-objects" class="page">
-      <div class="section-title">Mijn objecten</div>
-      <div id="objects-list"></div>
-      <button class="btn btn-dark btn-full" onclick="showPage('object-form');clearForm()">+ Nieuw object aanmaken</button>
-    </div>
+    <div id="content">
 
-    <!-- OBJECT FORM -->
-    <div id="page-object-form" class="page">
-      <div class="section-title">Objectgegevens</div>
-      <div class="field">
-        <label>Adres zoeken (BAG)</label>
-        <div class="bag-wrap">
-          <input type="text" id="f-bag-search" placeholder="Begin te typen: Kerkstraat 12..." autocomplete="off" oninput="bagSuggest(this.value)"/>
-          <div id="bag-dropdown" class="bag-dropdown" style="display:none;"></div>
+      <!-- LOGIN -->
+      <div id="page-login" class="page active">
+        <div class="login-logo">
+          <div class="login-logo-icon">🏢</div>
+          <h1>VastgoedInspectie</h1>
+          <p>Professionele bouwkundige inspectietool</p>
         </div>
-        <div id="bag-status"></div>
-      </div>
-      <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Automatisch ingevuld"/></div>
-      <div class="grid2">
-        <div class="field"><label>Type</label>
-          <select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select>
+        <div class="login-card">
+          <div class="login-tabs">
+            <button class="login-tab active" onclick="switchLoginTab('in')">Inloggen</button>
+            <button class="login-tab" onclick="switchLoginTab('reg')">Registreren</button>
+          </div>
+          <div id="login-in">
+            <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
+            <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password"/></div>
+            <button class="btn btn-dark btn-full" onclick="inloggen()">Inloggen</button>
+            <div id="login-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
+          </div>
+          <div id="login-reg" style="display:none;">
+            <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
+            <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl"/></div>
+            <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens"/></div>
+            <button class="btn btn-dark btn-full" onclick="registreren()">Account aanmaken</button>
+            <div id="reg-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
+          </div>
         </div>
-        <div class="field"><label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-jaar" placeholder="Uit BAG"/></div>
       </div>
-      <div class="grid2">
-        <div class="field"><label>Opp. m² <span id="f-opp-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-opp" placeholder="Uit BAG"/></div>
-        <div class="field"><label>Eenheden</label><input type="number" id="f-eenheden" placeholder="12"/></div>
-      </div>
-      <div class="field"><label>Postcode &amp; plaats</label><input type="text" id="f-postcode" placeholder="Uit BAG"/></div>
-      <div class="field"><label>Context / bijzonderheden</label><textarea id="f-context" placeholder="VvE, monumentaal, recent dak vervangen..."></textarea></div>
-      <div class="btn-row">
-        <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
-        <button class="btn btn-light" onclick="showPage('objects')">Annuleren</button>
-      </div>
-    </div>
 
-    <!-- OPNAME (FOTO'S PER GEVEL) -->
-    <div id="page-opname" class="page">
-      <div id="opname-no-object" class="empty">
-        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p>Selecteer eerst een object</p>
+      <!-- OBJECTEN -->
+      <div id="page-objects" class="page">
+        <div class="section-title">Mijn objecten</div>
+        <div id="objects-list"></div>
+        <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
-      <div id="opname-content" style="display:none;">
-        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">Upload per gevel overzichtsfoto's. De AI analyseert materialen, hoeveelheden en gebreken per gevel.</p>
-        <div class="gevel-grid" id="gevel-grid"></div>
-        <button class="btn btn-dark btn-full" id="analyseer-btn" onclick="analyseerAlleGevels()" style="display:none;">✦ Analyseer alle gevels met AI</button>
-      </div>
-    </div>
 
-    <!-- BEVINDINGEN -->
-    <div id="page-elementen" class="page">
-      <div id="elementen-no-object" class="empty">
-        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-        <p>Analyseer eerst de gevels<br>via het Opname tabblad</p>
-      </div>
-      <div id="elementen-content" style="display:none;">
-        <div id="elementen-loading" style="display:none;">
-          <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="el-loading-status">Analyseren...</span></div>
-          <div class="progress-bar-wrap"><div class="progress-bar" id="el-progress" style="width:0%"></div></div>
+      <!-- OBJECT FORM -->
+      <div id="page-object-form" class="page">
+        <div class="section-title">Objectgegevens</div>
+        <div class="field">
+          <label>Adres zoeken (BAG)</label>
+          <div class="bag-wrap">
+            <input type="text" id="f-bag" placeholder="Kerkstraat 12 Nijmegen..." autocomplete="off" oninput="bagSuggest(this.value)"/>
+            <div id="bag-dd" class="bag-dd" style="display:none;"></div>
+          </div>
+          <div id="bag-status"></div>
         </div>
-        <div id="elementen-list"></div>
-        <button class="btn btn-light btn-full btn-sm" onclick="voegElementToe()" style="margin-top:8px;">+ Bevinding handmatig toevoegen</button>
-      </div>
-    </div>
-
-    <!-- KOSTEN -->
-    <div id="page-kosten" class="page">
-      <div id="kosten-no-object" class="empty">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        <p>Voeg eerst bevindingen toe</p>
-      </div>
-      <div id="kosten-content" style="display:none;">
-        <div class="kosten-totaal-card">
-          <div class="kosten-totaal-label">Totale kostenraming indicatief</div>
-          <div class="kosten-totaal-bedrag" id="kosten-totaal">€ 0</div>
-        </div>
-        <div class="section-title">Per bevinding</div>
-        <div id="kosten-lijst"></div>
-        <div class="btn-row" style="margin-top:16px;">
-          <button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- RAPPORT -->
-    <div id="page-rapport" class="page">
-      <div id="rapport-empty" class="empty">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        <p>Voeg bevindingen toe<br>om een rapport te genereren</p>
-      </div>
-      <div id="rapport-loading" style="display:none;">
-        <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-status">Rapport genereren...</span></div>
-        <div class="progress-bar-wrap"><div class="progress-bar" id="rapport-progress" style="width:0%"></div></div>
-      </div>
-      <div id="rapport-content" style="display:none;">
-        <div id="rapport-type-badge" style="margin-bottom:8px;"></div>
-        <div id="rapport-text" class="rapport-card"></div>
-        <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn btn-dark btn-sm" onclick="generateRapport('kort')">↺ Kort</button>
-          <button class="btn btn-dark btn-sm" onclick="generateRapport('uitgebreid')">↺ Uitgebreid</button>
-          <button class="btn btn-light btn-sm" onclick="copyRapport()">Kopieer</button>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>
-          <button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>
-          <button class="btn btn-light btn-sm" onclick="downloadRapportExcel()">⬇ Excel</button>
-        </div>
-      </div>
-      <div style="margin-top:16px;" id="rapport-generate-btns">
+        <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Automatisch ingevuld"/></div>
         <div class="grid2">
-          <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport</button>
-          <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport</button>
+          <div class="field"><label>Type object</label>
+            <select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select>
+          </div>
+          <div class="field"><label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-jaar" placeholder="Uit BAG"/></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Oppervlakte m² <span id="f-opp-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-opp" placeholder="Uit BAG"/></div>
+          <div class="field"><label>Eenheden</label><input type="number" id="f-eenheden" placeholder="12"/></div>
+        </div>
+        <div class="field"><label>Postcode &amp; plaats</label><input type="text" id="f-postcode" placeholder="Uit BAG"/></div>
+        <div class="field"><label>Context / bijzonderheden</label><textarea id="f-context" placeholder="VvE, monumentaal pand, recent dak vervangen..."></textarea></div>
+        <div class="btn-row">
+          <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
+          <button class="btn btn-light" onclick="navTo('objects')">Annuleren</button>
         </div>
       </div>
-    </div>
 
-    <!-- SETTINGS -->
-    <div id="page-settings" class="page">
-      <div style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
-        <div style="font-size:13px;color:var(--text2);">Ingelogd als</div>
-        <div id="user-email" style="font-weight:600;margin-top:2px;"></div>
-      </div>
-      <div class="section-title">Anthropic API-sleutel</div>
-      <div class="field"><input type="password" id="api-key-input" placeholder="sk-ant-..."/></div>
-      <div class="btn-row" style="margin-bottom:8px;">
-        <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
-        <button class="btn btn-light btn-sm" onclick="document.getElementById('api-key-input').type=document.getElementById('api-key-input').type==='password'?'text':'password'">Toon</button>
-      </div>
-      <div id="api-key-status" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></div>
-      <div class="section-title">Worker URL</div>
-      <div class="field"><input type="text" id="worker-url-input" placeholder="https://....workers.dev"/></div>
-      <div class="btn-row" style="margin-bottom:6px;">
-        <button class="btn btn-dark btn-sm" onclick="saveWorkerUrl()">Opslaan</button>
-        <button class="btn btn-light btn-sm" onclick="testWorker()">Test</button>
-      </div>
-      <div id="worker-status" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></div>
-      <button class="btn btn-light btn-full btn-sm" style="color:var(--red-text);" onclick="uitloggen()">Uitloggen</button>
-    </div>
+      <!-- HOOFDSTUK PAGINA'S (1-8 + kosten + rapport) worden dynamisch geladen -->
+      <div id="page-chapter" class="page"></div>
 
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page">
+        <div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
+          <div style="font-size:12px;color:var(--text3);">Ingelogd als</div>
+          <div id="settings-user" style="font-weight:600;font-size:14px;margin-top:2px;"></div>
+        </div>
+        <div class="section-title">Anthropic API-sleutel</div>
+        <div class="field"><input type="password" id="api-key-inp" placeholder="sk-ant-..."/></div>
+        <div class="btn-row" style="margin-bottom:6px;">
+          <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
+          <button class="btn btn-light btn-sm" onclick="togglePass('api-key-inp')">Toon</button>
+        </div>
+        <div id="api-status" style="font-size:12px;color:var(--text3);margin-bottom:16px;"></div>
+        <div class="section-title">Worker URL</div>
+        <div class="field"><input type="text" id="worker-inp" placeholder="https://....workers.dev"/></div>
+        <div class="btn-row" style="margin-bottom:6px;">
+          <button class="btn btn-dark btn-sm" onclick="saveWorker()">Opslaan</button>
+          <button class="btn btn-light btn-sm" onclick="testWorker()">Test verbinding</button>
+        </div>
+        <div id="worker-status" style="font-size:12px;color:var(--text3);margin-bottom:20px;"></div>
+        <button class="btn btn-light btn-full btn-sm" style="color:var(--red-text);" onclick="uitloggen()">Uitloggen</button>
+      </div>
+
+    </div>
   </div>
 </div>
-
-<!-- GEVEL MODAL -->
-<div id="gevel-modal" class="modal-overlay" style="display:none;" onclick="sluitGevelModal(event)">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div class="modal-title" id="gevel-modal-title">Gevel foto's</div>
-      <button onclick="sluitGevelModal()" style="background:var(--bg2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;">×</button>
-    </div>
-    <div class="upload-zone" id="upload-zone"
-      onclick="document.getElementById('gevel-foto-input').click()"
-      ondragover="event.preventDefault();this.classList.add('drag-over')"
-      ondragleave="this.classList.remove('drag-over')"
-      ondrop="handleDrop(event)">
-      <div style="font-size:28px;margin-bottom:4px;">📷</div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:2px;">Foto's toevoegen</div>
-      <div style="font-size:12px;color:var(--text3);">Tik om te kiezen · Sleep foto's hierheen</div>
-      <input type="file" id="gevel-foto-input" accept="image/*" multiple style="display:none;" onchange="handleGevelFotos(event)"/>
-    </div>
-    <div class="photo-grid-modal" id="gevel-modal-grid"></div>
-    <button class="btn btn-dark btn-full" onclick="analyseerGevel()" id="gevel-analyseer-btn" style="display:none;">✦ Analyseer deze gevel</button>
-    <button class="btn btn-light btn-full btn-sm" style="margin-top:8px;" onclick="sluitGevelModal()">Sluiten</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, orderBy, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc,collection,query,orderBy,onSnapshot,deleteDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",
-  authDomain: "inspectie-app-26ca2.firebaseapp.com",
-  projectId: "inspectie-app-26ca2",
-  storageBucket: "inspectie-app-26ca2.firebasestorage.app",
-  messagingSenderId: "668843955807",
-  appId: "1:668843955807:web:bd8437df3bf233d931edea"
-};
+const FB={apiKey:"AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",authDomain:"inspectie-app-26ca2.firebaseapp.com",projectId:"inspectie-app-26ca2",storageBucket:"inspectie-app-26ca2.firebasestorage.app",messagingSenderId:"668843955807",appId:"1:668843955807:web:bd8437df3bf233d931edea"};
+const app=initializeApp(FB);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const fbApp = initializeApp(firebaseConfig);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
-
-// GEVELS definitie
-const GEVELS = [
-  { id: 'voorgevel', naam: 'Voorgevel', icon: '🏠' },
-  { id: 'achtergevel', naam: 'Achtergevel', icon: '🏠' },
-  { id: 'linkergevel', naam: 'Linkerzijgevel', icon: '🏠' },
-  { id: 'rechtergevel', naam: 'Rechterzijgevel', icon: '🏠' },
-  { id: 'dak', naam: 'Dak', icon: '🏗' },
-  { id: 'interieur', naam: 'Interieur / overig', icon: '🏢' },
+// HOOFDSTUKKEN definitie
+const CHAPTERS=[
+  {id:'objectgegevens',nr:1,naam:'Objectgegevens',icon:'🏢'},
+  {id:'gevels',nr:2,naam:'Gevels & exterieur',icon:'🧱',gevels:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
+  {id:'dak',nr:3,naam:'Dak & dakrand',icon:'🏗',gevels:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
+  {id:'kozijnen',nr:4,naam:'Kozijnen & beglazing',icon:'🪟',gevels:['Voorzijde','Achterzijde','Zijkanten']},
+  {id:'constructie',nr:5,naam:'Constructie & isolatie',icon:'🏠'},
+  {id:'installaties',nr:6,naam:'Installaties',icon:'⚙️'},
+  {id:'binnenzijde',nr:7,naam:'Binnenzijde',icon:'🏢'},
+  {id:'buitenruimte',nr:8,naam:'Buitenruimte',icon:'🌳'},
 ];
-
-const CONDITIE_LABELS = ['', 'Goed', 'Redelijk', 'Matig', 'Slecht', 'Zeer slecht'];
+const CONDITIE=['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
 
 // STATE
-let currentUser = null;
-let currentObjectId = null;
-let objects = [];
-let gevelFotos = {}; // { gevelId: [{dataUrl, label}] }
-let elementen = []; // bevindingen
-let activeGevelId = null;
-let rapportTekst = '';
+let currentUser=null;
+let objects=[];
+let currentObjId=null;
+let currentOpnameId=null;
+let opnames={};// {opnameId:{fotos:{},elementen:[]}}
+let currentChapter='gevels';
+let currentSubTab=null;
+let currentObj=null;
+let rapportTekst='';
 
-// FIREBASE PADEN
-const objCol = () => collection(db, 'objects');
-const objDoc = (id) => doc(db, 'objects', id);
-const dataDoc = (objId, type) => doc(db, 'objects', objId, 'data', type);
+// FIREBASE HELPERS
+const objCol=()=>collection(db,'objects');
+const objDoc=(id)=>doc(db,'objects',id);
+const opnameDoc=(oid,opnId)=>doc(db,'objects',oid,'opnames',opnId);
+const dataDoc=(oid,opnId,type)=>doc(db,'objects',oid,'opnames',opnId,'data',type);
 
 // AUTH
-onAuthStateChanged(auth, user => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('topbar').style.display = 'flex';
-    document.getElementById('tabbar').style.display = 'flex';
-    document.getElementById('user-email').textContent = user.email;
+onAuthStateChanged(auth,user=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('sb-user').textContent=user.displayName||user.email;
+    document.getElementById('settings-user').textContent=user.email;
     initSettings();
-    laadObjecten();
-    showPage('objects');
-  } else {
-    currentUser = null;
-    document.getElementById('topbar').style.display = 'none';
-    document.getElementById('tabbar').style.display = 'none';
-    showPage('login');
+    loadObjects();
+    showAppUI(true);
+    navTo('objects');
+  }else{
+    currentUser=null;
+    showAppUI(false);
+    navTo('login');
   }
 });
 
-window.switchLoginTab = (tab) => {
-  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='inloggen')||(i===1&&tab==='registreren')));
-  document.getElementById('login-form').style.display = tab==='inloggen'?'block':'none';
-  document.getElementById('register-form').style.display = tab==='registreren'?'block':'none';
+function showAppUI(on){
+  document.getElementById('sidebar').style.display=on?'':'none';
+  document.getElementById('topbar').style.display=on?'':'none';
+}
+
+window.switchLoginTab=tab=>{
+  document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='in')||(i===1&&tab==='reg')));
+  document.getElementById('login-in').style.display=tab==='in'?'block':'none';
+  document.getElementById('login-reg').style.display=tab==='reg'?'block':'none';
 };
 
-window.inloggen = async () => {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  document.getElementById('login-error').textContent = '';
-  try { await signInWithEmailAndPassword(auth, email, pass); }
-  catch(e) { document.getElementById('login-error').textContent = vertaalFout(e.code); }
+window.inloggen=async()=>{
+  const e=document.getElementById('login-email').value.trim();
+  const p=document.getElementById('login-pass').value;
+  document.getElementById('login-err').textContent='';
+  try{await signInWithEmailAndPassword(auth,e,p);}
+  catch(err){document.getElementById('login-err').textContent=vertaalFout(err.code);}
 };
 
-window.registreren = async () => {
-  const naam = document.getElementById('reg-naam').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass = document.getElementById('reg-pass').value;
-  document.getElementById('reg-error').textContent = '';
-  if (!naam) { document.getElementById('reg-error').textContent = 'Vul je naam in'; return; }
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, { displayName: naam });
-  } catch(e) { document.getElementById('reg-error').textContent = vertaalFout(e.code); }
+window.registreren=async()=>{
+  const naam=document.getElementById('reg-naam').value.trim();
+  const e=document.getElementById('reg-email').value.trim();
+  const p=document.getElementById('reg-pass').value;
+  document.getElementById('reg-err').textContent='';
+  if(!naam){document.getElementById('reg-err').textContent='Vul je naam in';return;}
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,e,p);
+    await updateProfile(cred.user,{displayName:naam});
+  }catch(err){document.getElementById('reg-err').textContent=vertaalFout(err.code);}
 };
 
-window.uitloggen = async () => {
+window.uitloggen=async()=>{
   await signOut(auth);
-  currentObjectId = null; gevelFotos = {}; elementen = []; objects = [];
+  currentObjId=null;currentOpnameId=null;objects=[];opnames={};
 };
 
-function vertaalFout(code) {
-  const map = {'auth/invalid-email':'Ongeldig e-mailadres','auth/user-not-found':'Geen account gevonden','auth/wrong-password':'Onjuist wachtwoord','auth/invalid-credential':'E-mail of wachtwoord onjuist','auth/email-already-in-use':'E-mailadres al in gebruik','auth/weak-password':'Wachtwoord minimaal 6 tekens'};
-  return map[code] || 'Er ging iets mis';
+function vertaalFout(c){
+  const m={'auth/invalid-email':'Ongeldig e-mailadres','auth/user-not-found':'Geen account gevonden','auth/wrong-password':'Onjuist wachtwoord','auth/invalid-credential':'E-mail of wachtwoord onjuist','auth/email-already-in-use':'E-mailadres al in gebruik','auth/weak-password':'Wachtwoord minimaal 6 tekens'};
+  return m[c]||'Er ging iets mis';
 }
 
-// OBJECTEN
-async function laadObjecten() {
-  document.getElementById('sync-status').innerHTML = '<span class="sync-dot offline"></span>Laden...';
-  try {
-    onSnapshot(query(objCol(), orderBy('aangemaaktOp','desc')), snap => {
-      objects = snap.docs.map(d => ({id:d.id,...d.data()}));
-      renderObjects();
-      document.getElementById('sync-status').innerHTML = '<span class="sync-dot"></span>Sync';
-    });
-  } catch(e) { document.getElementById('sync-status').textContent = '⚠ Offline'; }
+// OBJECTS
+function loadObjects(){
+  setSyncStatus('syncing','Laden...');
+  onSnapshot(query(objCol(),orderBy('aangemaaktOp','desc')),snap=>{
+    objects=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderObjects();
+    setSyncStatus('ok','Gesynchroniseerd');
+  });
 }
 
-function renderObjects() {
-  const list = document.getElementById('objects-list');
-  if (!objects.length) { list.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg><p>Nog geen objecten.</p></div>'; return; }
-  list.innerHTML = objects.map(o => `
+function renderObjects(){
+  const list=document.getElementById('objects-list');
+  if(!objects.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen objecten.<br>Maak er een aan.</p></div>';
+    return;
+  }
+  list.innerHTML=objects.map(o=>`
     <div class="obj-item" onclick="selectObject('${o.id}')">
-      <div style="flex:1;">
-        <div style="font-weight:600;font-size:15px;">${o.naam||'Naamloos'}</div>
-        <div style="font-size:12px;color:var(--text3);">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
+      <div class="obj-avatar">${o.type==='Eengezinswoning'?'🏠':o.type==='Appartementencomplex'?'🏢':o.type==='Kantoorpand'?'🏗':'🏠'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.naam||'Naamloos'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        ${o.heeftRapport?'<span class="badge badge-green" style="font-size:10px;">rapport</span>':''}
-        <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">✎</button>
-        <button onclick="event.stopPropagation();verwijderObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">🗑</button>
+        <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Bewerken">✎</button>
+        <button onclick="event.stopPropagation();deleteObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Verwijderen">🗑</button>
         <span style="color:var(--text3);font-size:18px;">›</span>
       </div>
     </div>`).join('');
 }
 
-window.selectObject = async (id) => {
-  currentObjectId = id;
-  gevelFotos = {};
-  elementen = [];
-  rapportTekst = '';
-  updateTopbar();
-  // Laad data
-  try {
-    const gSnap = await getDoc(dataDoc(id, 'gevels'));
-    if (gSnap.exists()) gevelFotos = gSnap.data().gevels || {};
-    const eSnap = await getDoc(dataDoc(id, 'elementen'));
-    if (eSnap.exists()) elementen = eSnap.data().lijst || [];
-    const rSnap = await getDoc(dataDoc(id, 'rapport'));
-    if (rSnap.exists()) rapportTekst = rSnap.data().tekst || '';
-  } catch(e) {}
-  renderOpname();
-  renderElementen();
-  renderKosten();
-  renderRapportPagina();
-  showPage('opname');
+window.newObject=()=>{
+  clearObjectForm();
+  document.getElementById('page-object-form').dataset.editId='';
+  navTo('object-form');
 };
 
-window.saveObject = async () => {
-  const naam = document.getElementById('f-naam').value.trim();
-  if (!naam) { showToast('Vul een naam in'); return; }
-  const editId = document.getElementById('page-object-form').dataset.editId;
-  const id = editId || Date.now().toString();
-  const bestaand = objects.find(o => o.id === editId);
-  await setDoc(objDoc(id), {
-    naam, type: document.getElementById('f-type').value,
-    jaar: document.getElementById('f-jaar').value,
-    opp: document.getElementById('f-opp').value,
-    eenheden: document.getElementById('f-eenheden').value,
-    postcode: document.getElementById('f-postcode').value,
-    context: document.getElementById('f-context').value,
-    aangemaaktOp: bestaand?.aangemaaktOp || serverTimestamp(),
-    aangemaaktDoor: bestaand?.aangemaaktDoor || (currentUser?.displayName || currentUser?.email || ''),
-    heeftRapport: bestaand?.heeftRapport || false,
+window.editObject=id=>{
+  const o=objects.find(x=>x.id===id);if(!o)return;
+  clearObjectForm();
+  ['naam','jaar','opp','eenheden','postcode','context'].forEach(k=>{const el=document.getElementById('f-'+k);if(el)el.value=o[k]||'';});
+  document.getElementById('f-type').value=o.type||'';
+  document.getElementById('f-bag').value=o.naam||'';
+  document.getElementById('page-object-form').dataset.editId=id;
+  navTo('object-form');
+};
+
+window.deleteObject=async id=>{
+  if(!confirm('Object verwijderen?'))return;
+  await deleteDoc(objDoc(id));
+  if(currentObjId===id){currentObjId=null;currentOpnameId=null;currentObj=null;resetSidebar();}
+  showToast('Object verwijderd');
+};
+
+window.saveObject=async()=>{
+  const naam=document.getElementById('f-naam').value.trim();
+  if(!naam){showToast('Vul een naam in');return;}
+  const editId=document.getElementById('page-object-form').dataset.editId;
+  const id=editId||Date.now().toString();
+  const bestaand=objects.find(o=>o.id===editId);
+  await setDoc(objDoc(id),{
+    naam,type:document.getElementById('f-type').value,
+    jaar:document.getElementById('f-jaar').value,
+    opp:document.getElementById('f-opp').value,
+    eenheden:document.getElementById('f-eenheden').value,
+    postcode:document.getElementById('f-postcode').value,
+    context:document.getElementById('f-context').value,
+    aangemaaktOp:bestaand?.aangemaaktOp||serverTimestamp(),
+    aangemaaktDoor:bestaand?.aangemaaktDoor||(currentUser?.displayName||currentUser?.email||''),
   });
   showToast('Object opgeslagen');
-  showPage('objects');
+  navTo('objects');
 };
 
-window.editObject = (id) => {
-  const o = objects.find(x => x.id === id);
-  if (!o) return;
-  ['naam','jaar','opp','eenheden','postcode','context'].forEach(k => { const el = document.getElementById('f-'+k); if(el) el.value = o[k]||''; });
-  document.getElementById('f-type').value = o.type||'';
-  document.getElementById('f-bag-search').value = o.naam||'';
-  document.getElementById('bag-status').innerHTML = '';
-  document.getElementById('page-object-form').dataset.editId = id;
-  showPage('object-form');
+function clearObjectForm(){
+  ['f-naam','f-jaar','f-opp','f-eenheden','f-postcode','f-context','f-bag'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-type').selectedIndex=0;
+  document.getElementById('bag-status').innerHTML='';
+  document.getElementById('f-jaar-badge').textContent='';
+  document.getElementById('f-opp-badge').textContent='';
+  hideBagDd();
+}
+
+// OPNAMES
+window.selectObject=async id=>{
+  currentObjId=id;
+  currentObj=objects.find(o=>o.id===id);
+  // Laad opnames
+  const snap=await getDoc(doc(db,'objects',id,'meta','opnames'));
+  let opnameList=snap.exists()?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+  // Sla op als er nog geen is
+  if(!snap.exists()) await setDoc(doc(db,'objects',id,'meta','opnames'),{lijst:opnameList});
+  updateSidebar(opnameList);
+  currentOpnameId=opnameList[0].id;
+  await loadOpnameData(id,currentOpnameId);
+  document.getElementById('sb-opname-select').style.display='block';
+  navTo('chapter');
+  renderChapter('gevels');
 };
 
-window.verwijderObject = async (id) => {
-  if (!confirm('Object verwijderen?')) return;
-  await deleteDoc(objDoc(id));
-  if (currentObjectId === id) currentObjectId = null;
-  showToast('Verwijderd');
+function updateSidebar(opnameList){
+  // Update topbar
+  document.getElementById('sb-object-name').textContent=currentObj?.naam||'Object';
+  document.getElementById('sb-object-sub').textContent=(currentObj?.type||'')+(currentObj?.jaar?', '+currentObj.jaar:'');
+  // Update opname dropdown
+  const sel=document.getElementById('sb-opname-select');
+  sel.innerHTML=opnameList.map(o=>`<option value="${o.id}">${o.naam} — ${o.datum}</option>`).join('')+'<option value="__nieuw">+ Nieuwe opname</option>';
+  // Update nav
+  const nav=document.getElementById('sb-nav');
+  nav.innerHTML=`
+    <div class="sb-section-label">Objecten</div>
+    <div class="sb-item" onclick="navTo('objects')" data-page="objects"><div class="sb-num">←</div>Terug naar objecten</div>
+    <div class="sb-section-label">Hoofdstukken</div>
+    ${CHAPTERS.map(c=>`<div class="sb-item" onclick="navToChapter('${c.id}')" data-chapter="${c.id}"><div class="sb-num">${c.nr}</div>${c.naam}</div>`).join('')}
+    <div class="sb-section-label">Samenvatting</div>
+    <div class="sb-item" onclick="navToChapter('kosten')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>
+    <div class="sb-item" onclick="navToChapter('rapport')" data-chapter="rapport"><div class="sb-num">📄</div>Rapport genereren</div>`;
+}
+
+function resetSidebar(){
+  document.getElementById('sb-object-name').textContent='VastgoedInspectie';
+  document.getElementById('sb-object-sub').textContent='Selecteer een object';
+  document.getElementById('sb-opname-select').style.display='none';
+  document.getElementById('sb-nav').innerHTML=`<div class="sb-section-label">Navigatie</div><div class="sb-item active" onclick="navTo('objects')" data-page="objects"><div class="sb-num">🏢</div>Objecten</div>`;
+}
+
+window.switchOpname=async val=>{
+  if(val==='__nieuw'){
+    const naam=prompt('Naam voor de nieuwe opname:','Opname 2');
+    if(!naam)return;
+    const snap=await getDoc(doc(db,'objects',currentObjId,'meta','opnames'));
+    const lijst=snap.exists()?snap.data().lijst||[]:[]; 
+    const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
+    lijst.push(nieuw);
+    await setDoc(doc(db,'objects',currentObjId,'meta','opnames'),{lijst});
+    updateSidebar(lijst);
+    currentOpnameId=nieuw.id;
+    document.getElementById('sb-opname-select').value=nieuw.id;
+    opnames[nieuw.id]={fotos:{},elementen:[]};
+    renderChapter(currentChapter);
+    showToast('Nieuwe opname aangemaakt');
+    return;
+  }
+  currentOpnameId=val;
+  await loadOpnameData(currentObjId,val);
+  renderChapter(currentChapter);
 };
 
-window.clearForm = () => {
-  ['f-naam','f-jaar','f-opp','f-eenheden','f-context','f-postcode','f-bag-search'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('f-type').selectedIndex = 0;
-  document.getElementById('bag-status').innerHTML = '';
-  document.getElementById('f-jaar-badge').textContent = '';
-  document.getElementById('f-opp-badge').textContent = '';
-  hideBagDropdown();
-  document.getElementById('page-object-form').dataset.editId = '';
+async function loadOpnameData(objId,opnId){
+  opnames[opnId]=opnames[opnId]||{fotos:{},elementen:[]};
+  try{
+    const fs=await getDoc(dataDoc(objId,opnId,'fotos'));
+    if(fs.exists())opnames[opnId].fotos=fs.data().fotos||{};
+    const es=await getDoc(dataDoc(objId,opnId,'elementen'));
+    if(es.exists())opnames[opnId].elementen=es.data().lijst||[];
+    const rs=await getDoc(dataDoc(objId,opnId,'rapport'));
+    if(rs.exists())rapportTekst=rs.data().tekst||'';
+    else rapportTekst='';
+  }catch(e){}
+}
+
+async function saveOpnameData(){
+  if(!currentObjId||!currentOpnameId)return;
+  const d=opnames[currentOpnameId]||{};
+  await setDoc(dataDoc(currentObjId,currentOpnameId,'fotos'),{fotos:d.fotos||{},bijgewerktOp:serverTimestamp()});
+  await setDoc(dataDoc(currentObjId,currentOpnameId,'elementen'),{lijst:d.elementen||[],bijgewerktOp:serverTimestamp()});
+}
+
+function getOpname(){return opnames[currentOpnameId]||{fotos:{},elementen:[]};}
+
+// NAVIGATIE
+window.navTo=page=>{
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const p=document.getElementById('page-'+page);if(p)p.classList.add('active');
+  const isLogin=page==='login';
+  document.getElementById('sidebar').style.display=isLogin?'none':(currentUser?'flex':'none');
+  document.getElementById('topbar').style.display=isLogin?'none':(currentUser?'flex':'none');
+  document.querySelectorAll(`[data-page="${page}"]`).forEach(el=>el.classList.add('active'));
+  updateTopbar(page);
+  closeSidebar();
 };
 
-// OPNAME
-function renderOpname() {
-  const hasObj = !!currentObjectId;
-  document.getElementById('opname-no-object').style.display = hasObj ? 'none' : 'block';
-  document.getElementById('opname-content').style.display = hasObj ? 'block' : 'none';
-  if (!hasObj) return;
-  const grid = document.getElementById('gevel-grid');
-  grid.innerHTML = GEVELS.map(g => {
-    const fotos = gevelFotos[g.id] || [];
-    const hasF = fotos.length > 0;
-    return `<div class="gevel-card ${hasF?'heeft-fotos':''}" onclick="openGevelModal('${g.id}')">
-      <div class="gevel-header">
-        <span class="gevel-naam">${g.icon} ${g.naam}</span>
-        <span class="gevel-count">${hasF?fotos.length+' foto\'s':'Geen foto\'s'}</span>
-      </div>
-      ${hasF
-        ? `<div class="gevel-preview">${fotos.slice(0,3).map(f=>`<img src="${f.dataUrl}" alt=""/>`).join('')}</div>`
-        : `<div class="gevel-placeholder">📷</div>`
-      }
+window.navToChapter=ch=>{
+  currentChapter=ch;
+  navTo('chapter');
+  if(ch==='kosten')renderKosten();
+  else if(ch==='rapport')renderRapportPagina();
+  else renderChapter(ch);
+  document.querySelectorAll('[data-chapter]').forEach(el=>el.classList.toggle('active',el.dataset.chapter===ch));
+};
+
+function updateTopbar(page){
+  if(page==='chapter'){
+    const ch=currentChapter==='kosten'?{naam:'Kostenraming',icon:'€'}:currentChapter==='rapport'?{naam:'Rapport genereren',icon:'📄'}:CHAPTERS.find(c=>c.id===currentChapter);
+    document.getElementById('topbar-title').textContent=(ch?.icon||'')+' '+( ch?.naam||'Hoofdstuk');
+    document.getElementById('topbar-sub').textContent=currentObj?.naam||'';
+  }else if(page==='objects'){
+    document.getElementById('topbar-title').textContent='VastgoedInspectie';
+    document.getElementById('topbar-sub').textContent='Objecten overzicht';
+  }else if(page==='settings'){
+    document.getElementById('topbar-title').textContent='Instellingen';
+    document.getElementById('topbar-sub').textContent='';
+  }
+}
+
+// CHAPTER RENDER
+function renderChapter(chId){
+  const ch=CHAPTERS.find(c=>c.id===chId);
+  if(!ch){return;}
+  const opn=getOpname();
+  const container=document.getElementById('page-chapter');
+  const subTabs=ch.gevels||null;
+  const activeTab=currentSubTab||( subTabs?subTabs[0]:null);
+  currentSubTab=activeTab;
+
+  let html=`<div class="section-title">${ch.icon} Hoofdstuk ${ch.nr} — ${ch.naam}</div>`;
+
+  if(subTabs){
+    html+=`<div class="chapter-tabs">`;
+    subTabs.forEach(t=>{
+      const fotos=(opn.fotos[chId+'_'+t]||[]).length;
+      const bevs=opn.elementen.filter(e=>e.subTab===t&&e.chapterId===chId).length;
+      const hasData=fotos>0||bevs>0;
+      html+=`<button class="chapter-tab ${t===activeTab?'active':''} ${hasData?'has-data':''}" onclick="switchSubTab('${t}')">
+        ${t} ${fotos?'<span style="font-size:10px;opacity:.7;">'+fotos+'📷</span>':''}
+      </button>`;
+    });
+    html+=`<button class="chapter-tab" onclick="addSubTab('${chId}')" style="border-style:dashed;">+ Toevoegen</button>`;
+    html+=`</div>`;
+    html+=renderSubTabContent(chId,activeTab,opn);
+  }else{
+    html+=renderSubTabContent(chId,null,opn);
+  }
+
+  // Nav knoppen
+  const chIdx=CHAPTERS.findIndex(c=>c.id===chId);
+  html+=`<div class="btn-row" style="margin-top:20px;">`;
+  if(chIdx>0)html+=`<button class="btn btn-light" onclick="navToChapter('${CHAPTERS[chIdx-1].id}')">← ${CHAPTERS[chIdx-1].naam}</button>`;
+  if(chIdx<CHAPTERS.length-1)html+=`<button class="btn btn-dark" onclick="navToChapter('${CHAPTERS[chIdx+1].id}')">Volgende: ${CHAPTERS[chIdx+1].naam} →</button>`;
+  else html+=`<button class="btn btn-dark" onclick="navToChapter('kosten')">→ Kostenraming</button>`;
+  html+=`</div>`;
+
+  container.innerHTML=html;
+}
+
+function renderSubTabContent(chId,subTab,opn){
+  const fotoKey=subTab?chId+'_'+subTab:chId;
+  const fotos=opn.fotos[fotoKey]||[];
+  const elementen=opn.elementen.filter(e=>e.chapterId===chId&&(subTab?e.subTab===subTab:!e.subTab));
+
+  let html=``;
+
+  // Foto upload zone
+  html+=`<div class="foto-zone" id="fotozone-${fotoKey}"
+    onclick="document.getElementById('foto-input-${fotoKey}').click()"
+    ondragover="event.preventDefault();document.getElementById('fotozone-${fotoKey}').classList.add('drag-over')"
+    ondragleave="document.getElementById('fotozone-${fotoKey}').classList.remove('drag-over')"
+    ondrop="handleDrop(event,'${fotoKey}')">
+    <div class="foto-zone-icon">📷</div>
+    <div class="foto-zone-title">${fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden'}</div>
+    <div class="foto-zone-sub">${fotos.length?'Tik om meer te voegen · Sleep foto\'s hierheen':'Tik om te kiezen · Sleep foto\'s hierheen'}</div>
+    <input type="file" id="foto-input-${fotoKey}" accept="image/*" multiple style="display:none;" onchange="handleFotoUpload(event,'${fotoKey}')"/>
+  </div>`;
+
+  // Foto grid (groot)
+  if(fotos.length){
+    html+=`<div class="foto-grid-groot">`;
+    fotos.forEach((f,i)=>{
+      html+=`<div class="foto-groot-item">
+        <img src="${f.dataUrl}" alt="Foto ${i+1}" loading="lazy"/>
+        <span class="foto-nr">${getFotoNr(chId,subTab,i)}</span>
+        <button class="foto-groot-del" onclick="verwijderFoto('${fotoKey}',${i})">×</button>
+        <div class="foto-groot-overlay">
+          <input class="foto-groot-label" placeholder="Label (optioneel)" value="${f.label||''}" onchange="updateFotoLabel('${fotoKey}',${i},this.value)"/>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+    html+=`<div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="btn btn-blue btn-sm" onclick="analyseerFotos('${chId}','${subTab||''}')">✦ Analyseer foto's met AI</button>
     </div>`;
-  }).join('');
-  const heeftFotos = Object.values(gevelFotos).some(f => f.length > 0);
-  document.getElementById('analyseer-btn').style.display = heeftFotos ? 'block' : 'none';
-}
-
-window.openGevelModal = (gevelId) => {
-  activeGevelId = gevelId;
-  const gevel = GEVELS.find(g => g.id === gevelId);
-  document.getElementById('gevel-modal-title').textContent = gevel.naam + ' — foto\'s';
-  renderGevelModalGrid();
-  document.getElementById('gevel-modal').style.display = 'block';
-};
-
-function renderGevelModalGrid() {
-  const fotos = gevelFotos[activeGevelId] || [];
-  const grid = document.getElementById('gevel-modal-grid');
-  grid.innerHTML = fotos.map((f,i) => `
-    <div class="photo-item-modal">
-      <img src="${f.dataUrl}" alt="Foto ${i+1}"/>
-      <button class="photo-del" onclick="verwijderGevelFoto(${i})">×</button>
-    </div>`).join('');
-  document.getElementById('gevel-analyseer-btn').style.display = fotos.length > 0 ? 'block' : 'none';
-}
-
-window.sluitGevelModal = (event) => {
-  if (event && event.target !== document.getElementById('gevel-modal')) return;
-  document.getElementById('gevel-modal').style.display = 'none';
-  activeGevelId = null;
-};
-
-window.handleDrop = async (event) => {
-  event.preventDefault();
-  document.getElementById('upload-zone').classList.remove('drag-over');
-  const files = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-  if (!files.length) { showToast('Geen afbeeldingen gevonden'); return; }
-  await verwerkFotoFiles(files);
-};
-
-window.handleGevelFotos = async (event) => {
-  await verwerkFotoFiles(Array.from(event.target.files));
-  event.target.value = '';
-};
-
-async function verwerkFotoFiles(files) {
-  if (!gevelFotos[activeGevelId]) gevelFotos[activeGevelId] = [];
-  showToast(`${files.length} foto's verwerken...`);
-  for (const file of files) {
-    const dataUrl = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
-    const compressed = await compressPhoto(dataUrl);
-    gevelFotos[activeGevelId].push({ dataUrl: compressed, label: '' });
   }
-  await slaGevelFotosOp();
-  renderGevelModalGrid();
-  renderOpname();
-  showToast('Foto\'s opgeslagen');
+
+  // Bevindingen
+  html+=`<div class="section-title">Bevindingen (${elementen.length})</div>`;
+  if(elementen.length){
+    elementen.forEach(el=>{
+      html+=renderBevindingCard(el);
+    });
+  }else{
+    html+=`<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0;">Nog geen bevindingen. Upload foto's en analyseer met AI, of voeg handmatig toe.</div>`;
+  }
+  html+=`<button class="btn btn-light btn-full btn-sm" style="margin-top:4px;" onclick="voegBevindingToe('${chId}','${subTab||''}')">+ Bevinding handmatig toevoegen</button>`;
+
+  return html;
 }
 
-window.verwijderGevelFoto = async (idx) => {
-  gevelFotos[activeGevelId].splice(idx, 1);
-  await slaGevelFotosOp();
-  renderGevelModalGrid();
-  renderOpname();
-};
-
-async function slaGevelFotosOp() {
-  if (!currentObjectId) return;
-  await setDoc(dataDoc(currentObjectId, 'gevels'), { gevels: gevelFotos, bijgewerktOp: serverTimestamp() });
-}
-
-// ANALYSE
-window.analyseerGevel = async () => {
-  const fotos = gevelFotos[activeGevelId] || [];
-  if (!fotos.length) { showToast('Upload eerst foto\'s'); return; }
-  const gevel = GEVELS.find(g => g.id === activeGevelId);
-  showToast(`${gevel.naam} analyseren...`);
-  document.getElementById('gevel-analyseer-btn').textContent = '⏳ Analyseren...';
-  try {
-    const content = fotos.slice(0,8).map(f => ({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
-    content.push({type:'text',text:`Analyseer deze foto's van de ${gevel.naam} van een gebouw.
-
-Geef een gedetailleerde bouwkundige opname. Voor elk element dat je ziet:
-1. Naam van het element
-2. Materiaal en specificaties
-3. Hoeveelheid met eenheid (m², m¹, stuks, etc.)
-4. Conditie (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
-5. Geconstateerde gebreken
-6. Indicatieve kosten herstel met onderbouwing
-7. Voor gevelopeningen: geef ook isolatiewaarde indicatie
-
-Geef ook aan of er vermoedelijk spouwmuurisolatie aanwezig is op basis van het bouwjaar en visuele kenmerken.
-
-Reageer UITSLUITEND als JSON array:
-[{
-  "element": "Metselwerk voorgevel",
-  "gevel": "${activeGevelId}",
-  "materiaal": "Gebakken baksteen rood",
-  "hoeveelheid": "450",
-  "eenheid": "m²",
-  "conditie": 3,
-  "beschrijving": "Uitgebreide voegwerkschade op meerdere locaties, plaatselijk losliggend voegwerk",
-  "gebreken": "Voegwerk verweerd en uitgevallen",
-  "kosten_indicatief": 9000,
-  "kosten_onderbouwing": "450 m² × €20/m²",
-  "isolatie_notitie": "Vermoedelijk geen spouwmuurisolatie gezien bouwjaar"
-}]
-Alleen JSON, geen tekst eromheen.`});
-
-    const raw = await callClaude(content);
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const s = clean.indexOf('['), e = clean.lastIndexOf(']');
-    if (s >= 0 && e > s) {
-      const nieuweElementen = JSON.parse(clean.substring(s, e+1));
-      // Voeg toe aan elementen, verwijder eerst die van deze gevel
-      elementen = elementen.filter(el => el.gevel !== activeGevelId);
-      elementen.push(...nieuweElementen.map((el,i) => ({
-        ...el,
-        id: `${activeGevelId}_${Date.now()}_${i}`,
-        bewerkt: false
-      })));
-      await slaElementenOp();
-      renderElementen();
-      renderKosten();
-      showToast(`${nieuweElementen.length} elementen gevonden in ${gevel.naam}`);
+function getFotoNr(chId,subTab,idx){
+  // Bereken globaal fotonummer over alle hoofdstukken
+  const opn=getOpname();
+  let nr=1;
+  for(const ch of CHAPTERS){
+    const tabs=ch.gevels||[null];
+    for(const t of tabs){
+      const key=t?ch.id+'_'+t:ch.id;
+      const fotos=opn.fotos[key]||[];
+      if(ch.id===chId&&(t===subTab||(!t&&!subTab))){
+        return nr+idx;
+      }
+      nr+=fotos.length;
     }
-  } catch(e) {
-    showToast('Analyse mislukt: ' + e.message);
   }
-  document.getElementById('gevel-analyseer-btn').textContent = '✦ Analyseer deze gevel';
-};
-
-window.analyseerAlleGevels = async () => {
-  document.getElementById('elementen-loading').style.display = 'block';
-  document.getElementById('elementen-content').style.display = 'block';
-  document.getElementById('elementen-no-object').style.display = 'none';
-  showPage('elementen');
-  const gevelsMetFotos = GEVELS.filter(g => (gevelFotos[g.id]||[]).length > 0);
-  elementen = [];
-  for (let i = 0; i < gevelsMetFotos.length; i++) {
-    const g = gevelsMetFotos[i];
-    document.getElementById('el-loading-status').textContent = `${g.naam} analyseren (${i+1}/${gevelsMetFotos.length})...`;
-    document.getElementById('el-progress').style.width = Math.round((i/gevelsMetFotos.length)*100) + '%';
-    activeGevelId = g.id;
-    try { await analyseerGevel(); } catch(e) {}
-  }
-  document.getElementById('el-progress').style.width = '100%';
-  document.getElementById('elementen-loading').style.display = 'none';
-  activeGevelId = null;
-  renderElementen();
-  renderKosten();
-};
-
-async function slaElementenOp() {
-  if (!currentObjectId) return;
-  await setDoc(dataDoc(currentObjectId, 'elementen'), { lijst: elementen, bijgewerktOp: serverTimestamp() });
+  return idx+1;
 }
 
-// BEVINDINGEN
-function renderElementen() {
-  const hasObj = !!currentObjectId;
-  const hasEl = elementen.length > 0;
-  document.getElementById('elementen-no-object').style.display = (!hasObj || !hasEl) ? 'block' : 'none';
-  document.getElementById('elementen-content').style.display = hasObj ? 'block' : 'none';
-  if (!hasObj) return;
-  const list = document.getElementById('elementen-list');
-  if (!elementen.length) { list.innerHTML = ''; return; }
-
-  // Groepeer per gevel
-  const groepen = {};
-  elementen.forEach(el => {
-    const gvl = el.gevel || 'overig';
-    if (!groepen[gvl]) groepen[gvl] = [];
-    groepen[gvl].push(el);
-  });
-
-  list.innerHTML = Object.entries(groepen).map(([gvelId, els]) => {
-    const gevel = GEVELS.find(g => g.id === gvelId);
-    return `<div class="section-title">${gevel?.icon||'📍'} ${gevel?.naam||gvelId}</div>
-    ${els.map(el => renderElementCard(el)).join('')}`;
-  }).join('');
-}
-
-function renderElementCard(el) {
-  const cond = el.conditie || 3;
-  const condLabel = CONDITIE_LABELS[cond] || 'Onbekend';
-  const fotos = (gevelFotos[el.gevel]||[]).slice(0,3);
-  return `<div class="element-card" id="el-${el.id}">
-    <div class="element-header">
-      <div class="element-info">
-        <div class="element-naam">${el.element}</div>
-        <div class="element-meta">${el.materiaal||''} ${el.hoeveelheid?'· '+el.hoeveelheid+' '+el.eenheid:''}</div>
-      </div>
-      <span class="badge badge-${cond}">${condLabel}</span>
-      <button onclick="verwijderElement('${el.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
+function renderBevindingCard(el){
+  const cond=el.conditie||3;
+  return `<div class="bevinding-card" id="bev-${el.id}">
+    <div class="bev-header">
+      <input class="bev-element-input" value="${escHtml(el.element||'')}" placeholder="Naam element" oninput="updateBev('${el.id}','element',this.value)"/>
+      <span class="badge badge-${cond}">${CONDITIE[cond]}</span>
+      <button onclick="verwijderBev('${el.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
     </div>
-    <div class="element-body">
-      ${el.beschrijving ? `<div class="ai-badge">✦ AI analyse</div>` : ''}
+    <div class="bev-body">
+      ${el.aiAnalyse?'<div class="ai-tag">✦ AI analyse</div>':''}
+      <div class="conditie-bar">
+        ${[1,2,3,4,5].map(n=>`<button class="conditie-opt ${cond==n?'sel-'+n:''}" onclick="updateBev('${el.id}','conditie',${n});renderChapter(currentChapter)">${n}<br><span style="font-size:9px">${CONDITIE[n]}</span></button>`).join('')}
+      </div>
       <div class="field" style="margin-bottom:8px;">
         <label>Beschrijving / bevinding</label>
-        <textarea oninput="updateElement('${el.id}','beschrijving',this.value)">${el.beschrijving||''}</textarea>
+        <textarea rows="2" oninput="updateBev('${el.id}','beschrijving',this.value)">${escHtml(el.beschrijving||'')}</textarea>
       </div>
-      <div class="field" style="margin-bottom:8px;">
-        <label>Conditiescore</label>
-        <div class="conditie-row">
-          ${[1,2,3,4,5].map(n=>`<button class="conditie-btn ${cond==n?'sel-'+n:''}" onclick="updateElement('${el.id}','conditie',${n});renderElementen()">${n}<br><span style="font-size:9px;">${CONDITIE_LABELS[n]}</span></button>`).join('')}
-        </div>
+      <div class="bev-meta-row">
+        <div class="field"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="450" oninput="updateBev('${el.id}','hoeveelheid',this.value)"/></div>
+        <div class="field"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" oninput="updateBev('${el.id}','eenheid',this.value)"/></div>
+        <div class="field"><label>Kosten € indicatief</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
       </div>
-      <div class="grid3" style="margin-bottom:8px;">
-        <div class="field" style="margin-bottom:0;">
-          <label>Hoeveelheid</label>
-          <input type="text" value="${el.hoeveelheid||''}" oninput="updateElement('${el.id}','hoeveelheid',this.value)" placeholder="450"/>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Eenheid</label>
-          <input type="text" value="${el.eenheid||''}" oninput="updateElement('${el.id}','eenheid',this.value)" placeholder="m²"/>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Kosten (€)</label>
-          <input type="number" value="${el.kosten_indicatief||''}" oninput="updateElement('${el.id}','kosten_indicatief',parseFloat(this.value)||0);renderKosten()" placeholder="0"/>
-        </div>
-      </div>
-      ${el.kosten_onderbouwing?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Indicatie: ${el.kosten_onderbouwing}</div>`:''}
-      ${el.isolatie_notitie?`<div class="isolatie-card"><div style="font-size:11px;font-weight:600;color:var(--blue-text);margin-bottom:4px;">🏠 Isolatie indicatie</div><div style="font-size:12px;">${el.isolatie_notitie}</div></div>`:''}
-      ${fotos.length?`<div class="foto-mini-grid">${fotos.map(f=>`<img class="foto-mini" src="${f.dataUrl}" alt=""/>`).join('')}</div>`:''}
+      ${el.kosten_onderbouwing?`<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Indicatie: ${escHtml(el.kosten_onderbouwing)}</div>`:''}
+      ${el.isolatie?`<div class="isolatie-block"><strong>🏠 Isolatie indicatie</strong>${escHtml(el.isolatie)}</div>`:''}
     </div>
   </div>`;
 }
 
-window.updateElement = async (id, key, val) => {
-  const el = elementen.find(e => e.id === id);
-  if (el) { el[key] = val; el.bewerkt = true; await slaElementenOp(); }
+window.switchSubTab=tab=>{
+  currentSubTab=tab;
+  renderChapter(currentChapter);
 };
 
-window.verwijderElement = async (id) => {
-  elementen = elementen.filter(e => e.id !== id);
-  await slaElementenOp();
-  renderElementen();
-  renderKosten();
+window.addSubTab=async chId=>{
+  const naam=prompt('Naam voor nieuw onderdeel:');
+  if(!naam)return;
+  const ch=CHAPTERS.find(c=>c.id===chId);
+  if(!ch.gevels)ch.gevels=[];
+  ch.gevels.push(naam);
+  currentSubTab=naam;
+  renderChapter(chId);
 };
 
-window.voegElementToe = async () => {
-  const nieuw = {
-    id: 'handmatig_' + Date.now(),
-    element: 'Nieuw element',
-    gevel: 'overig',
-    materiaal: '',
-    hoeveelheid: '',
-    eenheid: '',
-    conditie: 3,
-    beschrijving: '',
-    kosten_indicatief: 0,
-    kosten_onderbouwing: '',
-    isolatie_notitie: '',
-    bewerkt: false
-  };
-  elementen.push(nieuw);
-  await slaElementenOp();
-  renderElementen();
+// FOTO UPLOAD
+async function verwerkFotos(files,fotoKey){
+  const opn=getOpname();
+  if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
+  showToast(`${files.length} foto's verwerken...`);
+  for(const f of files){
+    const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
+    const compressed=await compressPhoto(url);
+    opn.fotos[fotoKey].push({dataUrl:compressed,label:''});
+  }
+  await saveOpnameData();
+  renderChapter(currentChapter);
+  showToast('Foto\'s opgeslagen');
+}
+
+window.handleFotoUpload=async(event,key)=>{await verwerkFotos(Array.from(event.target.files),key);event.target.value='';};
+window.handleDrop=async(event,key)=>{
+  event.preventDefault();
+  document.getElementById('fotozone-'+key)?.classList.remove('drag-over');
+  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(files.length)await verwerkFotos(files,key);
+};
+
+window.verwijderFoto=async(key,idx)=>{
+  const opn=getOpname();
+  opn.fotos[key].splice(idx,1);
+  await saveOpnameData();
+  renderChapter(currentChapter);
+};
+
+window.updateFotoLabel=async(key,idx,val)=>{
+  const opn=getOpname();
+  if(opn.fotos[key]&&opn.fotos[key][idx])opn.fotos[key][idx].label=val;
+  await saveOpnameData();
+};
+
+// AI ANALYSE
+window.analyseerFotos=async(chId,subTab)=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navTo('settings');return;}
+  const fotoKey=subTab?chId+'_'+subTab:chId;
+  const opn=getOpname();
+  const fotos=opn.fotos[fotoKey]||[];
+  if(!fotos.length){showToast('Upload eerst foto\'s');return;}
+  const ch=CHAPTERS.find(c=>c.id===chId);
+  const tabNaam=subTab||ch.naam;
+  showToast(`${tabNaam} analyseren...`);
+  // Voeg tijdelijke loading toe
+  const container=document.getElementById('page-chapter');
+  const analyzeBtn=container.querySelector('button[onclick*="analyseerFotos"]');
+  if(analyzeBtn){analyzeBtn.textContent='⏳ Analyseren...';analyzeBtn.disabled=true;}
+  try{
+    const content=fotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    content.push({type:'text',text:`Analyseer deze foto's van de ${tabNaam} (${ch.naam}) van een gebouw (bouwjaar ${currentObj?.jaar||'onbekend'}).
+
+Geef een gedetailleerde bouwkundige opname. Per zichtbaar element:
+1. Naam element
+2. Materiaal en specificaties  
+3. Hoeveelheid met eenheid (m², m¹, stuks, etc.) — wees specifiek
+4. Conditiescore 1-5 (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
+5. Beschrijving toestand en gebreken
+6. Indicatieve herstelkosten met onderbouwing (bijv. "450 m² × €20/m² = €9.000")
+7. Voor gevels: geef spouwmuur/isolatie analyse met indicatieve R-waarde
+
+Reageer ALLEEN als JSON array:
+[{
+  "element": "Metselwerk voorgevel",
+  "materiaal": "Gebakken baksteen rood",
+  "hoeveelheid": "450",
+  "eenheid": "m²",
+  "conditie": 3,
+  "beschrijving": "Uitgebreide voegwerkschade, plaatselijk losliggend voegwerk",
+  "kosten": 9000,
+  "kosten_onderbouwing": "450 m² × €20/m¹ = €9.000",
+  "isolatie": "Vermoedelijk geen spouwmuurisolatie. Indicatieve R-waarde gevel ≈ 0.35 m²K/W"
+}]
+Alleen JSON, niets anders.`});
+    const raw=await callClaude(content);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+    if(s>=0&&e>s){
+      const items=JSON.parse(clean.substring(s,e+1));
+      // Verwijder bestaande AI-elementen van deze subtab
+      opn.elementen=opn.elementen.filter(el=>!(el.chapterId===chId&&el.subTab===(subTab||null)&&el.aiAnalyse));
+      items.forEach((item,i)=>{
+        opn.elementen.push({
+          id:`${fotoKey}_${Date.now()}_${i}`,
+          chapterId:chId,
+          subTab:subTab||null,
+          aiAnalyse:true,
+          element:item.element||'Element',
+          materiaal:item.materiaal||'',
+          hoeveelheid:item.hoeveelheid||'',
+          eenheid:item.eenheid||'',
+          conditie:item.conditie||3,
+          beschrijving:item.beschrijving||'',
+          kosten:item.kosten||0,
+          kosten_onderbouwing:item.kosten_onderbouwing||'',
+          isolatie:item.isolatie||'',
+        });
+      });
+      await saveOpnameData();
+      showToast(`${items.length} elementen gevonden`);
+    }
+  }catch(err){showToast('Analyse mislukt: '+err.message);}
+  renderChapter(currentChapter);
+};
+
+window.voegBevindingToe=async(chId,subTab)=>{
+  const opn=getOpname();
+  opn.elementen.push({
+    id:`handmatig_${Date.now()}`,chapterId:chId,subTab:subTab||null,
+    element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',
+    conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',isolatie:'',aiAnalyse:false
+  });
+  await saveOpnameData();
+  renderChapter(currentChapter);
+};
+
+window.updateBev=async(id,key,val)=>{
+  const opn=getOpname();
+  const el=opn.elementen.find(e=>e.id===id);
+  if(el){el[key]=val;await saveOpnameData();}
+};
+
+window.verwijderBev=async id=>{
+  const opn=getOpname();
+  opn.elementen=opn.elementen.filter(e=>e.id!==id);
+  await saveOpnameData();
+  renderChapter(currentChapter);
 };
 
 // KOSTEN
-function renderKosten() {
-  const hasEl = elementen.filter(e => (e.kosten_indicatief||0) > 0).length > 0;
-  document.getElementById('kosten-no-object').style.display = (!currentObjectId || !hasEl) ? 'block' : 'none';
-  document.getElementById('kosten-content').style.display = (currentObjectId && elementen.length > 0) ? 'block' : 'none';
-  if (!currentObjectId) return;
-  const totaal = elementen.reduce((s,e) => s + (parseFloat(e.kosten_indicatief)||0), 0);
-  document.getElementById('kosten-totaal').textContent = '€ ' + Math.round(totaal).toLocaleString('nl-NL');
-  const lijst = document.getElementById('kosten-lijst');
-  const metKosten = elementen.filter(e => (e.kosten_indicatief||0) > 0).sort((a,b) => (b.kosten_indicatief||0)-(a.kosten_indicatief||0));
-  lijst.innerHTML = metKosten.map(e => `
-    <div class="kosten-item">
-      <div>
-        <div style="font-weight:500;font-size:13px;">${e.element}</div>
-        <div style="font-size:11px;color:var(--text3);">${e.kosten_onderbouwing||'Handmatig ingevoerd'} · <span class="badge badge-${e.conditie}">${CONDITIE_LABELS[e.conditie]||''}</span></div>
-      </div>
-      <div class="kosten-item-bedrag">€ ${Math.round(e.kosten_indicatief||0).toLocaleString('nl-NL')}</div>
-    </div>`).join('');
+function renderKostenTotaal(){
+  // Herbereken totaal zonder volledige re-render
+  const opn=getOpname();
+  const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const el=document.getElementById('kosten-totaal-amt');
+  if(el)el.textContent='€ '+Math.round(totaal).toLocaleString('nl-NL');
 }
+
+function renderKosten(){
+  const opn=getOpname();
+  const container=document.getElementById('page-chapter');
+  const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  let html=`
+    <div class="kosten-totaal-banner">
+      <div><div class="kosten-totaal-label">Totale kostenraming indicatief</div>
+      <div class="kosten-totaal-amt" id="kosten-totaal-amt">€ ${Math.round(totaal).toLocaleString('nl-NL')}</div></div>
+      <div style="font-size:12px;opacity:.7;">${opn.elementen.filter(e=>e.kosten>0).length} posten</div>
+    </div>`;
+  // Per hoofdstuk uitklapbaar
+  CHAPTERS.forEach(ch=>{
+    const els=opn.elementen.filter(e=>e.chapterId===ch.id&&(parseFloat(e.kosten)||0)>0);
+    if(!els.length)return;
+    const subtotaal=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const maxCond=Math.max(...els.map(e=>e.conditie||1));
+    const accId='acc-'+ch.id;
+    html+=`<div class="kosten-accordion">
+      <div class="kosten-acc-header" onclick="toggleAcc('${accId}')">
+        <span class="kosten-acc-icon">${ch.icon}</span>
+        <span class="kosten-acc-naam">${ch.naam}</span>
+        <span class="badge badge-${maxCond}">${CONDITIE[maxCond]}</span>
+        <span class="kosten-acc-amt">€ ${Math.round(subtotaal).toLocaleString('nl-NL')}</span>
+        <span class="kosten-acc-arrow" id="arrow-${accId}">›</span>
+      </div>
+      <div class="kosten-acc-body" id="${accId}">
+        ${els.map(e=>`<div class="kosten-sub-row">
+          <div class="kosten-sub-naam">${escHtml(e.element)}<br><span class="kosten-sub-onderbouwing">${escHtml(e.kosten_onderbouwing||'')}</span></div>
+          <div class="kosten-sub-amt">€ ${Math.round(parseFloat(e.kosten)||0).toLocaleString('nl-NL')}</div>
+        </div>`).join('')}
+        <div class="kosten-sub-row"><div class="kosten-sub-naam">Subtotaal ${ch.naam}</div><div class="kosten-sub-amt">€ ${Math.round(subtotaal).toLocaleString('nl-NL')}</div></div>
+      </div>
+    </div>`;
+  });
+  html+=`<div class="btn-row" style="margin-top:16px;">
+    <button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button>
+    <button class="btn btn-dark btn-sm" onclick="navToChapter('rapport')">→ Rapport genereren</button>
+  </div>`;
+  container.innerHTML=html;
+}
+
+window.toggleAcc=id=>{
+  const body=document.getElementById(id);
+  const arrow=document.getElementById('arrow-'+id);
+  const open=body.classList.toggle('open');
+  arrow.classList.toggle('open',open);
+};
 
 // RAPPORT
-function renderRapportPagina() {
-  const hasEl = elementen.length > 0;
-  document.getElementById('rapport-empty').style.display = !hasEl && !rapportTekst ? 'block' : 'none';
-  document.getElementById('rapport-content').style.display = rapportTekst ? 'block' : 'none';
-  document.getElementById('rapport-generate-btns').style.display = hasEl ? 'block' : 'none';
-  if (rapportTekst) {
-    document.getElementById('rapport-text').innerHTML = renderRapportHtml(rapportTekst);
+function renderRapportPagina(){
+  const container=document.getElementById('page-chapter');
+  const opn=getOpname();
+  const hasEl=opn.elementen.length>0;
+  let html=`<div class="section-title">📄 Rapport genereren</div>`;
+  if(rapportTekst){
+    html+=`<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-dark btn-sm" onclick="generateRapport('kort')">↺ Kort rapport</button>
+      <button class="btn btn-dark btn-sm" onclick="generateRapport('uitgebreid')">↺ Uitgebreid rapport</button>
+      <button class="btn btn-light btn-sm" onclick="copyRapport()">Kopieer</button>
+      <button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>
+      <button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>
+      <button class="btn btn-light btn-sm" onclick="downloadRapportExcel()">⬇ Excel</button>
+    </div>
+    <div class="rapport-card" id="rapport-tekst">${renderRapportHtml(rapportTekst)}</div>`;
+  }else if(hasEl){
+    html+=`<p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">Er zijn ${opn.elementen.length} bevindingen met een totale kostenraming van €${Math.round(opn.elementen.reduce((s,e)=>s+(e.kosten||0),0)).toLocaleString('nl-NL')}. Kies een rapport type:</p>`;
+  }else{
+    html+=`<div class="empty"><div class="empty-icon">📄</div><p>Voeg eerst bevindingen toe via de hoofdstukken.</p></div>`;
   }
+  if(hasEl||rapportTekst){
+    html+=`<div id="rapport-loading" style="display:none;">
+      <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-load-status">Rapport genereren...</span></div>
+      <div class="progress-wrap"><div class="progress-bar" id="rapport-pbar" style="width:0%"></div></div>
+    </div>`;
+    if(!rapportTekst){
+      html+=`<div class="grid2">
+        <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport<br><span style="font-size:11px;font-weight:400;opacity:.7;">Samenvatting + overzicht</span></button>
+        <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport<br><span style="font-size:11px;font-weight:400;opacity:.7;">Volledig per hoofdstuk</span></button>
+      </div>`;
+    }
+  }
+  container.innerHTML=html;
 }
 
-window.generateRapport = async (type = 'uitgebreid') => {
-  if (!getApiKey()) { showToast('Stel eerst je API-sleutel in'); showPage('settings'); return; }
-  if (!elementen.length) { showToast('Voeg eerst bevindingen toe'); return; }
-  document.getElementById('rapport-empty').style.display = 'none';
-  document.getElementById('rapport-content').style.display = 'none';
-  document.getElementById('rapport-loading').style.display = 'block';
-  document.getElementById('rapport-progress').style.width = '20%';
-  document.getElementById('rapport-status').textContent = 'Rapport genereren...';
-  const obj = objects.find(o => o.id === currentObjectId);
-  const datum = new Date().toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
-  const totaal = elementen.reduce((s,e) => s+(parseFloat(e.kosten_indicatief)||0), 0);
-  const elementenStr = elementen.map(e =>
-    `- ${e.element} (${GEVELS.find(g=>g.id===e.gevel)?.naam||e.gevel}): ${CONDITIE_LABELS[e.conditie]||''} | ${e.hoeveelheid||'?'} ${e.eenheid||''} | €${e.kosten_indicatief||0} | ${e.beschrijving||''}`
-  ).join('\n');
-  const isolatieNotities = elementen.filter(e => e.isolatie_notitie).map(e => e.isolatie_notitie).join('\n');
-
-  const kortPrompt = `Schrijf een beknopt bouwkundig inspectierapport (max 1 pagina) in het Nederlands.
-
+window.generateRapport=async type=>{
+  if(!getApiKey()){showToast('API-sleutel ontbreekt');navTo('settings');return;}
+  const opn=getOpname();
+  if(!opn.elementen.length){showToast('Geen bevindingen gevonden');return;}
+  const loadEl=document.getElementById('rapport-loading');
+  const pbar=document.getElementById('rapport-pbar');
+  const statusEl=document.getElementById('rapport-load-status');
+  const tekstEl=document.getElementById('rapport-tekst');
+  if(loadEl)loadEl.style.display='block';
+  if(tekstEl)tekstEl.style.display='none';
+  const obj=currentObj;
+  const datum=new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
+  const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const bevStr=opn.elementen.map(e=>`- ${e.element} (${CHAPTERS.find(c=>c.id===e.chapterId)?.naam||e.chapterId}): ${CONDITIE[e.conditie]||''} | ${e.hoeveelheid||'?'} ${e.eenheid||''} | €${e.kosten||0} | ${e.beschrijving||''}`).join('\n');
+  if(pbar)pbar.style.width='30%';
+  if(statusEl)statusEl.textContent='Rapport samenstellen...';
+  const kort=type==='kort';
+  const prompt=kort?
+    `Schrijf een beknopt bouwkundig inspectierapport (max 1 A4) in het Nederlands.
 Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
-
-Bevindingen:
-${elementenStr}
-
-Totale kostenraming: €${Math.round(totaal).toLocaleString('nl-NL')}
+Bevindingen:\n${bevStr}\nTotaal: €${Math.round(totaal).toLocaleString('nl-NL')}
 
 Format:
 **SAMENVATTING**
@@ -943,271 +1101,217 @@ Format:
 **OVERZICHT**
 | Onderdeel | Conditie | Prioriteit | Kosten |
 |---|---|---|---|
-[max 8 rijen]
 **Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
 
 **URGENTE ACTIES**
 [max 5 bullets]
 
 **DISCLAIMER**
-Visuele inspectie op basis van fotodocumentatie.`;
-
-  const uitgebreidPrompt = `Schrijf een professioneel bouwkundig inspectierapport in het Nederlands.
-
+Visuele inspectie op basis van fotodocumentatie.`
+    :
+    `Schrijf een professioneel bouwkundig inspectierapport in het Nederlands.
 Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Eenheden: ${obj?.eenheden||'?'} | Datum: ${datum}
 
-Bevindingen per gevel/onderdeel:
-${elementenStr}
-
-Isolatie indicaties:
-${isolatieNotities || 'Geen specifieke isolatiegegevens beschikbaar'}
+Bevindingen per hoofdstuk:\n${bevStr}
 
 Totale kostenraming: €${Math.round(totaal).toLocaleString('nl-NL')}
 
-Schrijf rapport met hoofdstukken:
-
-**1. ALGEMENE INFORMATIE**
-[Objecttabel]
-
-**2. SAMENVATTING**
-[Algehele staat in 3-4 zinnen]
-
+Hoofdstukken:
+**1. ALGEMENE INFORMATIE** [objecttabel]
+**2. SAMENVATTING** [algehele staat 3-4 zinnen]
 **3. OVERZICHTSTABEL**
-| Onderdeel | Conditie | Prioriteit | Kosten indicatief |
+| Onderdeel | Conditie | Prioriteit | Kosten |
 |---|---|---|---|
 **Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
-
-**4. BEVINDINGEN PER ONDERDEEL**
-[Per gevel/onderdeel, met hoeveelheden en materialen]
-
-**5. CONSTRUCTIE & ISOLATIE**
-[Indicatieve isolatiewaarden, spouwmuur analyse]
-
+**4. BEVINDINGEN PER ONDERDEEL** [per hoofdstuk met hoeveelheden]
+**5. CONSTRUCTIE & ISOLATIE** [isolatiewaarden + spouwmuur]
 **6. KOSTENRAMING**
 | Onderdeel | Maatregel | Hoeveelheid | Kosten | Onderbouwing |
 |---|---|---|---|---|
-**Totaal indicatief: €${Math.round(totaal).toLocaleString('nl-NL')}**
-
-**7. AANBEVELINGEN**
-Urgent: [bullets]
-Hoog (1-3 mnd): [bullets]
-Gemiddeld (6-12 mnd): [bullets]
-Laag: [bullets]
-
-**DISCLAIMER**
-Dit rapport is opgesteld op basis van visuele inspectie van fotodocumentatie. Het vervangt geen professioneel bouwkundig keuringsrapport ter plaatse.`;
-
-  try {
-    document.getElementById('rapport-progress').style.width = '60%';
-    const tekst = await callClaude([{type:'text',text: type==='kort' ? kortPrompt : uitgebreidPrompt}]);
-    rapportTekst = tekst;
-    await setDoc(dataDoc(currentObjectId,'rapport'), {tekst, aangemaaktOp:serverTimestamp(), aangemaaktDoor:currentUser?.displayName||currentUser?.email||''});
-    await setDoc(objDoc(currentObjectId), {heeftRapport:true}, {merge:true});
-    document.getElementById('rapport-progress').style.width = '100%';
-    setTimeout(() => {
-      document.getElementById('rapport-loading').style.display = 'none';
-      document.getElementById('rapport-type-badge').innerHTML = type==='kort' ? '<span class="badge badge-blue">Korte versie</span>' : '<span class="badge badge-green">Uitgebreide versie</span>';
-      document.getElementById('rapport-text').innerHTML = renderRapportHtml(tekst);
-      document.getElementById('rapport-content').style.display = 'block';
-    }, 400);
-  } catch(e) {
-    document.getElementById('rapport-loading').style.display = 'none';
-    showToast('Fout: ' + e.message);
+**Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
+**7. AANBEVELINGEN** [geprioriteerd]
+**DISCLAIMER** Visuele inspectie. Vervangt geen bouwkundig keuringsrapport.`;
+  if(pbar)pbar.style.width='60%';
+  try{
+    const tekst=await callClaude([{type:'text',text:prompt}]);
+    rapportTekst=tekst;
+    await setDoc(dataDoc(currentObjId,currentOpnameId,'rapport'),{tekst,aangemaaktOp:serverTimestamp()});
+    if(pbar)pbar.style.width='100%';
+    setTimeout(()=>{if(loadEl)loadEl.style.display='none';renderRapportPagina();},400);
+  }catch(err){
+    if(loadEl)loadEl.style.display='none';
+    showToast('Fout: '+err.message);
   }
 };
 
-function renderRapportHtml(text) {
-  let html = text
-    .replace(/^### (.*)/gm,'<h3 style="font-size:14px;font-weight:700;margin:14px 0 5px;">$1</h3>')
-    .replace(/^## (.*)/gm,'<h2 style="font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;">$1</h2>')
-    .replace(/^# (.*)/gm,'<h1 style="font-size:17px;font-weight:700;margin:16px 0 8px;">$1</h1>')
+function renderRapportHtml(text){
+  let h=text
+    .replace(/^### (.*)/gm,'<h3>$1</h3>')
+    .replace(/^## (.*)/gm,'<h2>$1</h2>')
+    .replace(/^# (.*)/gm,'<h2>$1</h2>')
     .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\|(.+)\|/g, match => {
-      const cells = match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
-      if(cells.every(c=>/^[-:]+$/.test(c))) return '';
-      return '<tr>'+cells.map(c=>`<td style="padding:6px 8px;border:0.5px solid var(--border);font-size:12px;">${c}</td>`).join('')+'</tr>';
+    .replace(/\|(.+)\|/g,match=>{
+      const cells=match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
+      if(cells.every(c=>/^[-:]+$/.test(c)))return'';
+      return'<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>';
     });
-  html = html.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g, m=>`<table style="width:100%;border-collapse:collapse;margin:8px 0;">${m}</table>`);
-  html = html
-    .replace(/^- (.*)/gm,'<div style="padding:3px 0 3px 14px;font-size:13px;">• $1</div>')
-    .replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
-  return html;
+  h=h.replace(/(<tr>[\s\S]*?<\/tr>(\s*<tr>[\s\S]*?<\/tr>)*)/g,m=>`<table>${m}</table>`);
+  h=h.replace(/^- (.*)/gm,'<div style="padding:2px 0 2px 12px;font-size:13px;">• $1</div>');
+  h=h.replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
+  return h;
 }
 
-// EXPORT
-window.copyRapport = () => {
-  navigator.clipboard.writeText(rapportTekst||'').then(()=>showToast('Gekopieerd'));
+window.copyRapport=()=>navigator.clipboard.writeText(rapportTekst||'').then(()=>showToast('Gekopieerd'));
+
+window.downloadPDF=()=>{
+  const win=window.open('','_blank');
+  const html=document.getElementById('rapport-tekst')?.innerHTML||'';
+  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Rapport ${currentObj?.naam||''}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;margin:10pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}@media print{body{margin:1.5cm;}}</style>
+  </head><body><h1 style="font-size:16pt;text-align:center;">${currentObj?.naam||''}</h1><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('nl-NL')}</p>${html}</body></html>`);
+  win.document.close();setTimeout(()=>win.print(),600);
 };
 
-window.downloadPDF = () => {
-  const obj = objects.find(o=>o.id===currentObjectId);
-  const win = window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Rapport ${obj?.naam||''}</title>
-  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h1{font-size:16pt;}h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;margin:12pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}strong{font-weight:bold;}@media print{body{margin:1.5cm;}}</style>
-  </head><body>${renderRapportHtml(rapportTekst||'')}</body></html>`);
-  win.document.close(); setTimeout(()=>win.print(),600);
-};
-
-window.downloadWord = async () => {
+window.downloadWord=async()=>{
   showToast('Word aanmaken...');
-  try {
+  try{
     if(!window.docx){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-    const {Document,Packer,Paragraph,TextRun,AlignmentType} = docx;
-    const obj = objects.find(o=>o.id===currentObjectId);
-    const children = [];
+    const{Document,Packer,Paragraph,TextRun,AlignmentType}=docx;
+    const children=[];
     children.push(new Paragraph({children:[new TextRun({text:'BOUWKUNDIGE INSPECTIERAPPORTAGE',bold:true,size:40,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:200}}));
-    children.push(new Paragraph({children:[new TextRun({text:obj?.naam||'',size:28,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
-    children.push(new Paragraph({children:[new TextRun({text:`Datum: ${new Date().toLocaleDateString('nl-NL')}`,size:22,color:'666666',font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:600}}));
+    children.push(new Paragraph({children:[new TextRun({text:currentObj?.naam||'',size:28,font:'Arial'})],alignment:AlignmentType.CENTER,spacing:{after:600}}));
     (rapportTekst||'').split('\n').forEach(line=>{
-      const t=line.trim(); if(!t){children.push(new Paragraph({spacing:{after:80}}));return;}
+      const t=line.trim();if(!t){children.push(new Paragraph({spacing:{after:80}}));return;}
       const parts=t.split(/\*\*(.*?)\*\*/g);
       children.push(new Paragraph({children:parts.map((p,i)=>new TextRun({text:p,bold:i%2===1,font:'Arial',size:22})),spacing:{after:100}}));
     });
     const docFile=new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
     const buffer=await Packer.toBuffer(docFile);
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
-    a.download=`Rapport_${(obj?.naam||'rapport').replace(/[^a-z0-9]/gi,'_')}.docx`;
-    a.click(); showToast('Word gedownload');
-  } catch(e){showToast('Fout: '+e.message);}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
+    a.download=`Rapport_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.docx`;a.click();showToast('Word gedownload');
+  }catch(e){showToast('Fout: '+e.message);}
 };
 
-window.downloadKostenExcel = async () => {
+async function loadXLSX(){if(!window.XLSX){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}}
+
+window.downloadKostenExcel=async()=>{
   await loadXLSX();
-  const obj = objects.find(o=>o.id===currentObjectId);
-  const wb = XLSX.utils.book_new();
-  const totaal = elementen.reduce((s,e)=>s+(parseFloat(e.kosten_indicatief)||0),0);
-  const rows = [
-    [`Kostenraming — ${obj?.naam||''}`],
-    [`Datum: ${new Date().toLocaleDateString('nl-NL')}`],
-    [],
-    ['Onderdeel','Gevel/Locatie','Conditie','Hoeveelheid','Eenheid','Kosten (€)','Onderbouwing'],
-    ...elementen.map(e=>[e.element, GEVELS.find(g=>g.id===e.gevel)?.naam||e.gevel, CONDITIE_LABELS[e.conditie]||'', e.hoeveelheid||'', e.eenheid||'', e.kosten_indicatief||0, e.kosten_onderbouwing||'']),
-    [],['Totaal indicatief','','','','',totaal,'']
+  const opn=getOpname();const wb=XLSX.utils.book_new();
+  const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const rows=[
+    [`Kostenraming — ${currentObj?.naam||''}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],
+    ['Hoofdstuk','Element','Conditie','Hoeveelheid','Eenheid','Kosten (€)','Onderbouwing'],
+    ...opn.elementen.map(e=>[CHAPTERS.find(c=>c.id===e.chapterId)?.naam||e.chapterId,e.element,CONDITIE[e.conditie]||'',e.hoeveelheid||'',e.eenheid||'',e.kosten||0,e.kosten_onderbouwing||'']),
+    [],[],[`Totaal indicatief`,'','','','',totaal,'']
   ];
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:28},{wch:16},{wch:12},{wch:12},{wch:8},{wch:12},{wch:30}];
-  XLSX.utils.book_append_sheet(wb, ws, 'Kostenraming');
-  XLSX.writeFile(wb, `Kosten_${(obj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:20},{wch:28},{wch:12},{wch:12},{wch:8},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'Kostenraming');
+  XLSX.writeFile(wb,`Kosten_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
   showToast('Excel gedownload');
 };
 
-window.downloadRapportExcel = async () => {
+window.downloadRapportExcel=async()=>{
   await loadXLSX();
-  const obj = objects.find(o=>o.id===currentObjectId);
-  const wb = XLSX.utils.book_new();
-  const rapportEl = document.getElementById('rapport-text');
-  const tables = rapportEl.querySelectorAll('table');
-  const namen = ['Overzicht','Kostenraming','Extra'];
-  tables.forEach((table,idx)=>{
-    const rows = [];
-    table.querySelectorAll('tr').forEach(tr=>{
-      const row=[]; tr.querySelectorAll('td,th').forEach(td=>row.push(td.innerText.trim()));
-      if(row.some(c=>c)) rows.push(row);
-    });
-    if(rows.length>1){
-      const ws=XLSX.utils.aoa_to_sheet([[`${obj?.naam||''} — ${namen[idx]||'Tabel'}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],...rows]);
-      ws['!cols']=rows[0]?.map(()=>({wch:22}));
-      XLSX.utils.book_append_sheet(wb,ws,namen[idx]||'Tabel '+(idx+1));
-    }
+  const wb=XLSX.utils.book_new();
+  const rapEl=document.getElementById('rapport-tekst');
+  if(!rapEl){showToast('Genereer eerst een rapport');return;}
+  const tables=rapEl.querySelectorAll('table');
+  const namen=['Overzicht','Kostenraming','Extra'];
+  tables.forEach((t,i)=>{
+    const rows=[];
+    t.querySelectorAll('tr').forEach(tr=>{const row=[];tr.querySelectorAll('td,th').forEach(td=>row.push(td.innerText.trim()));if(row.some(c=>c))rows.push(row);});
+    if(rows.length>1){const ws=XLSX.utils.aoa_to_sheet([[`${currentObj?.naam||''} — ${namen[i]||'Tabel'}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],...rows]);ws['!cols']=rows[0]?.map(()=>({wch:22}));XLSX.utils.book_append_sheet(wb,ws,namen[i]||'Tabel '+(i+1));}
   });
-  if(wb.SheetNames.length===0){showToast('Geen tabellen gevonden');return;}
-  XLSX.writeFile(wb,`Rapport_${(obj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
+  if(!wb.SheetNames.length){showToast('Geen tabellen gevonden');return;}
+  XLSX.writeFile(wb,`Rapport_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
   showToast('Excel gedownload');
 };
-
-async function loadXLSX(){
-  if(window.XLSX) return;
-  await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
-}
 
 // API
-function getApiKey(){ return localStorage.getItem('vi-apikey')||''; }
-window.saveApiKey=()=>{const v=document.getElementById('api-key-input').value.trim();if(!v){showToast('Vul een sleutel in');return;}localStorage.setItem('vi-apikey',v);document.getElementById('api-key-status').textContent='Actief: '+v.substring(0,16)+'...';showToast('Opgeslagen');};
-window.saveWorkerUrl=()=>{const v=document.getElementById('worker-url-input').value.trim();if(!v){showToast('Vul een URL in');return;}localStorage.setItem('vi-worker',v);document.getElementById('worker-status').textContent='✓ Opgeslagen';showToast('Opgeslagen');};
+function getApiKey(){return localStorage.getItem('vi-apikey')||'';}
+window.saveApiKey=()=>{const v=document.getElementById('api-key-inp').value.trim();if(!v){showToast('Vul sleutel in');return;}localStorage.setItem('vi-apikey',v);document.getElementById('api-status').textContent='Actief: '+v.substring(0,16)+'...';showToast('Opgeslagen');};
+window.saveWorker=()=>{const v=document.getElementById('worker-inp').value.trim();if(!v){showToast('Vul URL in');return;}localStorage.setItem('vi-worker',v);document.getElementById('worker-status').textContent='✓ Opgeslagen';showToast('Opgeslagen');};
 window.testWorker=async()=>{
-  const url=localStorage.getItem('vi-worker')||'';const key=getApiKey();const s=document.getElementById('worker-status');
-  if(!url||!key){s.textContent='Vul URL en sleutel in';return;}s.textContent='Testen...';
-  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'OK'}]})});s.textContent=r.ok?'✓ Werkt!':'✗ Fout: '+r.status;s.style.color=r.ok?'var(--green-text)':'var(--red-text)';}
+  const url=localStorage.getItem('vi-worker')||'';const key=getApiKey();
+  const s=document.getElementById('worker-status');if(!url||!key){s.textContent='Vul URL en sleutel in';return;}s.textContent='Testen...';
+  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'OK'}]})});s.textContent=r.ok?'✓ Verbinding werkt!':'✗ Fout: '+r.status;s.style.color=r.ok?'var(--green-text)':'var(--red-text)';}
   catch(e){s.textContent='✗ '+e.message;s.style.color='var(--red-text)';}
 };
+window.togglePass=id=>{const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';};
+function initSettings(){
+  const k=getApiKey();if(k){document.getElementById('api-key-inp').value=k;document.getElementById('api-status').textContent='Actief: '+k.substring(0,16)+'...';}
+  const w=localStorage.getItem('vi-worker');if(w){document.getElementById('worker-inp').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
+}
 
 async function callClaude(content){
-  const key=getApiKey();if(!key) throw new Error('Geen API-sleutel');
-  const url=localStorage.getItem('vi-worker')||'';if(!url) throw new Error('Geen Worker URL');
-  const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content}]})});
-  if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||resp.status);}
-  const data=await resp.json();
-  return data.content?.map(b=>b.text||'').join('')||'';
+  const key=getApiKey();if(!key)throw new Error('Geen API-sleutel');
+  const url=localStorage.getItem('vi-worker');if(!url)throw new Error('Geen Worker URL');
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content}]})});
+  if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||r.status);}
+  const d=await r.json();return d.content?.map(b=>b.text||'').join('')||'';
 }
 
-function initSettings(){
-  const key=getApiKey();if(key){document.getElementById('api-key-input').value=key;document.getElementById('api-key-status').textContent='Actief: '+key.substring(0,16)+'...';}
-  const w=localStorage.getItem('vi-worker');if(w){document.getElementById('worker-url-input').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
-}
-
-// FOTO COMPRESSIE
-function compressPhoto(dataUrl,maxWidth=1024){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{const canvas=document.createElement('canvas');let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);res(canvas.toDataURL('image/jpeg',.75));};
-    img.onerror=()=>res(dataUrl);img.src=dataUrl;
-  });
-}
-
-// NAVIGATIE
-window.showPage=(name)=>{
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tabbar-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
-  const page=document.getElementById('page-'+name);if(page) page.classList.add('active');
-  const isLogin=name==='login';
-  document.getElementById('topbar').style.display=isLogin?'none':'flex';
-  document.getElementById('tabbar').style.display=isLogin?'none':'flex';
-  updateTopbar();
-};
-
-function updateTopbar(){
-  const obj=objects.find(o=>o.id===currentObjectId);
-  if(obj){document.getElementById('topbar-title').textContent=obj.naam||'Object';document.getElementById('topbar-sub').textContent=obj.type+(obj.jaar?', '+obj.jaar:'');}
-  else{document.getElementById('topbar-title').textContent='VastgoedInspectie';document.getElementById('topbar-sub').textContent=currentUser?.email||'';}
+// SYNC STATUS
+function setSyncStatus(status,text){
+  const dot=document.getElementById('sync-dot');const txt=document.getElementById('sync-text');
+  if(dot)dot.className='sync-dot'+(status==='syncing'?' syncing':'');
+  if(txt)txt.textContent=text;
 }
 
 // BAG
 let bagTimer=null;
-window.bagSuggest=(q)=>{clearTimeout(bagTimer);if(!q||q.length<3){hideBagDropdown();return;}bagTimer=setTimeout(()=>_bagFetch(q),280);};
+window.bagSuggest=q=>{clearTimeout(bagTimer);if(!q||q.length<3){hideBagDd();return;}bagTimer=setTimeout(()=>_bagFetch(q),280);};
 async function _bagFetch(q){
-  const dd=document.getElementById('bag-dropdown');dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
-  const wUrl=localStorage.getItem('vi-worker')||'';if(!wUrl){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
-  try{const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam');const data=await r.json();const docs=data?.response?.docs||[];
-  if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
-  dd.innerHTML=docs.map(d=>`<div class="bag-item" onclick="bagSelect('${d.id}','${escHtml(d.weergavenaam)}')">${escHtml(d.weergavenaam)}</div>`).join('');}
-  catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout</div>';}
+  const dd=document.getElementById('bag-dd');dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
+  const w=localStorage.getItem('vi-worker')||'';
+  if(!w){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
+  try{
+    const r=await fetch(w.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam');
+    const d=await r.json();const docs=d?.response?.docs||[];
+    if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
+    dd.innerHTML=docs.map(x=>`<div class="bag-dd-item" onclick="bagSelect('${x.id}','${escHtml(x.weergavenaam)}')">${escHtml(x.weergavenaam)}</div>`).join('');
+  }catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout</div>';}
 }
-function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 window.bagSelect=async(id,naam)=>{
-  hideBagDropdown();document.getElementById('f-bag-search').value=naam;document.getElementById('f-naam').value=naam;
-  const status=document.getElementById('bag-status');status.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:6px;">BAG data ophalen...</div>';
-  const wUrl=localStorage.getItem('vi-worker')||'';if(!wUrl) return;
-  try{const r=await fetch(wUrl.replace(/\/$/,'')+'/bag/lookup?id='+id);const data=await r.json();const d=data?.response?.docs?.[0];
-  if(!d){status.innerHTML='<div class="bag-badge fail">Geen BAG data</div>';return;}
-  const gevonden=[];
-  if(d.postcode&&d.woonplaatsnaam) document.getElementById('f-postcode').value=d.postcode+' '+d.woonplaatsnaam;
-  if(d.bouwjaar){document.getElementById('f-jaar').value=d.bouwjaar;document.getElementById('f-jaar-badge').textContent='✓ BAG';gevonden.push('bouwjaar '+d.bouwjaar);}
-  if(d.oppervlakte_min){document.getElementById('f-opp').value=d.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';gevonden.push('opp. '+d.oppervlakte_min+'m²');}
-  if(d.aantal_eenheden) document.getElementById('f-eenheden').value=d.aantal_eenheden;
-  if(d.gebruiksdoel){const gd=Array.isArray(d.gebruiksdoel)?d.gebruiksdoel[0]:d.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
-  status.innerHTML=gevonden.length?`<div class="bag-badge">✓ BAG: ${gevonden.join(' · ')}</div>`:'<div class="bag-badge fail">Beperkte BAG data</div>';}
-  catch(e){status.innerHTML='<div class="bag-badge fail">BAG mislukt</div>';}
+  hideBagDd();document.getElementById('f-bag').value=naam;document.getElementById('f-naam').value=naam;
+  const st=document.getElementById('bag-status');st.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:5px;">BAG data ophalen...</div>';
+  const w=localStorage.getItem('vi-worker')||'';if(!w)return;
+  try{
+    const r=await fetch(w.replace(/\/$/,'')+'/bag/lookup?id='+id);const d=await r.json();const doc=d?.response?.docs?.[0];
+    if(!doc){st.innerHTML='<div class="bag-badge fail">Geen data</div>';return;}
+    const g=[];
+    if(doc.postcode&&doc.woonplaatsnaam)document.getElementById('f-postcode').value=doc.postcode+' '+doc.woonplaatsnaam;
+    if(doc.bouwjaar){document.getElementById('f-jaar').value=doc.bouwjaar;document.getElementById('f-jaar-badge').textContent='✓ BAG';g.push('bouwjaar '+doc.bouwjaar);}
+    if(doc.oppervlakte_min){document.getElementById('f-opp').value=doc.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';g.push('opp. '+doc.oppervlakte_min+'m²');}
+    if(doc.aantal_eenheden)document.getElementById('f-eenheden').value=doc.aantal_eenheden;
+    if(doc.gebruiksdoel){const gd=Array.isArray(doc.gebruiksdoel)?doc.gebruiksdoel[0]:doc.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
+    st.innerHTML=g.length?`<div class="bag-badge">✓ BAG: ${g.join(' · ')}</div>`:'<div class="bag-badge fail">Beperkte data</div>';
+  }catch(e){st.innerHTML='<div class="bag-badge fail">BAG mislukt</div>';}
 };
-function hideBagDropdown(){const dd=document.getElementById('bag-dropdown');if(dd){dd.style.display='none';dd.innerHTML='';}}
-document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagDropdown();});
+function hideBagDd(){const dd=document.getElementById('bag-dd');if(dd){dd.style.display='none';dd.innerHTML='';}}
+document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagDd();});
 
-// TOAST
-window.showToast=(msg)=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
+// MOBILE SIDEBAR
+window.toggleSidebar=()=>{
+  const sb=document.getElementById('sidebar');const ov=document.getElementById('sb-overlay');
+  sb.classList.toggle('open');ov.classList.toggle('show');
+};
+window.closeSidebar=()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('show');
+};
+
+// UTILS
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
+window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
 
 // SERVICE WORKER
-if('serviceWorker'in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
+// INIT (sidebar verborgen tot login)
+showAppUI(false);
 </script>
 </body>
 </html>
