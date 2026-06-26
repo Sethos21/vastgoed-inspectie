@@ -401,6 +401,9 @@ const auth=firebase.auth();
 const db=firebase.firestore();
 const serverTimestamp=firebase.firestore.FieldValue.serverTimestamp;
 
+// LOGIN SESSIE ONTHOUDEN — blijft ingelogd tussen sessies
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 // HOOFDSTUKKEN definitie
 const CHAPTERS=[
   {id:'objectgegevens',nr:1,naam:'Objectgegevens',icon:'🏢'},
@@ -439,12 +442,21 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('settings-user').textContent=user.email;
     initSettings();
     loadObjects();
-    showAppUI(true);
+    // Verberg login, toon app
+    document.getElementById('page-login').classList.remove('active');
+    document.getElementById('sidebar').style.display='flex';
+    document.getElementById('topbar').style.display='flex';
     navTo('objects');
   }else{
     currentUser=null;
-    showAppUI(false);
-    navTo('login');
+    // Toon login, verberg app
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-login').classList.add('active');
+    document.getElementById('sidebar').style.display='none';
+    document.getElementById('topbar').style.display='none';
+    // Reset login knop
+    const btn=document.getElementById('btn-inloggen');
+    if(btn){btn.textContent='Inloggen';btn.disabled=false;}
   }
 });
 
@@ -462,26 +474,42 @@ window.switchLoginTab=tab=>{
 window.inloggen=async()=>{
   const e=document.getElementById('login-email').value.trim();
   const p=document.getElementById('login-pass').value;
-  document.getElementById('login-err').textContent='';
-  try{await auth.signInWithEmailAndPassword(e,p);}
-  catch(err){document.getElementById('login-err').textContent=vertaalFout(err.code);}
+  const errEl=document.getElementById('login-err');
+  const btn=document.getElementById('btn-inloggen');
+  errEl.textContent='';
+  if(!e||!p){errEl.textContent='Vul e-mail en wachtwoord in';return;}
+  btn.textContent='Bezig...';btn.disabled=true;
+  try{
+    await auth.signInWithEmailAndPassword(e,p);
+  }catch(err){
+    errEl.textContent=vertaalFout(err.code);
+    btn.textContent='Inloggen';btn.disabled=false;
+  }
 };
 
 window.registreren=async()=>{
   const naam=document.getElementById('reg-naam').value.trim();
   const e=document.getElementById('reg-email').value.trim();
   const p=document.getElementById('reg-pass').value;
-  document.getElementById('reg-err').textContent='';
-  if(!naam){document.getElementById('reg-err').textContent='Vul je naam in';return;}
+  const errEl=document.getElementById('reg-err');
+  const btn=document.getElementById('btn-registreren');
+  errEl.textContent='';
+  if(!naam){errEl.textContent='Vul je naam in';return;}
+  if(!e||!p){errEl.textContent='Vul e-mail en wachtwoord in';return;}
+  btn.textContent='Bezig...';btn.disabled=true;
   try{
     const cred=await auth.createUserWithEmailAndPassword(e,p);
     await cred.user.updateProfile({displayName:naam});
-  }catch(err){document.getElementById('reg-err').textContent=vertaalFout(err.code);}
+  }catch(err){
+    errEl.textContent=vertaalFout(err.code);
+    btn.textContent='Account aanmaken';btn.disabled=false;
+  }
 };
 
 window.uitloggen=async()=>{
   await auth.signOut();
   currentObjId=null;currentOpnameId=null;objects=[];opnames={};
+  resetSidebar();
 };
 
 function vertaalFout(c){
@@ -1441,8 +1469,9 @@ window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=ms
 // SERVICE WORKER
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// INIT
-showAppUI(false);
+// INIT — begin met login pagina, sidebar en topbar verborgen
+document.getElementById('sidebar').style.display='none';
+document.getElementById('topbar').style.display='none';
 </script>
 </body>
 </html>
