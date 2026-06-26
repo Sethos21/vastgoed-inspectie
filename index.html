@@ -983,12 +983,15 @@ function getFotoNr(chId,subTab,idx){
 
 function renderBevindingCard(el){
   const cond=el.conditie||3;
-  // Bepaal fotonummers voor dit element
   const opn=getOpname();
   const fotoKey=el.subTab?el.chapterId+'_'+el.subTab:el.chapterId;
   const fotos=opn.fotos[fotoKey]||[];
   const startNr=getFotoNr(el.chapterId,el.subTab,0);
   const fotoRefs=fotos.length?`(foto ${startNr}${fotos.length>1?'–'+(startNr+fotos.length-1):''})`:'';
+
+  // Combineer beschrijving + onderbouwing in één veld
+  const beschrijvingMet=el.beschrijving||'';
+  const onderbouwingTekst=el.kosten_onderbouwing||'';
 
   return `<div class="bevinding-card" id="bev-${el.id}">
     <div class="bev-header">
@@ -1004,27 +1007,28 @@ function renderBevindingCard(el){
       <div class="conditie-bar">
         ${[1,2,3,4,5].map(n=>`<button class="conditie-opt ${cond==n?'sel-'+n:''}" onclick="updateBev('${el.id}','conditie',${n});renderChapter(currentChapter)">${n}<br><span style="font-size:9px">${CONDITIE[n]}</span></button>`).join('')}
       </div>
-      <div class="field" style="margin-bottom:8px;">
-        <label>Beschrijving / bevinding</label>
-        <textarea rows="2" oninput="updateBev('${el.id}','beschrijving',this.value)">${escHtml(el.beschrijving||'')}</textarea>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Beschrijving, bevinding &amp; uit te voeren werkzaamheden</label>
+        <textarea rows="4" style="font-size:13px;line-height:1.6;" oninput="updateBev('${el.id}','beschrijving',this.value)">${escHtml(beschrijvingMet)}</textarea>
       </div>
-      <div class="bev-meta-row">
-        <div class="field"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="450" oninput="updateBev('${el.id}','hoeveelheid',this.value)"/></div>
-        <div class="field"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" oninput="updateBev('${el.id}','eenheid',this.value)"/></div>
-        <div class="field"><label>Herstelkosten € indicatief</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
+      <div class="grid3" style="margin-bottom:6px;">
+        <div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="850" oninput="updateBev('${el.id}','hoeveelheid',this.value)"/></div>
+        <div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" oninput="updateBev('${el.id}','eenheid',this.value)"/></div>
+        <div class="field" style="margin-bottom:0;"><label>Herstelkosten €</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
       </div>
-      <div class="field" style="margin-bottom:8px;">
-        <label>Onderbouwing herstelkosten</label>
-        <textarea rows="2" style="font-size:13px;" placeholder="Bijv. 450 m² × €20/m² (hervoegen) = €9.000" oninput="updateBev('${el.id}','kosten_onderbouwing',this.value)">${escHtml(el.kosten_onderbouwing||'')}</textarea>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Kostensspecificatie herstel</label>
+        <textarea rows="2" style="font-size:13px;" placeholder="uit te voeren werkzaamheden: reiniging, behandeling corrosie (850 m² × €50/m² = €42.500)" oninput="updateBev('${el.id}','kosten_onderbouwing',this.value)">${escHtml(onderbouwingTekst)}</textarea>
       </div>
-      <div class="bev-meta-row" style="grid-template-columns:1fr 1fr;">
-        <div class="field" style="margin-bottom:0;">
-          <label>Vervangingskosten € indicatief</label>
-          <input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0)"/>
+      <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;">
+        <div style="font-size:11px;font-weight:600;color:var(--orange-text);margin-bottom:8px;">🏗 Vervangingsvoorstel</div>
+        <div class="grid2" style="margin-bottom:6px;">
+          <div class="field" style="margin-bottom:0;"><label>Vervangingskosten €</label><input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0)"/></div>
+          <div></div>
         </div>
         <div class="field" style="margin-bottom:0;">
-          <label>Onderbouwing vervanging</label>
-          <input type="text" value="${escHtml(el.kosten_vervanging_onderbouwing||'')}" placeholder="Bijv. 450 m² × €80/m² = €36.000" oninput="updateBev('${el.id}','kosten_vervanging_onderbouwing',this.value)"/>
+          <label>Voorstel &amp; kostenspecificatie vervanging</label>
+          <textarea rows="2" style="font-size:13px;" placeholder="vervanging: volledig nieuw metselwerk inclusief steigers (850 m² × €100/m² = €85.000)" oninput="updateBev('${el.id}','kosten_vervanging_onderbouwing',this.value)">${escHtml(el.kosten_vervanging_onderbouwing||'')}</textarea>
         </div>
       </div>
       ${el.isolatie?`<div class="isolatie-block" style="margin-top:8px;"><strong>🏠 Isolatie indicatie</strong>${escHtml(el.isolatie)}</div>`:''}
@@ -1055,7 +1059,9 @@ async function verwerkFotos(files,fotoKey){
   for(const f of files){
     const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
     const compressed=await compressPhoto(url);
-    opn.fotos[fotoKey].push({dataUrl:compressed,label:''});
+    // Auto-nummering label
+    const nr=opn.fotos[fotoKey].length+1;
+    opn.fotos[fotoKey].push({dataUrl:compressed,label:`Foto ${nr}`});
   }
   await saveOpnameData();
   renderChapter(currentChapter);
@@ -1099,32 +1105,38 @@ window.analyseerFotos=async(chId,subTab)=>{
   if(analyzeBtn){analyzeBtn.textContent='⏳ Analyseren...';analyzeBtn.disabled=true;}
   try{
     const content=fotos.slice(0,8).map((f,i)=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    // Fotonummers op basis van globale nummering
+    const startNr=getFotoNr(chId,subTab||null,0);
+    const fotoNummers=fotos.slice(0,8).map((f,i)=>`Foto ${startNr+i}: ${f.label||'Foto '+(startNr+i)}`).join(', ');
     content.push({type:'text',text:`Analyseer deze foto's van de ${tabNaam} (${ch.naam}) van een gebouw (bouwjaar ${currentObj?.jaar||'onbekend'}).
+Foto nummering: ${fotoNummers}
 
 Geef een gedetailleerde bouwkundige opname. Per zichtbaar element:
 1. Naam element
 2. Materiaal en specificaties
 3. Hoeveelheid met eenheid (m², m¹, stuks, etc.) — wees specifiek
 4. Conditiescore 1-5 (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
-5. Beschrijving toestand en gebreken
-6. Foto label — korte omschrijving wat er op de foto te zien is (bijv. "Voorgevel overzicht", "Detail voegwerk scheur")
-7. Indicatieve HERSTELKOSTEN met onderbouwing (bijv. "450 m² × €20/m² = €9.000")
-8. Indicatieve VERVANGINGSKOSTEN met onderbouwing (bijv. "450 m² × €80/m² = €36.000")
-9. Voor gevels: spouwmuur/isolatie analyse met R-waarde
+5. Beschrijving toestand en gebreken — verwijs naar fotonummers, bijv. "zie foto 3, 5"
+6. Uit te voeren werkzaamheden herstel — beschrijf de werkzaamheden
+7. Kosten herstel (getal, geen €-teken)
+8. Onderbouwing herstel in format: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] × €[prijs]/[eenheid] = €[totaal])"
+9. Vervangingsvoorstel — beschrijf wat vervangen zou worden en waarom
+10. Kosten vervanging (getal, geen €-teken)
+11. Onderbouwing vervanging in format: "vervanging: [omschrijving] ([hoeveelheid] × €[prijs]/[eenheid] = €[totaal])"
+12. Voor gevels: spouwmuur/isolatie analyse met R-waarde
 
 Reageer ALLEEN als JSON array:
 [{
   "element": "Metselwerk voorgevel",
   "materiaal": "Gebakken baksteen rood",
-  "hoeveelheid": "450",
+  "hoeveelheid": "850",
   "eenheid": "m²",
   "conditie": 3,
-  "beschrijving": "Uitgebreide voegwerkschade, plaatselijk losliggend voegwerk",
-  "foto_labels": ["Voorgevel overzicht", "Detail voegwerk scheur links"],
-  "kosten": 9000,
-  "kosten_onderbouwing": "450 m² × €20/m² (hervoegen) = €9.000",
-  "kosten_vervanging": 36000,
-  "kosten_vervanging_onderbouwing": "450 m² × €80/m² (nieuw metselwerk) = €36.000",
+  "beschrijving": "Corrosieschade en vervuiling zichtbaar op meerdere locaties, zie foto 1, 2",
+  "kosten": 42500,
+  "kosten_onderbouwing": "uit te voeren werkzaamheden: reiniging, behandeling corrosie, lokaal herstel (850 m² × €50/m² = €42.500)",
+  "kosten_vervanging": 85000,
+  "kosten_vervanging_onderbouwing": "vervanging: volledig nieuw metselwerk inclusief steigers en afvoer (850 m² × €100/m² = €85.000)",
   "isolatie": "Vermoedelijk geen spouwmuurisolatie. R-waarde ≈ 0.35 m²K/W"
 }]
 Alleen JSON, niets anders.`});
@@ -1133,29 +1145,29 @@ Alleen JSON, niets anders.`});
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
     if(s>=0&&e>s){
       const items=JSON.parse(clean.substring(s,e+1));
-      // Auto-label foto's op basis van AI analyse
-      if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
-      items.forEach((item,i)=>{
-        if(item.foto_labels&&opn.fotos[fotoKey][i]&&!opn.fotos[fotoKey][i].label){
-          opn.fotos[fotoKey][i].label=item.foto_labels[0]||'';
-        }
-      });
       // Verwijder bestaande AI-elementen van deze subtab
       opn.elementen=opn.elementen.filter(el=>!(el.chapterId===chId&&el.subTab===(subTab||null)&&el.aiAnalyse));
+      const startNr=getFotoNr(chId,subTab||null,0);
       items.forEach((item,i)=>{
+        // Voeg fotonummers toe aan beschrijving als die er niet al in zitten
+        let beschrijving=item.beschrijving||'';
+        if(fotos.length&&!beschrijving.includes('foto')){
+          const nrs=fotos.slice(0,3).map((_,fi)=>startNr+fi).join(', ');
+          beschrijving+=` (zie foto ${nrs})`;
+        }
+        // Combineer beschrijving met onderbouwing werkzaamheden
+        const onderbouwing=item.kosten_onderbouwing||'';
         opn.elementen.push({
           id:`${fotoKey}_${Date.now()}_${i}`,
-          chapterId:chId,
-          subTab:subTab||null,
-          aiAnalyse:true,
+          chapterId:chId,subTab:subTab||null,aiAnalyse:true,
           element:item.element||'Element',
           materiaal:item.materiaal||'',
           hoeveelheid:item.hoeveelheid||'',
           eenheid:item.eenheid||'',
           conditie:item.conditie||3,
-          beschrijving:item.beschrijving||'',
+          beschrijving:beschrijving,
           kosten:item.kosten||0,
-          kosten_onderbouwing:item.kosten_onderbouwing||'',
+          kosten_onderbouwing:onderbouwing,
           kosten_vervanging:item.kosten_vervanging||0,
           kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||'',
           isolatie:item.isolatie||'',
