@@ -163,6 +163,33 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 /* BEVINDINGEN */
 .bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+
+/* SNELLE INVOER */
+.si-header{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;padding:4px 10px;margin-bottom:4px;}
+.si-header span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
+.si-row{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;align-items:center;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--bg);}
+.si-row input{padding:4px 6px;border:0.5px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:12px;font-family:inherit;width:100%;outline:none;}
+.si-row input:focus{border-color:var(--border2);background:var(--bg2);}
+.si-cond{padding:4px 4px;border:0.5px solid transparent;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit;width:100%;-webkit-appearance:none;outline:none;}
+.si-cond.c1{background:var(--green-bg);color:var(--green-text);}
+.si-cond.c2{background:var(--amber-bg);color:var(--amber-text);}
+.si-cond.c3{background:var(--orange-bg);color:var(--orange-text);}
+.si-cond.c4{background:var(--red-bg);color:var(--red-text);}
+.si-cond.c5{background:var(--red-bg);color:var(--red2);}
+.si-add{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;align-items:end;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;margin-bottom:6px;}
+.si-add input,.si-add select{padding:6px 8px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;width:100%;}
+.si-add-btn{width:36px;height:36px;border-radius:6px;border:none;background:var(--accent);color:var(--accent-text);font-size:18px;cursor:pointer;}
+.si-totaal{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:8px 10px;border-top:0.5px solid var(--border);margin-top:4px;}
+
+/* BEVINDING CARD secties */
+.bev-sec-h{font-size:12px;font-weight:600;color:#3b6d11;background:#eaf3de;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
+.bev-sec-h .amt{margin-left:auto;font-size:13px;font-weight:700;}
+.bev-sec-v{font-size:12px;font-weight:600;color:#993c1d;background:#faece7;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
+.bev-sec-v .amt{margin-left:auto;font-size:13px;font-weight:700;}
+.bev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.bev-tag{font-size:11px;padding:2px 8px;border-radius:99px;border:0.5px solid var(--border);}
+.bev-tag.foto{background:var(--blue-bg);color:var(--blue-text);border-color:transparent;}
+.bev-tag.info{background:var(--bg2);color:var(--text2);}
 .bev-header{padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);background:var(--bg1);}
 .bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);font-family:inherit;outline:none;}
 .bev-body{padding:12px 14px;}
@@ -407,13 +434,14 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 // HOOFDSTUKKEN definitie
 const CHAPTERS=[
   {id:'objectgegevens',nr:1,naam:'Objectgegevens',icon:'🏢'},
-  {id:'gevels',nr:2,naam:'Gevels & exterieur',icon:'🧱',gevels:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
-  {id:'dak',nr:3,naam:'Dak & dakrand',icon:'🏗',gevels:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
-  {id:'kozijnen',nr:4,naam:'Kozijnen & beglazing',icon:'🪟',gevels:['Voorzijde','Achterzijde','Zijkanten']},
-  {id:'constructie',nr:5,naam:'Constructie & isolatie',icon:'🏠'},
-  {id:'installaties',nr:6,naam:'Installaties',icon:'⚙️'},
-  {id:'binnenzijde',nr:7,naam:'Binnenzijde',icon:'🏢'},
-  {id:'buitenruimte',nr:8,naam:'Buitenruimte',icon:'🌳'},
+  {id:'snellinvoer',nr:2,naam:'Snelle invoer',icon:'⚡'},
+  {id:'gevels',nr:3,naam:'Gevels & exterieur',icon:'🧱',gevels:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
+  {id:'dak',nr:4,naam:'Dak & dakrand',icon:'🏗',gevels:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
+  {id:'kozijnen',nr:5,naam:'Kozijnen & beglazing',icon:'🪟',gevels:['Voorzijde','Achterzijde','Zijkanten']},
+  {id:'constructie',nr:6,naam:'Constructie & isolatie',icon:'🏠'},
+  {id:'installaties',nr:7,naam:'Installaties',icon:'⚙️'},
+  {id:'binnenzijde',nr:8,naam:'Binnenzijde',icon:'🏢'},
+  {id:'buitenruimte',nr:9,naam:'Buitenruimte',icon:'🌳'},
 ];
 const CONDITIE=['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
 
@@ -865,15 +893,159 @@ window.saveObjExtra=async(key,val)=>{
   if(currentObj)currentObj[key]=val;
 };
 
+// SNELLE INVOER
+function renderSnelInvoer(container){
+  const opn=getOpname();
+  const els=opn.elementen;
+  const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+
+  const condOpts=CONDITIE.slice(1).map((l,i)=>`<option value="${i+1}">${i+1} · ${l}</option>`).join('');
+  const condClass=['','c1','c2','c3','c4','c5'];
+
+  let rows=els.map((el,i)=>`
+    <div class="si-row" id="si-${el.id}">
+      <input type="text" value="${escHtml(el.subTab||el.chapterId||'')}" placeholder="Locatie" oninput="updateBev('${el.id}','subTab',this.value)"/>
+      <input type="text" value="${escHtml(el.element||'')}" placeholder="Element..." oninput="updateBev('${el.id}','element',this.value)"/>
+      <select class="si-cond ${condClass[el.conditie||3]}" onchange="updateBev('${el.id}','conditie',parseInt(this.value));this.className='si-cond ${condClass[1]}'.replace('c1',condClass[parseInt(this.value)]||'c3');renderKostenTotaal()">
+        ${CONDITIE.slice(1).map((l,i)=>`<option value="${i+1}" ${(el.conditie||3)==i+1?'selected':''}>${i+1} · ${l}</option>`).join('')}
+      </select>
+      <input type="text" value="${escHtml(el.hoeveelheid||'')} ${escHtml(el.eenheid||'')}" placeholder="850 m²" oninput="updateHoeveelheidSnel('${el.id}',this.value)"/>
+      <input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal();updateSITotaal()"/>
+      <input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0);updateSITotaal()"/>
+      <button onclick="verwijderBev('${el.id}')" style="width:28px;height:28px;border-radius:5px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:14px;">×</button>
+    </div>`).join('');
+
+  container.innerHTML=`
+    <div class="section-title">⚡ Snelle invoer — alle bevindingen</div>
+    <button class="btn btn-blue btn-sm" style="margin-bottom:12px;" onclick="analyseerSnelInvoer()">✦ Analyseer foto's en vul automatisch in</button>
+
+    <div class="si-header">
+      <span>Locatie</span>
+      <span>Element / bevinding</span>
+      <span>Conditie</span>
+      <span>Hoeveelheid</span>
+      <span>Herstel €</span>
+      <span>Vervanging €</span>
+      <span></span>
+    </div>
+
+    <div id="si-list">${rows}</div>
+
+    <div class="si-add">
+      <input type="text" id="si-new-loc" placeholder="Locatie..."/>
+      <input type="text" id="si-new-el" placeholder="Element / bevinding..."/>
+      <select class="si-cond c2" id="si-new-cond">${condOpts}</select>
+      <input type="text" id="si-new-hv" placeholder="850 m²"/>
+      <input type="number" id="si-new-h" placeholder="0"/>
+      <input type="number" id="si-new-v" placeholder="0"/>
+      <button class="si-add-btn" onclick="snelToevoegen()">+</button>
+    </div>
+
+    <div class="si-totaal">
+      <span style="font-size:12px;color:var(--text2);">Totaal herstel</span>
+      <span id="si-tot-h" style="font-size:15px;font-weight:600;">€ ${Math.round(totH).toLocaleString('nl-NL')}</span>
+      <span style="font-size:12px;color:var(--text2);margin-left:16px;">Totaal vervanging</span>
+      <span id="si-tot-v" style="font-size:15px;font-weight:600;color:var(--orange-text);">€ ${Math.round(totV).toLocaleString('nl-NL')}</span>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-dark" onclick="navToChapter('gevels')">→ Naar uitgebreide bevindingen</button>
+      <button class="btn btn-light" onclick="navToChapter('kosten')">€ Kostenraming</button>
+    </div>`;
+}
+
+window.updateHoeveelheidSnel=async(id,val)=>{
+  const parts=val.trim().split(/\s+/);
+  const opn=getOpname();
+  const el=opn.elementen.find(e=>e.id===id);
+  if(!el)return;
+  // Splits bijv "850 m²" → hoeveelheid=850, eenheid=m²
+  if(parts.length>=2){el.hoeveelheid=parts[0];el.eenheid=parts.slice(1).join(' ');}
+  else{el.hoeveelheid=val;el.eenheid='';}
+  await saveOpnameData();
+};
+
+window.snelToevoegen=async()=>{
+  const loc=document.getElementById('si-new-loc').value.trim();
+  const el=document.getElementById('si-new-el').value.trim();
+  if(!el){showToast('Vul een element in');return;}
+  const cond=parseInt(document.getElementById('si-new-cond').value)||3;
+  const hvRaw=document.getElementById('si-new-hv').value.trim();
+  const parts=hvRaw.split(/\s+/);
+  const hv=parts[0]||'';
+  const eu=parts.slice(1).join(' ')||'';
+  const h=parseFloat(document.getElementById('si-new-h').value)||0;
+  const v=parseFloat(document.getElementById('si-new-v').value)||0;
+  const opn=getOpname();
+  opn.elementen.push({
+    id:'snel_'+Date.now(),
+    chapterId:'snellinvoer',subTab:loc,
+    element:el,materiaal:'',
+    hoeveelheid:hv,eenheid:eu,
+    conditie:cond,beschrijving:'',
+    kosten:h,kosten_onderbouwing:'',
+    kosten_vervanging:v,kosten_vervanging_onderbouwing:'',
+    isolatie:'',aiAnalyse:false
+  });
+  await saveOpnameData();
+  renderSnelInvoer(document.getElementById('page-chapter'));
+};
+
+window.updateSITotaal=()=>{
+  const opn=getOpname();
+  const totH=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  const h=document.getElementById('si-tot-h');
+  const v=document.getElementById('si-tot-v');
+  if(h)h.textContent='€ '+Math.round(totH).toLocaleString('nl-NL');
+  if(v)v.textContent='€ '+Math.round(totV).toLocaleString('nl-NL');
+};
+
+window.analyseerSnelInvoer=async()=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');return;}
+  showToast('Foto\'s analyseren voor snelle invoer...');
+  const opn=getOpname();
+  // Verzamel alle foto's van alle gevels
+  const allefotos=[];
+  Object.entries(opn.fotos).forEach(([key,fotos])=>{
+    fotos.slice(0,2).forEach(f=>allefotos.push({...f,key}));
+  });
+  if(!allefotos.length){showToast('Upload eerst foto\'s in de hoofdstukken');return;}
+  try{
+    const content=allefotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    content.push({type:'text',text:`Geef een beknopte lijst van alle zichtbare bouwkundige elementen en gebreken. Per element één regel. Reageer ALLEEN als JSON:
+[{"locatie":"Voorgevel","element":"Metselwerk","conditie":3,"hoeveelheid":"450","eenheid":"m²","kosten_herstel":9000,"kosten_vervanging":36000}]`});
+    const raw=await callClaude(content);
+    const clean=raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+    if(s>=0&&e>s){
+      const items=JSON.parse(clean.substring(s,e+1));
+      items.forEach((item,i)=>{
+        opn.elementen.push({
+          id:'ai_snel_'+Date.now()+'_'+i,
+          chapterId:'snellinvoer',subTab:item.locatie||'',
+          element:item.element||'',materiaal:'',
+          hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',
+          conditie:item.conditie||3,beschrijving:'',
+          kosten:item.kosten_herstel||0,kosten_onderbouwing:'',
+          kosten_vervanging:item.kosten_vervanging||0,kosten_vervanging_onderbouwing:'',
+          isolatie:'',aiAnalyse:true
+        });
+      });
+      await saveOpnameData();
+      showToast(`${items.length} elementen toegevoegd`);
+      renderSnelInvoer(document.getElementById('page-chapter'));
+    }
+  }catch(e){showToast('Analyse mislukt: '+e.message);}
+};
+
 // CHAPTER RENDER
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
 
-  // Speciaal geval: Objectgegevens
-  if(chId==='objectgegevens'){
-    renderObjectgegevens(container);
-    return;
-  }
+  if(chId==='objectgegevens'){renderObjectgegevens(container);return;}
+  if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
 
   const ch=CHAPTERS.find(c=>c.id===chId);
   if(!ch){return;}
@@ -987,57 +1159,62 @@ function renderBevindingCard(el){
   const fotoKey=el.subTab?el.chapterId+'_'+el.subTab:el.chapterId;
   const fotos=opn.fotos[fotoKey]||[];
   const startNr=getFotoNr(el.chapterId,el.subTab,0);
-  const fotoRefs=fotos.length?fotos.map((f,i)=>`Foto ${startNr+i}${f.label&&f.label!==`Foto ${startNr+i}`?' ('+f.label+')':''}`).join(', '):'';
+  const fotoRefs=fotos.length?fotos.map((f,i)=>`Foto ${startNr+i}${f.label&&f.label!==('Foto '+(startNr+i))?' ('+f.label+')':''}`).join(', '):'';
+  const kostenH=parseFloat(el.kosten)||0;
+  const kostenV=parseFloat(el.kosten_vervanging)||0;
 
-  return `<div class="bevinding-card" id="bev-${el.id}">
-    <div class="bev-header">
-      <div style="flex:1;">
-        <input class="bev-element-input" value="${escHtml(el.element||'')}" placeholder="Naam element" oninput="updateBev('${el.id}','element',this.value)"/>
-        ${fotoRefs?`<div style="font-size:12px;color:var(--blue-text);margin-top:3px;">📷 ${fotoRefs}</div>`:''}
-      </div>
-      <span class="badge badge-${cond}">${CONDITIE[cond]}</span>
-      <button onclick="verwijderBev('${el.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
-    </div>
-    <div class="bev-body">
-      ${el.aiAnalyse?'<div class="ai-tag">✦ AI analyse</div>':''}
-      <div class="conditie-bar">
-        ${[1,2,3,4,5].map(n=>`<button class="conditie-opt ${cond==n?'sel-'+n:''}" onclick="updateBev('${el.id}','conditie',${n});renderChapter(currentChapter)">${n}<br><span style="font-size:9px">${CONDITIE[n]}</span></button>`).join('')}
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label>Beschrijving, bevinding &amp; uit te voeren werkzaamheden</label>
-        <textarea rows="4" style="font-size:13px;line-height:1.6;" oninput="updateBev('${el.id}','beschrijving',this.value)">${escHtml(el.beschrijving||'')}</textarea>
-      </div>
+  return '<div class="bevinding-card" id="bev-'+el.id+'">'+
+    '<div class="bev-header">'+
+      '<div style="flex:1;">'+
+        '<input class="bev-element-input" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
+        '<div class="bev-tags">'+
+          (fotoRefs?'<span class="bev-tag foto">📷 '+fotoRefs+'</span>':'')+
+          (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
+          (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
+      '<button onclick="verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>'+
+    '</div>'+
+    '<div class="bev-body">'+
+      (el.aiAnalyse?'<div class="ai-tag">✦ AI analyse</div>':'')+
+      '<div class="conditie-bar">'+
+        [1,2,3,4,5].map(n=>'<button class="conditie-opt '+(cond==n?'sel-'+n:'')+'" onclick="updateBev(\''+el.id+'\',\'conditie\','+n+');renderChapter(currentChapter)">'+n+'<br><span style="font-size:9px">'+CONDITIE[n]+'</span></button>').join('')+
+      '</div>'+
+      '<div class="field" style="margin-bottom:10px;">'+
+        '<label>Beschrijving en bevinding</label>'+
+        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'beschrijving\',this.value)">'+escHtml(el.beschrijving||'')+'</textarea>'+
+      '</div>'+
 
-      <div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;">🔧 Herstel / onderhoud</div>
-        <div class="field" style="margin-bottom:8px;">
-          <label>Kostenspecificatie herstel</label>
-          <textarea rows="2" style="font-size:13px;" placeholder="uit te voeren werkzaamheden: reiniging, behandeling corrosie, lokaal herstel (850 m² × €50/m² = €42.500)" oninput="updateBev('${el.id}','kosten_onderbouwing',this.value)">${escHtml(el.kosten_onderbouwing||'')}</textarea>
-        </div>
-        <div class="grid3">
-          <div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="850" oninput="updateBev('${el.id}','hoeveelheid',this.value)"/></div>
-          <div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" oninput="updateBev('${el.id}','eenheid',this.value)"/></div>
-          <div class="field" style="margin-bottom:0;"><label>Herstelkosten €</label><input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal()"/></div>
-        </div>
-      </div>
+      '<div style="margin-bottom:8px;">'+
+        '<div class="bev-sec-h">🔧 Herstel / onderhoud <span class="amt">'+(kostenH?'€ '+Math.round(kostenH).toLocaleString('nl-NL'):'')+'</span></div>'+
+        '<div class="field" style="margin-bottom:6px;"><label>Uit te voeren werkzaamheden</label>'+
+        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_onderbouwing\',this.value)">'+escHtml(el.kosten_onderbouwing||'')+'</textarea></div>'+
+        '<div class="grid3" style="gap:6px;">'+
+          '<div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="'+escHtml(el.hoeveelheid||'')+'" placeholder="850" oninput="updateBev(\''+el.id+'\',\'hoeveelheid\',this.value)"/></div>'+
+          '<div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="'+escHtml(el.eenheid||'')+'" placeholder="m²" oninput="updateBev(\''+el.id+'\',\'eenheid\',this.value)"/></div>'+
+          '<div class="field" style="margin-bottom:0;"><label>Prijs p/eenheid €</label><input type="number" value="'+(el.prijs_herstel||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'prijs_herstel\',parseFloat(this.value)||0)"/></div>'+
+        '</div>'+
+        '<div class="field" style="margin-top:6px;margin-bottom:0;"><label>Totaal herstel €</label><input type="number" value="'+(kostenH||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten\',parseFloat(this.value)||0);renderKostenTotaal()"/></div>'+
+      '</div>'+
 
-      <div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;color:var(--orange-text);margin-bottom:8px;">🏗 Vervangingsvoorstel</div>
-        <div class="field" style="margin-bottom:8px;">
-          <label>Kostenspecificatie vervanging</label>
-          <textarea rows="2" style="font-size:13px;" placeholder="vervanging: volledig nieuw metselwerk inclusief steigers (850 m² × €100/m² = €85.000)" oninput="updateBev('${el.id}','kosten_vervanging_onderbouwing',this.value)">${escHtml(el.kosten_vervanging_onderbouwing||'')}</textarea>
-        </div>
-        <div class="grid3">
-          <div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="${escHtml(el.hoeveelheid||'')}" placeholder="850" readonly style="background:var(--bg3);font-size:13px;"/></div>
-          <div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="${escHtml(el.eenheid||'')}" placeholder="m²" readonly style="background:var(--bg3);font-size:13px;"/></div>
-          <div class="field" style="margin-bottom:0;"><label>Vervangingskosten €</label><input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0)"/></div>
-        </div>
-      </div>
+      '<div>'+
+        '<div class="bev-sec-v">🏗 Vervanging <span class="amt">'+(kostenV?'€ '+Math.round(kostenV).toLocaleString('nl-NL'):'')+'</span></div>'+
+        '<div class="field" style="margin-bottom:6px;"><label>Voorstel vervanging</label>'+
+        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging_onderbouwing\',this.value)">'+escHtml(el.kosten_vervanging_onderbouwing||'')+'</textarea></div>'+
+        '<div class="grid3" style="gap:6px;">'+
+          '<div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="'+escHtml(el.hoeveelheid||'')+'" placeholder="850" oninput="updateBev(\''+el.id+'\',\'hoeveelheid\',this.value)"/></div>'+
+          '<div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="'+escHtml(el.eenheid||'')+'" placeholder="m²" oninput="updateBev(\''+el.id+'\',\'eenheid\',this.value)"/></div>'+
+          '<div class="field" style="margin-bottom:0;"><label>Prijs p/eenheid €</label><input type="number" value="'+(el.prijs_vervanging||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'prijs_vervanging\',parseFloat(this.value)||0)"/></div>'+
+        '</div>'+
+        '<div class="field" style="margin-top:6px;margin-bottom:0;"><label>Totaal vervanging €</label><input type="number" value="'+(kostenV||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging\',parseFloat(this.value)||0)"/></div>'+
+      '</div>'+
 
-      ${el.isolatie?`<div class="isolatie-block" style="margin-top:8px;"><strong>🏠 Isolatie indicatie</strong>${escHtml(el.isolatie)}</div>`:''}
-    </div>
-  </div>`;
+      (el.isolatie?'<div class="isolatie-block" style="margin-top:10px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
+    '</div>'+
+  '</div>';
 }
+
 
 window.switchSubTab=tab=>{
   currentSubTab=tab;
