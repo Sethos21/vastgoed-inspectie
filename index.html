@@ -304,20 +304,20 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
         <div class="login-card">
           <div class="login-tabs">
-            <button class="login-tab active" id="tab-in">Inloggen</button>
-            <button class="login-tab" id="tab-reg">Registreren</button>
+            <button class="login-tab active" id="tab-in" onclick="switchLoginTab('in')">Inloggen</button>
+            <button class="login-tab" id="tab-reg" onclick="switchLoginTab('reg')">Registreren</button>
           </div>
           <div id="login-in">
             <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
-            <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password"/></div>
-            <button class="btn btn-dark btn-full" id="btn-inloggen">Inloggen</button>
+            <div class="field"><label>Wachtwoord</label><input type="password" id="login-pass" placeholder="Wachtwoord" autocomplete="current-password" onkeydown="if(event.key==='Enter')inloggen()"/></div>
+            <button class="btn btn-dark btn-full" id="btn-inloggen" onclick="inloggen()">Inloggen</button>
             <div id="login-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
           </div>
           <div id="login-reg" style="display:none;">
             <div class="field"><label>Naam</label><input type="text" id="reg-naam" placeholder="Je naam"/></div>
             <div class="field"><label>E-mailadres</label><input type="email" id="reg-email" placeholder="naam@bedrijf.nl"/></div>
-            <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens"/></div>
-            <button class="btn btn-dark btn-full" id="btn-registreren">Account aanmaken</button>
+            <div class="field"><label>Wachtwoord</label><input type="password" id="reg-pass" placeholder="Minimaal 6 tekens" onkeydown="if(event.key==='Enter')registreren()"/></div>
+            <button class="btn btn-dark btn-full" id="btn-registreren" onclick="registreren()">Account aanmaken</button>
             <div id="reg-err" style="font-size:12px;color:var(--red-text);margin-top:8px;text-align:center;"></div>
           </div>
         </div>
@@ -391,15 +391,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,collection,query,orderBy,onSnapshot,deleteDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
 
 const FB={apiKey:"AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",authDomain:"inspectie-app-26ca2.firebaseapp.com",projectId:"inspectie-app-26ca2",storageBucket:"inspectie-app-26ca2.firebasestorage.app",messagingSenderId:"668843955807",appId:"1:668843955807:web:bd8437df3bf233d931edea"};
-const app=initializeApp(FB);
-const auth=getAuth(app);
-const db=getFirestore(app);
+firebase.initializeApp(FB);
+const auth=firebase.auth();
+const db=firebase.firestore();
+const serverTimestamp=firebase.firestore.FieldValue.serverTimestamp;
 
 // HOOFDSTUKKEN definitie
 const CHAPTERS=[
@@ -425,14 +426,14 @@ let currentSubTab=null;
 let currentObj=null;
 let rapportTekst='';
 
-// FIREBASE HELPERS
-const objCol=()=>collection(db,'objects');
-const objDoc=(id)=>doc(db,'objects',id);
-const opnameDoc=(oid,opnId)=>doc(db,'objects',oid,'opnames',opnId);
-const dataDoc=(oid,opnId,type)=>doc(db,'objects',oid,'opnames',opnId,'data',type);
+// FIREBASE HELPERS (compat API)
+const objCol=()=>db.collection('objects');
+const objDoc=(id)=>db.collection('objects').doc(id);
+const opnameDoc=(oid,opnId)=>db.collection('objects').doc(oid).collection('opnames').doc(opnId);
+const dataDoc=(oid,opnId,type)=>db.collection('objects').doc(oid).collection('opnames').doc(opnId).collection('data').doc(type);
 
 // AUTH
-onAuthStateChanged(auth,user=>{
+auth.onAuthStateChanged(user=>{
   if(user){
     currentUser=user;
     document.getElementById('sb-user').textContent=user.displayName||user.email;
@@ -463,7 +464,7 @@ window.inloggen=async()=>{
   const e=document.getElementById('login-email').value.trim();
   const p=document.getElementById('login-pass').value;
   document.getElementById('login-err').textContent='';
-  try{await signInWithEmailAndPassword(auth,e,p);}
+  try{await auth.signInWithEmailAndPassword(e,p);}
   catch(err){document.getElementById('login-err').textContent=vertaalFout(err.code);}
 };
 
@@ -474,13 +475,13 @@ window.registreren=async()=>{
   document.getElementById('reg-err').textContent='';
   if(!naam){document.getElementById('reg-err').textContent='Vul je naam in';return;}
   try{
-    const cred=await createUserWithEmailAndPassword(auth,e,p);
-    await updateProfile(cred.user,{displayName:naam});
+    const cred=await auth.createUserWithEmailAndPassword(e,p);
+    await cred.user.updateProfile({displayName:naam});
   }catch(err){document.getElementById('reg-err').textContent=vertaalFout(err.code);}
 };
 
 window.uitloggen=async()=>{
-  await signOut(auth);
+  await auth.signOut();
   currentObjId=null;currentOpnameId=null;objects=[];opnames={};
 };
 
@@ -492,7 +493,7 @@ function vertaalFout(c){
 // OBJECTS
 function loadObjects(){
   setSyncStatus('syncing','Laden...');
-  onSnapshot(query(objCol(),orderBy('aangemaaktOp','desc')),snap=>{
+  objCol().orderBy('aangemaaktOp','desc').onSnapshot(snap=>{
     objects=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderObjects();
     setSyncStatus('ok','Gesynchroniseerd');
@@ -538,7 +539,7 @@ window.editObject=id=>{
 
 window.deleteObject=async id=>{
   if(!confirm('Object verwijderen?'))return;
-  await deleteDoc(objDoc(id));
+  await objDoc(id).delete();
   if(currentObjId===id){currentObjId=null;currentOpnameId=null;currentObj=null;resetSidebar();}
   showToast('Object verwijderd');
 };
@@ -549,7 +550,7 @@ window.saveObject=async()=>{
   const editId=document.getElementById('page-object-form').dataset.editId;
   const id=editId||Date.now().toString();
   const bestaand=objects.find(o=>o.id===editId);
-  await setDoc(objDoc(id),{
+  await objDoc(id).set({
     naam,type:document.getElementById('f-type').value,
     jaar:document.getElementById('f-jaar').value,
     opp:document.getElementById('f-opp').value,
@@ -577,10 +578,9 @@ window.selectObject=async id=>{
   currentObjId=id;
   currentObj=objects.find(o=>o.id===id);
   // Laad opnames
-  const snap=await getDoc(doc(db,'objects',id,'meta','opnames'));
-  let opnameList=snap.exists()?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
-  // Sla op als er nog geen is
-  if(!snap.exists()) await setDoc(doc(db,'objects',id,'meta','opnames'),{lijst:opnameList});
+  const snap=await db.collection('objects').doc(id).collection('meta').doc('opnames').get();
+  let opnameList=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+  if(!snap.exists) await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst:opnameList});
   updateSidebar(opnameList);
   currentOpnameId=opnameList[0].id;
   await loadOpnameData(id,currentOpnameId);
@@ -619,11 +619,11 @@ window.switchOpname=async val=>{
   if(val==='__nieuw'){
     const naam=prompt('Naam voor de nieuwe opname:','Opname 2');
     if(!naam)return;
-    const snap=await getDoc(doc(db,'objects',currentObjId,'meta','opnames'));
-    const lijst=snap.exists()?snap.data().lijst||[]:[]; 
+    const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
+    const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
     lijst.push(nieuw);
-    await setDoc(doc(db,'objects',currentObjId,'meta','opnames'),{lijst});
+    await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').set({lijst});
     updateSidebar(lijst);
     currentOpnameId=nieuw.id;
     document.getElementById('sb-opname-select').value=nieuw.id;
@@ -640,12 +640,12 @@ window.switchOpname=async val=>{
 async function loadOpnameData(objId,opnId){
   opnames[opnId]=opnames[opnId]||{fotos:{},elementen:[]};
   try{
-    const fs=await getDoc(dataDoc(objId,opnId,'fotos'));
-    if(fs.exists())opnames[opnId].fotos=fs.data().fotos||{};
-    const es=await getDoc(dataDoc(objId,opnId,'elementen'));
-    if(es.exists())opnames[opnId].elementen=es.data().lijst||[];
-    const rs=await getDoc(dataDoc(objId,opnId,'rapport'));
-    if(rs.exists())rapportTekst=rs.data().tekst||'';
+    const fs=await dataDoc(objId,opnId,'fotos').get();
+    if(fs.exists)opnames[opnId].fotos=fs.data().fotos||{};
+    const es=await dataDoc(objId,opnId,'elementen').get();
+    if(es.exists)opnames[opnId].elementen=es.data().lijst||[];
+    const rs=await dataDoc(objId,opnId,'rapport').get();
+    if(rs.exists)rapportTekst=rs.data().tekst||'';
     else rapportTekst='';
   }catch(e){}
 }
@@ -653,8 +653,8 @@ async function loadOpnameData(objId,opnId){
 async function saveOpnameData(){
   if(!currentObjId||!currentOpnameId)return;
   const d=opnames[currentOpnameId]||{};
-  await setDoc(dataDoc(currentObjId,currentOpnameId,'fotos'),{fotos:d.fotos||{},bijgewerktOp:serverTimestamp()});
-  await setDoc(dataDoc(currentObjId,currentOpnameId,'elementen'),{lijst:d.elementen||[],bijgewerktOp:serverTimestamp()});
+  await dataDoc(currentObjId,currentOpnameId,'fotos').set({fotos:d.fotos||{},bijgewerktOp:serverTimestamp()});
+  await dataDoc(currentObjId,currentOpnameId,'elementen').set({lijst:d.elementen||[],bijgewerktOp:serverTimestamp()});
 }
 
 function getOpname(){return opnames[currentOpnameId]||{fotos:{},elementen:[]};}
@@ -1135,7 +1135,7 @@ Hoofdstukken:
   try{
     const tekst=await callClaude([{type:'text',text:prompt}]);
     rapportTekst=tekst;
-    await setDoc(dataDoc(currentObjId,currentOpnameId,'rapport'),{tekst,aangemaaktOp:serverTimestamp()});
+    await dataDoc(currentObjId,currentOpnameId,'rapport').set({tekst,aangemaaktOp:serverTimestamp()});
     if(pbar)pbar.style.width='100%';
     setTimeout(()=>{if(loadEl)loadEl.style.display='none';renderRapportPagina();},400);
   }catch(err){
@@ -1307,21 +1307,10 @@ function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
 window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
 
-// EVENT LISTENERS (module scope — werkt betrouwbaarder dan inline onclick)
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('btn-inloggen')?.addEventListener('click',()=>window.inloggen());
-  document.getElementById('btn-registreren')?.addEventListener('click',()=>window.registreren());
-  document.getElementById('tab-in')?.addEventListener('click',()=>window.switchLoginTab('in'));
-  document.getElementById('tab-reg')?.addEventListener('click',()=>window.switchLoginTab('reg'));
-  // Enter key in login
-  document.getElementById('login-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')window.inloggen();});
-  document.getElementById('reg-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')window.registreren();});
-});
-
 // SERVICE WORKER
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// INIT (sidebar verborgen tot login)
+// INIT
 showAppUI(false);
 </script>
 </body>
