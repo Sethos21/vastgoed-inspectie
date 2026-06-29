@@ -27,57 +27,49 @@
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bot:env(safe-area-inset-bottom,0px);
 }
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#181818;--bg1:#1e1e1e;--bg2:#242424;--bg3:#2a2a2a;
-    --text:#f0f0f0;--text2:#aaa;--text3:#666;--text4:#444;
-    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
-    --accent:#f0f0f0;--accent-text:#1a1a1a;
-    --blue:#6aadee;--blue-bg:#0a1e35;--blue-text:#6aadee;
-    --green:#8ecf50;--green-bg:#1a2e0a;--green-text:#8ecf50;
-    --amber:#f5b942;--amber-bg:#2e1f00;--amber-text:#f5b942;
-    --orange:#f09060;--orange-bg:#2e1208;--orange-text:#f09060;
-    --red:#f07070;--red-bg:#2e0a0a;--red-text:#f07070;
-    --red2:#f9a0a0;
-  }
-}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#181818;--bg1:#1e1e1e;--bg2:#242424;--bg3:#2a2a2a;
+  --text:#f0f0f0;--text2:#aaa;--text3:#666;--text4:#444;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --accent:#f0f0f0;--accent-text:#1a1a1a;
+  --blue:#6aadee;--blue-bg:#0a1e35;--blue-text:#6aadee;
+  --green:#8ecf50;--green-bg:#1a2e0a;--green-text:#8ecf50;
+  --amber:#f5b942;--amber-bg:#2e1f00;--amber-text:#f5b942;
+  --orange:#f09060;--orange-bg:#2e1208;--orange-text:#f09060;
+  --red:#f07070;--red-bg:#2e0a0a;--red-text:#f07070;
+  --red2:#f9a0a0;
+}}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
-
-/* APP SHELL */
 #app{display:flex;height:100%;height:100dvh;}
 #sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s;}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-
-/* SIDEBAR */
-.sb-header{padding:16px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
-.sb-object-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-header{padding:12px 14px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.sb-object-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-object-sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.sb-opname-select{width:100%;padding:6px 8px;font-size:12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-family:inherit;margin-top:10px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;}
-.sb-nav{flex:1;overflow-y:auto;padding:8px 0;}
-.sb-section-label{font-size:10px;font-weight:600;color:var(--text3);padding:8px 16px 4px;text-transform:uppercase;letter-spacing:.5px;}
-.sb-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-left:2px solid transparent;user-select:none;}
+.sb-opname-select{width:100%;padding:5px 8px;font-size:11px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-family:inherit;margin-top:8px;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.sb-section-label{font-size:10px;font-weight:600;color:var(--text3);padding:8px 14px 3px;text-transform:uppercase;letter-spacing:.5px;}
+.sb-item{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--text2);border-left:2px solid transparent;user-select:none;}
 .sb-item:hover{background:var(--bg2);}
 .sb-item.active{color:var(--text);border-left-color:var(--blue);background:var(--blue-bg);}
-.sb-num{width:20px;height:20px;border-radius:50%;background:var(--bg3);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);}
+.sb-item.sub{padding-left:26px;font-size:12px;}
+.sb-item.sub.active{color:var(--blue-text);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-num{width:18px;height:18px;border-radius:50%;background:var(--bg3);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);}
 .sb-item.active .sb-num{background:var(--blue);color:#fff;}
-.sb-item.done .sb-num{background:var(--green-bg);color:var(--green-text);}
-.sb-item.done .sb-num::after{content:'✓';}
-.sb-footer{padding:12px 16px;border-top:0.5px solid var(--border);flex-shrink:0;}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:var(--bg3);flex-shrink:0;}
+.sb-dot.done{background:var(--green);}
+.sb-dot.active{background:var(--blue);}
+.sb-footer{padding:10px 14px;border-top:0.5px solid var(--border);flex-shrink:0;}
 .sb-user{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* TOPBAR */
 #topbar{padding:calc(var(--safe-top)+10px) 16px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
 .topbar-menu-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;padding:2px;flex-shrink:0;}
 .topbar-chapter{flex:1;}
 .topbar-chapter-title{font-size:15px;font-weight:600;}
 .topbar-chapter-sub{font-size:11px;color:var(--text3);margin-top:1px;}
-.topbar-nav{display:flex;gap:6px;flex-shrink:0;}
 .icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
-
-/* CONTENT */
 #content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.page{display:none;padding:20px;padding-bottom:calc(20px + var(--safe-bot));max-width:900px;}
+.page{display:none;padding:20px;padding-bottom:calc(20px + var(--safe-bot));max-width:960px;}
 .page.active{display:block;}
 #page-login{max-width:100%;padding:0;}
 #page-login.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;}
@@ -85,42 +77,33 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .login-logo-icon{width:64px;height:64px;background:var(--accent);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;}
 .login-logo h1{font-size:22px;font-weight:700;margin-bottom:4px;}
 .login-logo p{font-size:14px;color:var(--text3);}
-.login-card{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;}
+.login-card{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px;}
 .login-tabs{display:flex;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px;}
 .login-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;border-radius:5px;font-family:inherit;color:var(--text3);}
 .login-tab.active{background:var(--bg);color:var(--text);}
-
-/* FORMS */
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500;}
-input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;padding:10px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500;}
+input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;padding:9px 11px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;outline:none;-webkit-appearance:none;}
 input:focus,select:focus,textarea:focus{border-color:var(--blue);}
 textarea{resize:vertical;min-height:60px;line-height:1.5;}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-
-/* BUTTONS */
-.btn{padding:10px 18px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:14px;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity .1s,transform .1s;}
+.btn{padding:9px 16px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity .1s,transform .1s;}
 .btn:active{transform:scale(.97);opacity:.85;}
 .btn-dark{background:var(--accent);color:var(--accent-text);}
 .btn-light{background:var(--bg2);color:var(--text);border:0.5px solid var(--border2);}
 .btn-blue{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--border2);}
+.btn-green{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--border2);}
 .btn-full{width:100%;justify-content:center;}
-.btn-sm{padding:7px 14px;font-size:13px;}
+.btn-sm{padding:6px 12px;font-size:12px;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-
-/* SECTION TITLES */
 .section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:20px;}
 .section-title:first-child{margin-top:0;}
-
-/* CARDS */
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
-.card-header{padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--bg1);border-bottom:0.5px solid var(--border);}
-.card-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.card-body{padding:14px 16px;}
-
-/* BADGES */
+.card-header{padding:11px 14px;display:flex;align-items:center;gap:10px;background:var(--bg1);border-bottom:0.5px solid var(--border);}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.card-body{padding:13px 14px;}
 .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;}
 .badge-1{background:var(--green-bg);color:var(--green-text);}
 .badge-2{background:var(--amber-bg);color:var(--amber-text);}
@@ -130,105 +113,60 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .badge-blue{background:var(--blue-bg);color:var(--blue-text);}
 .badge-green{background:var(--green-bg);color:var(--green-text);}
 .badge-gray{background:var(--bg3);color:var(--text3);}
-
-/* OBJECTS LIST */
-.obj-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;}
+.obj-item{display:flex;align-items:center;gap:12px;padding:13px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:9px;cursor:pointer;}
 .obj-item:active{background:var(--bg2);}
 .obj-avatar{width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-
-/* CHAPTER TABS (gevels) */
-.chapter-tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;}
+.chapter-tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;}
 .chapter-tabs::-webkit-scrollbar{display:none;}
-.chapter-tab{padding:6px 14px;border-radius:99px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.chapter-tab{padding:5px 13px;border-radius:99px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:12px;color:var(--text2);font-family:inherit;white-space:nowrap;flex-shrink:0;}
 .chapter-tab.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
 .chapter-tab.has-data{border-color:var(--blue);color:var(--blue);}
-.chapter-tab.active.has-data{background:var(--accent);color:var(--accent-text);}
-
-/* FOTO ZONE */
-.foto-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;background:var(--bg1);transition:all .15s;margin-bottom:12px;}
+.foto-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:18px;text-align:center;cursor:pointer;background:var(--bg1);transition:all .15s;margin-bottom:12px;}
 .foto-zone.drag-over{background:var(--blue-bg);border-color:var(--blue);}
-.foto-zone-icon{font-size:28px;margin-bottom:6px;}
-.foto-zone-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.foto-zone-icon{font-size:26px;margin-bottom:5px;}
+.foto-zone-title{font-size:13px;font-weight:500;margin-bottom:3px;}
 .foto-zone-sub{font-size:12px;color:var(--text3);}
-
-/* FOTO GRID (groot) */
 .foto-grid-groot{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px;}
-.foto-groot-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;cursor:default;}
+.foto-groot-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;}
 .foto-groot-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .foto-groot-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.5));padding:6px 8px;}
 .foto-groot-label{color:#fff;font-size:11px;font-family:inherit;background:none;border:none;outline:none;width:100%;padding:0;}
 .foto-groot-label::placeholder{color:rgba(255,255,255,.6);}
 .foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-
-/* BEVINDINGEN */
 .bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
-
-/* SNELLE INVOER */
-.si-header{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;padding:4px 10px;margin-bottom:4px;}
-.si-header span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
-.si-row{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;align-items:center;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--bg);}
-.si-row input{padding:4px 6px;border:0.5px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:12px;font-family:inherit;width:100%;outline:none;}
-.si-row input:focus{border-color:var(--border2);background:var(--bg2);}
-.si-cond{padding:4px 4px;border:0.5px solid transparent;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit;width:100%;-webkit-appearance:none;outline:none;}
-.si-cond.c1{background:var(--green-bg);color:var(--green-text);}
-.si-cond.c2{background:var(--amber-bg);color:var(--amber-text);}
-.si-cond.c3{background:var(--orange-bg);color:var(--orange-text);}
-.si-cond.c4{background:var(--red-bg);color:var(--red-text);}
-.si-cond.c5{background:var(--red-bg);color:var(--red2);}
-.si-add{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 36px;gap:6px;align-items:end;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;margin-bottom:6px;}
-.si-add input,.si-add select{padding:6px 8px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;width:100%;}
-.si-add-btn{width:36px;height:36px;border-radius:6px;border:none;background:var(--accent);color:var(--accent-text);font-size:18px;cursor:pointer;}
-.si-totaal{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:8px 10px;border-top:0.5px solid var(--border);margin-top:4px;}
-
-/* BEVINDING CARD secties */
-.bev-sec-h{font-size:12px;font-weight:600;color:#3b6d11;background:#eaf3de;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
-.bev-sec-h .amt{margin-left:auto;font-size:13px;font-weight:700;}
-.bev-sec-v{font-size:12px;font-weight:600;color:#993c1d;background:#faece7;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
-.bev-sec-v .amt{margin-left:auto;font-size:13px;font-weight:700;}
+.bev-header{padding:10px 13px;display:flex;align-items:flex-start;gap:8px;border-bottom:0.5px solid var(--border);background:var(--bg1);}
+.bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);font-family:inherit;outline:none;}
+.bev-body{padding:11px 13px;}
 .bev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
-.bev-tag{font-size:11px;padding:2px 8px;border-radius:99px;border:0.5px solid var(--border);}
+.bev-tag{font-size:11px;padding:2px 7px;border-radius:99px;border:0.5px solid var(--border);}
 .bev-tag.foto{background:var(--blue-bg);color:var(--blue-text);border-color:transparent;}
 .bev-tag.info{background:var(--bg2);color:var(--text2);}
-.bev-header{padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);background:var(--bg1);}
-.bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);font-family:inherit;outline:none;}
-.bev-body{padding:12px 14px;}
-.conditie-bar{display:flex;gap:5px;margin-bottom:10px;}
-.conditie-opt{flex:1;padding:6px 2px;border:0.5px solid var(--border2);border-radius:5px;background:none;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;text-align:center;color:var(--text3);}
+.conditie-bar{display:flex;gap:4px;margin-bottom:10px;}
+.conditie-opt{flex:1;padding:5px 2px;border:0.5px solid var(--border2);border-radius:5px;background:none;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;text-align:center;color:var(--text3);}
 .conditie-opt.sel-1{background:var(--green-bg);color:var(--green-text);border-color:transparent;}
 .conditie-opt.sel-2{background:var(--amber-bg);color:var(--amber-text);border-color:transparent;}
 .conditie-opt.sel-3{background:var(--orange-bg);color:var(--orange-text);border-color:transparent;}
 .conditie-opt.sel-4{background:var(--red-bg);color:var(--red-text);border-color:transparent;}
 .conditie-opt.sel-5{background:var(--red-bg);color:var(--red2);border-color:var(--red-text);}
-.bev-meta-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
-.bev-meta-row .field{margin-bottom:0;}
-.bev-meta-row .field label{font-size:11px;}
-.bev-meta-row input{font-size:13px;padding:7px 10px;}
 .ai-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--blue-bg);color:var(--blue-text);padding:2px 8px;border-radius:99px;margin-bottom:6px;}
-.isolatie-block{background:var(--blue-bg);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;font-size:12px;color:var(--blue-text);line-height:1.6;}
+.isolatie-block{background:var(--blue-bg);border-radius:var(--radius-sm);padding:9px 11px;margin-top:8px;font-size:12px;color:var(--blue-text);line-height:1.6;}
 .isolatie-block strong{display:block;margin-bottom:2px;}
-
-/* KOSTEN */
-.kosten-totaal-banner{background:var(--accent);color:var(--accent-text);border-radius:var(--radius);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.bev-sec-h{font-size:12px;font-weight:600;color:#3b6d11;background:#eaf3de;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
+.bev-sec-h .amt{margin-left:auto;font-size:13px;font-weight:700;}
+.bev-sec-v{font-size:12px;font-weight:600;color:#993c1d;background:#faece7;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;}
+.bev-sec-v .amt{margin-left:auto;font-size:13px;font-weight:700;}
+.kosten-totaal-banner{background:var(--accent);color:var(--accent-text);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .kosten-totaal-label{font-size:12px;opacity:.7;}
-.kosten-totaal-amt{font-size:26px;font-weight:600;}
+.kosten-totaal-amt{font-size:24px;font-weight:600;}
 .kosten-accordion{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
-.kosten-acc-header{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg1);}
+.kosten-acc-header{padding:10px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg1);}
 .kosten-acc-header:active{background:var(--bg2);}
-.kosten-acc-icon{font-size:16px;flex-shrink:0;}
 .kosten-acc-naam{flex:1;font-size:13px;font-weight:500;}
-.kosten-acc-amt{font-size:13px;font-weight:600;}
-.kosten-acc-arrow{font-size:12px;color:var(--text3);margin-left:6px;transition:transform .2s;}
+.kosten-acc-arrow{font-size:12px;color:var(--text3);margin-left:4px;transition:transform .2s;}
 .kosten-acc-arrow.open{transform:rotate(90deg);}
-.kosten-acc-body{display:none;padding:10px 14px;border-top:0.5px solid var(--border);}
+.kosten-acc-body{display:none;padding:10px 13px;border-top:0.5px solid var(--border);}
 .kosten-acc-body.open{display:block;}
-.kosten-sub-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;font-size:12px;border-bottom:0.5px solid var(--border);}
-.kosten-sub-row:last-child{border:none;font-weight:500;padding-top:8px;font-size:13px;}
-.kosten-sub-naam{color:var(--text2);flex:1;padding-right:8px;}
-.kosten-sub-onderbouwing{font-size:11px;color:var(--text3);}
-.kosten-sub-amt{font-weight:500;flex-shrink:0;}
-
-/* LOADING */
 .loading-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:13px;padding:8px 0;}
 .dots{display:flex;gap:4px;}
 .dots span{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:blink 1.2s infinite;}
@@ -237,38 +175,57 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 .progress-wrap{background:var(--bg2);border-radius:99px;height:4px;margin:8px 0;overflow:hidden;}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
-
-/* EMPTY STATE */
-.empty{text-align:center;padding:40px 20px;color:var(--text3);}
-.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty{text-align:center;padding:36px 20px;color:var(--text3);}
+.empty-icon{font-size:34px;margin-bottom:9px;}
 .empty p{font-size:13px;line-height:1.6;}
-
-/* RAPPORT */
-.rapport-card{background:var(--bg1);border-radius:var(--radius);padding:16px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
-.rapport-card h2{font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px;}
-.rapport-card h3{font-size:14px;font-weight:600;margin:12px 0 4px;}
+.rapport-card{background:var(--bg1);border-radius:var(--radius);padding:14px;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:12px;}
+.rapport-card h2{font-size:15px;font-weight:700;margin:14px 0 5px;border-bottom:0.5px solid var(--border);padding-bottom:4px;}
+.rapport-card h3{font-size:14px;font-weight:600;margin:10px 0 3px;}
 .rapport-card table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
-.rapport-card td{border:0.5px solid var(--border);padding:6px 8px;}
-
-/* BAG */
+.rapport-card td,rapport-card th{border:0.5px solid var(--border);padding:5px 8px;}
 .bag-wrap{position:relative;}
 .bag-dd{position:absolute;left:0;right:0;top:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:200;max-height:200px;overflow-y:auto;margin-top:2px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-.bag-dd-item{padding:10px 13px;font-size:13px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
+.bag-dd-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:0.5px solid var(--border);color:var(--text);}
 .bag-dd-item:active{background:var(--bg2);}
-.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:5px;font-weight:500;}
+.bag-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--green-bg);color:var(--green-text);margin-top:4px;font-weight:500;}
 .bag-badge.fail{background:var(--amber-bg);color:var(--amber-text);}
-
-/* TOAST */
-.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:var(--accent-text);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;}
+.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:var(--accent-text);padding:9px 18px;border-radius:99px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-
-/* SYNC */
 .sync-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 .sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* RESPONSIVE - mobile */
+.si-header{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 34px;gap:5px;padding:4px 10px;margin-bottom:4px;}
+.si-header span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
+.si-row{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 34px;gap:5px;align-items:center;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--bg);}
+.si-row input{padding:4px 6px;border:0.5px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:12px;font-family:inherit;width:100%;outline:none;}
+.si-row input:focus{border-color:var(--border2);background:var(--bg2);}
+.si-cond{padding:3px 4px;border:0.5px solid transparent;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit;width:100%;-webkit-appearance:none;outline:none;}
+.si-cond.c1{background:var(--green-bg);color:var(--green-text);}
+.si-cond.c2{background:var(--amber-bg);color:var(--amber-text);}
+.si-cond.c3{background:var(--orange-bg);color:var(--orange-text);}
+.si-cond.c4{background:var(--red-bg);color:var(--red-text);}
+.si-cond.c5{background:var(--red-bg);color:var(--red2);}
+.si-add{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 34px;gap:5px;align-items:end;padding:7px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;margin-bottom:6px;}
+.si-add input,.si-add select{padding:5px 7px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;width:100%;}
+.si-add-btn{width:34px;height:32px;border-radius:6px;border:none;background:var(--accent);color:var(--accent-text);font-size:18px;cursor:pointer;}
+.si-totaal{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:8px 10px;border-top:0.5px solid var(--border);margin-top:4px;}
+.mjop-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;}
+.mjop-table th{padding:7px 10px;background:var(--bg1);border:0.5px solid var(--border);text-align:left;font-weight:500;font-size:11px;color:var(--text2);}
+.mjop-table td{padding:7px 10px;border:0.5px solid var(--border);}
+.mjop-table tr:hover td{background:var(--bg1);}
+.mjop-amt-h{color:#3b6d11;font-weight:500;}
+.mjop-amt-v{color:#993c1d;font-weight:500;}
+.mjop-banner{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.mjop-stat{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;}
+.mjop-stat-val{font-size:20px;font-weight:600;}
+.mjop-stat-lbl{font-size:11px;color:var(--text3);margin-top:3px;}
+.rapport-keuze{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.rapport-opt{border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;background:var(--bg);}
+.rapport-opt:hover{border-color:var(--blue);background:var(--blue-bg);}
+.rapport-opt-icon{font-size:22px;margin-bottom:6px;}
+.rapport-opt-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.rapport-opt-sub{font-size:11px;color:var(--text3);line-height:1.5;}
 @media(max-width:700px){
   #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);width:260px;}
   #sidebar.open{transform:translateX(0);}
@@ -280,10 +237,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </head>
 <body>
 <div id="app">
-  <!-- SIDEBAR OVERLAY (mobile) -->
   <div class="sidebar-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
-
-  <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="sb-header">
       <div class="sb-object-name" id="sb-object-name">VastgoedInspectie</div>
@@ -292,21 +246,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <nav class="sb-nav" id="sb-nav">
       <div class="sb-section-label">Navigatie</div>
-      <div class="sb-item active" onclick="navTo('objects')" data-page="objects">
-        <div class="sb-num">🏢</div>Objecten
-      </div>
+      <div class="sb-item active" onclick="navTo('objects')" data-page="objects"><div class="sb-num">🏢</div>Objecten</div>
     </nav>
     <div class="sb-footer">
-      <div class="sync-indicator" id="sync-indicator">
-        <div class="sync-dot" id="sync-dot"></div>
-        <span id="sync-text">Niet verbonden</span>
-      </div>
-      <div class="sb-user" id="sb-user" style="margin-top:6px;"></div>
-      <button onclick="uitloggen()" style="margin-top:8px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:0;">Uitloggen</button>
+      <div class="sync-indicator"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Niet verbonden</span></div>
+      <div class="sb-user" id="sb-user" style="margin-top:5px;"></div>
+      <button onclick="uitloggen()" style="margin-top:6px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:0;">Uitloggen</button>
     </div>
   </div>
-
-  <!-- MAIN -->
   <div id="main">
     <div id="topbar">
       <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -314,14 +261,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="topbar-chapter-title" id="topbar-title">VastgoedInspectie</div>
         <div class="topbar-chapter-sub" id="topbar-sub">Professionele bouwkundige inspectietool</div>
       </div>
-      <div class="topbar-nav">
+      <div style="display:flex;gap:6px;">
         <button class="icon-btn" onclick="navTo('settings')" title="Instellingen">⚙</button>
       </div>
     </div>
-
     <div id="content">
-
-      <!-- LOGIN -->
       <div id="page-login" class="page active">
         <div class="login-logo">
           <div class="login-logo-icon">🏢</div>
@@ -330,8 +274,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
         <div class="login-card">
           <div class="login-tabs">
-            <button class="login-tab active" id="tab-in" onclick="switchLoginTab('in')">Inloggen</button>
-            <button class="login-tab" id="tab-reg" onclick="switchLoginTab('reg')">Registreren</button>
+            <button class="login-tab active" onclick="switchLoginTab('in')">Inloggen</button>
+            <button class="login-tab" onclick="switchLoginTab('reg')">Registreren</button>
           </div>
           <div id="login-in">
             <div class="field"><label>E-mailadres</label><input type="email" id="login-email" placeholder="naam@bedrijf.nl" autocomplete="email"/></div>
@@ -348,30 +292,20 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           </div>
         </div>
       </div>
-
-      <!-- OBJECTEN -->
       <div id="page-objects" class="page">
         <div class="section-title">Mijn objecten</div>
         <div id="objects-list"></div>
         <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
-
-      <!-- OBJECT FORM -->
       <div id="page-object-form" class="page">
         <div class="section-title">Objectgegevens</div>
-        <div class="field">
-          <label>Adres zoeken (BAG)</label>
-          <div class="bag-wrap">
-            <input type="text" id="f-bag" placeholder="Kerkstraat 12 Nijmegen..." autocomplete="off" oninput="bagSuggest(this.value)"/>
-            <div id="bag-dd" class="bag-dd" style="display:none;"></div>
-          </div>
+        <div class="field"><label>Adres zoeken (BAG)</label>
+          <div class="bag-wrap"><input type="text" id="f-bag" placeholder="Kerkstraat 12 Nijmegen..." autocomplete="off" oninput="bagSuggest(this.value)"/><div id="bag-dd" class="bag-dd" style="display:none;"></div></div>
           <div id="bag-status"></div>
         </div>
         <div class="field"><label>Naam / adres</label><input type="text" id="f-naam" placeholder="Automatisch ingevuld"/></div>
         <div class="grid2">
-          <div class="field"><label>Type object</label>
-            <select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select>
-          </div>
+          <div class="field"><label>Type object</label><select id="f-type"><option>Appartementencomplex</option><option>Eengezinswoning</option><option>Kantoorpand</option><option>Winkelruimte</option><option>Bedrijfshal</option><option>Gemengd gebruik</option></select></div>
           <div class="field"><label>Bouwjaar <span id="f-jaar-badge" style="color:var(--green-text);font-size:11px;"></span></label><input type="number" id="f-jaar" placeholder="Uit BAG"/></div>
         </div>
         <div class="grid2">
@@ -385,13 +319,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <button class="btn btn-light" onclick="navTo('objects')">Annuleren</button>
         </div>
       </div>
-
-      <!-- HOOFDSTUK PAGINA'S (1-8 + kosten + rapport) worden dynamisch geladen -->
       <div id="page-chapter" class="page"></div>
-
-      <!-- SETTINGS -->
       <div id="page-settings" class="page">
-        <div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px;">
+        <div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:14px;">
           <div style="font-size:12px;color:var(--text3);">Ingelogd als</div>
           <div id="settings-user" style="font-weight:600;font-size:14px;margin-top:2px;"></div>
         </div>
@@ -401,65 +331,50 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <button class="btn btn-dark btn-sm" onclick="saveApiKey()">Opslaan</button>
           <button class="btn btn-light btn-sm" onclick="togglePass('api-key-inp')">Toon</button>
         </div>
-        <div id="api-status" style="font-size:12px;color:var(--text3);margin-bottom:16px;"></div>
+        <div id="api-status" style="font-size:12px;color:var(--text3);margin-bottom:14px;"></div>
         <div class="section-title">Worker URL</div>
         <div class="field"><input type="text" id="worker-inp" placeholder="https://....workers.dev"/></div>
         <div class="btn-row" style="margin-bottom:6px;">
           <button class="btn btn-dark btn-sm" onclick="saveWorker()">Opslaan</button>
           <button class="btn btn-light btn-sm" onclick="testWorker()">Test verbinding</button>
         </div>
-        <div id="worker-status" style="font-size:12px;color:var(--text3);margin-bottom:20px;"></div>
+        <div id="worker-status" style="font-size:12px;color:var(--text3);margin-bottom:18px;"></div>
         <button class="btn btn-light btn-full btn-sm" style="color:var(--red-text);" onclick="uitloggen()">Uitloggen</button>
       </div>
-
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-
 const FB={apiKey:"AIzaSyAMAX3QgUCJgmTa4dCsdO_lc74w9GMPzRk",authDomain:"inspectie-app-26ca2.firebaseapp.com",projectId:"inspectie-app-26ca2",storageBucket:"inspectie-app-26ca2.firebasestorage.app",messagingSenderId:"668843955807",appId:"1:668843955807:web:bd8437df3bf233d931edea"};
 firebase.initializeApp(FB);
 const auth=firebase.auth();
 const db=firebase.firestore();
 const serverTimestamp=firebase.firestore.FieldValue.serverTimestamp;
-
-// LOGIN SESSIE ONTHOUDEN — blijft ingelogd tussen sessies
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-// HOOFDSTUKKEN definitie
-const CHAPTERS=[
-  {id:'objectgegevens',nr:1,naam:'Objectgegevens',icon:'🏢'},
-  {id:'gebouwpaspoort',nr:2,naam:'Gebouwpaspoort',icon:'📋'},
-  {id:'gevels',nr:3,naam:'Gevels & exterieur',icon:'🧱',gevels:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
-  {id:'dak',nr:4,naam:'Dak & dakrand',icon:'🏗',gevels:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
-  {id:'kozijnen',nr:5,naam:'Kozijnen & beglazing',icon:'🪟',gevels:['Voorzijde','Achterzijde','Zijkanten']},
-  {id:'constructie',nr:6,naam:'Constructie & isolatie',icon:'🏠'},
-  {id:'installaties',nr:7,naam:'Installaties',icon:'⚙️'},
-  {id:'binnenzijde',nr:8,naam:'Binnenzijde',icon:'🏢'},
-  {id:'buitenruimte',nr:9,naam:'Buitenruimte',icon:'🌳'},
+// INSPECTIE PARAGRAFEN
+const INSP_PARAGRAFEN=[
+  {id:'gevels',naam:'Gevels & exterieur',icon:'🧱',subtabs:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
+  {id:'dak',naam:'Dak & dakrand',icon:'🏗',subtabs:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
+  {id:'kozijnen',naam:'Kozijnen & beglazing',icon:'🪟',subtabs:['Voorzijde','Achterzijde','Zijkanten']},
+  {id:'constructie',naam:'Constructie & isolatie',icon:'🏠'},
+  {id:'installaties',naam:'Installaties',icon:'⚙️'},
+  {id:'binnenzijde',naam:'Binnenzijde',icon:'🏢'},
+  {id:'buitenruimte',naam:'Buitenruimte',icon:'🌳'},
 ];
 const CONDITIE=['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
+const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 
 // STATE
-let currentUser=null;
-let objects=[];
-let currentObjId=null;
-let currentOpnameId=null;
-let opnames={};// {opnameId:{fotos:{},elementen:[]}}
-let currentChapter='gevels';
-let currentSubTab=null;
-let currentObj=null;
-let rapportTekst='';
+let currentUser=null,objects=[],currentObjId=null,currentOpnameId=null;
+let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
-// FIREBASE HELPERS (compat API)
-const objCol=()=>db.collection('objects');
-const objDoc=(id)=>db.collection('objects').doc(id);
-const opnameDoc=(oid,opnId)=>db.collection('objects').doc(oid).collection('opnames').doc(opnId);
+// FIREBASE HELPERS
+const objDoc=id=>db.collection('objects').doc(id);
 const dataDoc=(oid,opnId,type)=>db.collection('objects').doc(oid).collection('opnames').doc(opnId).collection('data').doc(type);
 
 // AUTH
@@ -468,37 +383,27 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     document.getElementById('sb-user').textContent=user.displayName||user.email;
     document.getElementById('settings-user').textContent=user.email;
-    initSettings();
-    loadObjects();
-    // Verberg login, toon app
+    initSettings();loadObjects();
     document.getElementById('page-login').classList.remove('active');
     document.getElementById('sidebar').style.display='flex';
     document.getElementById('topbar').style.display='flex';
     navTo('objects');
   }else{
     currentUser=null;
-    // Toon login, verberg app
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-login').classList.add('active');
     document.getElementById('sidebar').style.display='none';
     document.getElementById('topbar').style.display='none';
-    // Reset login knop
     const btn=document.getElementById('btn-inloggen');
     if(btn){btn.textContent='Inloggen';btn.disabled=false;}
   }
 });
-
-function showAppUI(on){
-  document.getElementById('sidebar').style.display=on?'':'none';
-  document.getElementById('topbar').style.display=on?'':'none';
-}
 
 window.switchLoginTab=tab=>{
   document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='in')||(i===1&&tab==='reg')));
   document.getElementById('login-in').style.display=tab==='in'?'block':'none';
   document.getElementById('login-reg').style.display=tab==='reg'?'block':'none';
 };
-
 window.inloggen=async()=>{
   const e=document.getElementById('login-email').value.trim();
   const p=document.getElementById('login-pass').value;
@@ -507,14 +412,9 @@ window.inloggen=async()=>{
   errEl.textContent='';
   if(!e||!p){errEl.textContent='Vul e-mail en wachtwoord in';return;}
   btn.textContent='Bezig...';btn.disabled=true;
-  try{
-    await auth.signInWithEmailAndPassword(e,p);
-  }catch(err){
-    errEl.textContent=vertaalFout(err.code);
-    btn.textContent='Inloggen';btn.disabled=false;
-  }
+  try{await auth.signInWithEmailAndPassword(e,p);}
+  catch(err){errEl.textContent=vertaalFout(err.code);btn.textContent='Inloggen';btn.disabled=false;}
 };
-
 window.registreren=async()=>{
   const naam=document.getElementById('reg-naam').value.trim();
   const e=document.getElementById('reg-email').value.trim();
@@ -525,21 +425,13 @@ window.registreren=async()=>{
   if(!naam){errEl.textContent='Vul je naam in';return;}
   if(!e||!p){errEl.textContent='Vul e-mail en wachtwoord in';return;}
   btn.textContent='Bezig...';btn.disabled=true;
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(e,p);
-    await cred.user.updateProfile({displayName:naam});
-  }catch(err){
-    errEl.textContent=vertaalFout(err.code);
-    btn.textContent='Account aanmaken';btn.disabled=false;
-  }
+  try{const cred=await auth.createUserWithEmailAndPassword(e,p);await cred.user.updateProfile({displayName:naam});}
+  catch(err){errEl.textContent=vertaalFout(err.code);btn.textContent='Account aanmaken';btn.disabled=false;}
 };
-
 window.uitloggen=async()=>{
   await auth.signOut();
-  currentObjId=null;currentOpnameId=null;objects=[];opnames={};
-  resetSidebar();
+  currentObjId=null;currentOpnameId=null;objects=[];opnames={};resetSidebar();
 };
-
 function vertaalFout(c){
   const m={'auth/invalid-email':'Ongeldig e-mailadres','auth/user-not-found':'Geen account gevonden','auth/wrong-password':'Onjuist wachtwoord','auth/invalid-credential':'E-mail of wachtwoord onjuist','auth/email-already-in-use':'E-mailadres al in gebruik','auth/weak-password':'Wachtwoord minimaal 6 tekens'};
   return m[c]||'Er ging iets mis';
@@ -548,40 +440,28 @@ function vertaalFout(c){
 // OBJECTS
 function loadObjects(){
   setSyncStatus('syncing','Laden...');
-  objCol().orderBy('aangemaaktOp','desc').onSnapshot(snap=>{
+  db.collection('objects').orderBy('aangemaaktOp','desc').onSnapshot(snap=>{
     objects=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderObjects();
-    setSyncStatus('ok','Gesynchroniseerd');
+    renderObjects();setSyncStatus('ok','Gesynchroniseerd');
   });
 }
-
 function renderObjects(){
   const list=document.getElementById('objects-list');
-  if(!objects.length){
-    list.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen objecten.<br>Maak er een aan.</p></div>';
-    return;
-  }
-  list.innerHTML=objects.map(o=>`
-    <div class="obj-item" onclick="selectObject('${o.id}')">
-      <div class="obj-avatar">${o.type==='Eengezinswoning'?'🏠':o.type==='Appartementencomplex'?'🏢':o.type==='Kantoorpand'?'🏗':'🏠'}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.naam||'Naamloos'}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Bewerken">✎</button>
-        <button onclick="event.stopPropagation();deleteObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Verwijderen">🗑</button>
-        <span style="color:var(--text3);font-size:18px;">›</span>
-      </div>
-    </div>`).join('');
+  if(!objects.length){list.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen objecten.<br>Maak er een aan.</p></div>';return;}
+  list.innerHTML=objects.map(o=>`<div class="obj-item" onclick="selectObject('${o.id}')">
+    <div class="obj-avatar">${o.type==='Eengezinswoning'?'🏠':o.type==='Kantoorpand'?'🏗':'🏢'}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.naam||'Naamloos'}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px;">${o.type||''}${o.jaar?' · '+o.jaar:''}${o.aangemaaktDoor?' · '+o.aangemaaktDoor:''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <button onclick="event.stopPropagation();editObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">✎</button>
+      <button onclick="event.stopPropagation();deleteObject('${o.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">🗑</button>
+      <span style="color:var(--text3);font-size:18px;">›</span>
+    </div>
+  </div>`).join('');
 }
-
-window.newObject=()=>{
-  clearObjectForm();
-  document.getElementById('page-object-form').dataset.editId='';
-  navTo('object-form');
-};
-
+window.newObject=()=>{clearObjectForm();document.getElementById('page-object-form').dataset.editId='';navTo('object-form');};
 window.editObject=id=>{
   const o=objects.find(x=>x.id===id);if(!o)return;
   clearObjectForm();
@@ -591,14 +471,12 @@ window.editObject=id=>{
   document.getElementById('page-object-form').dataset.editId=id;
   navTo('object-form');
 };
-
 window.deleteObject=async id=>{
   if(!confirm('Object verwijderen?'))return;
   await objDoc(id).delete();
   if(currentObjId===id){currentObjId=null;currentOpnameId=null;currentObj=null;resetSidebar();}
   showToast('Object verwijderd');
 };
-
 window.saveObject=async()=>{
   const naam=document.getElementById('f-naam').value.trim();
   if(!naam){showToast('Vul een naam in');return;}
@@ -615,10 +493,8 @@ window.saveObject=async()=>{
     aangemaaktOp:bestaand?.aangemaaktOp||serverTimestamp(),
     aangemaaktDoor:bestaand?.aangemaaktDoor||(currentUser?.displayName||currentUser?.email||''),
   });
-  showToast('Object opgeslagen');
-  navTo('objects');
+  showToast('Object opgeslagen');navTo('objects');
 };
-
 function clearObjectForm(){
   ['f-naam','f-jaar','f-opp','f-eenheden','f-postcode','f-context','f-bag'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-type').selectedIndex=0;
@@ -630,38 +506,42 @@ function clearObjectForm(){
 
 // OPNAMES
 window.selectObject=async id=>{
-  currentObjId=id;
-  currentObj=objects.find(o=>o.id===id);
-  // Laad opnames
+  currentObjId=id;currentObj=objects.find(o=>o.id===id);
   const snap=await db.collection('objects').doc(id).collection('meta').doc('opnames').get();
-  let opnameList=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
-  if(!snap.exists) await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst:opnameList});
-  updateSidebar(opnameList);
-  currentOpnameId=opnameList[0].id;
+  let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+  if(!snap.exists)await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst});
+  updateSidebar(lijst);
+  currentOpnameId=lijst[0].id;
   await loadOpnameData(id,currentOpnameId);
   document.getElementById('sb-opname-select').style.display='block';
-  navTo('chapter');
-  renderChapter('gevels');
+  navToChapter('objectgegevens');
 };
 
 function updateSidebar(opnameList){
-  // Update topbar
   document.getElementById('sb-object-name').textContent=currentObj?.naam||'Object';
   document.getElementById('sb-object-sub').textContent=(currentObj?.type||'')+(currentObj?.jaar?', '+currentObj.jaar:'');
-  // Update opname dropdown
   const sel=document.getElementById('sb-opname-select');
-  sel.innerHTML=opnameList.map(o=>`<option value="${o.id}">${o.naam} — ${o.datum}</option>`).join('')+'<option value="__nieuw">+ Nieuwe opname</option>';
-  // Update nav
+  sel.innerHTML=opnameList.map(o=>`<option value="${o.id}">${o.naam} — ${o.datum}</option>`).join('')+'<option value="__nieuw">+ Nieuwe opname aanmaken</option>';
+  const opn=getOpname();
+  // Bereken voortgang dots
+  const inGevuld=id=>{const para=INSP_PARAGRAFEN.find(p=>p.id===id);if(!para)return false;const tabs=para.subtabs||[null];return tabs.some(t=>{const key=t?id+'_'+t:id;return(opn.fotos[key]||[]).length>0||opn.elementen.some(e=>e.chapterId===id);});};
   const nav=document.getElementById('sb-nav');
   nav.innerHTML=`
-    <div class="sb-section-label">Objecten</div>
-    <div class="sb-item" onclick="navTo('objects')" data-page="objects"><div class="sb-num">←</div>Terug naar objecten</div>
-    <div class="sb-section-label">Hoofdstukken</div>
-    ${CHAPTERS.map(c=>`<div class="sb-item" onclick="navToChapter('${c.id}')" data-chapter="${c.id}"><div class="sb-num">${c.nr}</div>${c.naam}</div>`).join('')}
+    <div class="sb-section-label">Navigatie</div>
+    <div class="sb-item" onclick="navTo('objects')" data-page="objects"><div class="sb-num">←</div>Alle objecten</div>
+    <div class="sb-section-label">Object</div>
+    <div class="sb-item" onclick="navToChapter('objectgegevens')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot ${currentObj?.naam?'done':''}" style="margin-left:auto;"></div></div>
+    <div class="sb-item" onclick="navToChapter('gebouwpaspoort')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot ${currentObj?.gp?'done':''}" style="margin-left:auto;"></div></div>
+    <div class="sb-section-label">Inspectie</div>
+    ${INSP_PARAGRAFEN.map(p=>`<div class="sb-item sub" onclick="navToChapter('${p.id}')" data-chapter="${p.id}"><div class="sb-dot ${inGevuld(p.id)?'done':''}"></div>${p.naam}</div>`).join('')}
+    <div class="sb-section-label">Onderhoud & herstel</div>
+    <div class="sb-item sub" onclick="navToChapter('onderhoud')" data-chapter="onderhoud"><div class="sb-dot ${opn.elementen.some(e=>e.kosten>0)?'done':''}"></div>Bevindingen & kosten</div>
+    <div class="sb-section-label">MJOP</div>
+    <div class="sb-item sub" onclick="navToChapter('mjop')" data-chapter="mjop"><div class="sb-dot ${opn.mjop&&opn.mjop.length?'done':''}"></div>Meerjaren plan</div>
     <div class="sb-section-label">Samenvatting</div>
     <div class="sb-item" onclick="navToChapter('snellinvoer')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>
     <div class="sb-item" onclick="navToChapter('kosten')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>
-    <div class="sb-item" onclick="navToChapter('rapport')" data-chapter="rapport"><div class="sb-num">📄</div>Rapport genereren</div>`;
+    <div class="sb-item" onclick="navToChapter('rapportage')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>`;
 }
 
 function resetSidebar(){
@@ -673,36 +553,36 @@ function resetSidebar(){
 
 window.switchOpname=async val=>{
   if(val==='__nieuw'){
-    const naam=prompt('Naam voor de nieuwe opname:','Opname 2');
-    if(!naam)return;
+    const naam=prompt('Naam voor de nieuwe opname:','Opname 2');if(!naam)return;
     const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
     const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
     lijst.push(nieuw);
     await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').set({lijst});
-    updateSidebar(lijst);
-    currentOpnameId=nieuw.id;
+    updateSidebar(lijst);currentOpnameId=nieuw.id;
     document.getElementById('sb-opname-select').value=nieuw.id;
-    opnames[nieuw.id]={fotos:{},elementen:[]};
-    renderChapter(currentChapter);
-    showToast('Nieuwe opname aangemaakt');
-    return;
+    opnames[nieuw.id]={fotos:{},elementen:[],mjop:[]};
+    renderChapter(currentChapter);showToast('Nieuwe opname aangemaakt');return;
   }
-  currentOpnameId=val;
-  await loadOpnameData(currentObjId,val);
-  renderChapter(currentChapter);
+  currentOpnameId=val;await loadOpnameData(currentObjId,val);renderChapter(currentChapter);
 };
 
 async function loadOpnameData(objId,opnId){
-  opnames[opnId]=opnames[opnId]||{fotos:{},elementen:[]};
+  opnames[opnId]=opnames[opnId]||{fotos:{},elementen:[],mjop:[]};
   try{
     const fs=await dataDoc(objId,opnId,'fotos').get();
     if(fs.exists)opnames[opnId].fotos=fs.data().fotos||{};
     const es=await dataDoc(objId,opnId,'elementen').get();
     if(es.exists)opnames[opnId].elementen=es.data().lijst||[];
+    const ms=await dataDoc(objId,opnId,'mjop').get();
+    if(ms.exists)opnames[opnId].mjop=ms.data().lijst||[];
     const rs=await dataDoc(objId,opnId,'rapport').get();
-    if(rs.exists)rapportTekst=rs.data().tekst||'';
-    else rapportTekst='';
+    if(rs.exists)rapportTekst=rs.data().tekst||'';else rapportTekst='';
+    // Migreer bestaande elementen: zet snellinvoer chapterId's om naar inspectie
+    opnames[opnId].elementen=opnames[opnId].elementen.map(el=>{
+      if(el.chapterId==='snellinvoer')return{...el,chapterId:'gevels',subTab:el.subTab||'Voorgevel'};
+      return el;
+    });
   }catch(e){}
 }
 
@@ -713,44 +593,39 @@ async function saveOpnameData(){
   await dataDoc(currentObjId,currentOpnameId,'elementen').set({lijst:d.elementen||[],bijgewerktOp:serverTimestamp()});
 }
 
-function getOpname(){return opnames[currentOpnameId]||{fotos:{},elementen:[]};}
+async function saveMjopData(){
+  if(!currentObjId||!currentOpnameId)return;
+  const d=opnames[currentOpnameId]||{};
+  await dataDoc(currentObjId,currentOpnameId,'mjop').set({lijst:d.mjop||[],bijgewerktOp:serverTimestamp()});
+}
+
+function getOpname(){return opnames[currentOpnameId]||{fotos:{},elementen:[],mjop:[]};}
 
 // NAVIGATIE
 window.navTo=page=>{
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-  const p=document.getElementById('page-'+page);
-  if(p) p.classList.add('active');
+  const p=document.getElementById('page-'+page);if(p)p.classList.add('active');
   const isLogin=page==='login';
-  const sidebar=document.getElementById('sidebar');
-  const topbar=document.getElementById('topbar');
-  if(isLogin){
-    sidebar.style.display='none';
-    topbar.style.display='none';
-    // Verberg content wrapper ook op mobile
-    document.getElementById('content').style.paddingTop='0';
-  } else {
-    sidebar.style.display=currentUser?'flex':'none';
-    topbar.style.display=currentUser?'flex':'none';
-  }
+  const sidebar=document.getElementById('sidebar');const topbar=document.getElementById('topbar');
+  if(isLogin){sidebar.style.display='none';topbar.style.display='none';}
+  else{sidebar.style.display=currentUser?'flex':'none';topbar.style.display=currentUser?'flex':'none';}
   document.querySelectorAll(`[data-page="${page}"]`).forEach(el=>el.classList.add('active'));
-  updateTopbar(page);
-  closeSidebar();
+  updateTopbar(page);closeSidebar();
 };
 
 window.navToChapter=ch=>{
-  currentChapter=ch;
-  navTo('chapter');
-  if(ch==='kosten')renderKosten();
-  else if(ch==='rapport')renderRapportPagina();
-  else renderChapter(ch);
+  currentChapter=ch;navTo('chapter');
   document.querySelectorAll('[data-chapter]').forEach(el=>el.classList.toggle('active',el.dataset.chapter===ch));
+  renderChapter(ch);
 };
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const ch=currentChapter==='kosten'?{naam:'Kostenraming',icon:'€'}:currentChapter==='rapport'?{naam:'Rapport genereren',icon:'📄'}:currentChapter==='snellinvoer'?{naam:'Snelle invoer',icon:'⚡'}:CHAPTERS.find(c=>c.id===currentChapter);
-    document.getElementById('topbar-title').textContent=(ch?.icon||'')+' '+( ch?.naam||'Hoofdstuk');
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
+    const sp=special[currentChapter];
+    document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
     document.getElementById('topbar-sub').textContent=currentObj?.naam||'';
   }else if(page==='objects'){
     document.getElementById('topbar-title').textContent='VastgoedInspectie';
@@ -761,69 +636,49 @@ function updateTopbar(page){
   }
 }
 
-// OBJECTGEGEVENS HOOFDSTUK
+// OBJECTGEGEVENS
 function renderObjectgegevens(container){
   const obj=currentObj||{};
   const opn=getOpname();
-  const docFotos=opn.fotos['objectgegevens_docs']||[];
-
+  const DOCTYPES=[
+    {key:'objectgegevens_kadaster',icon:'📋',naam:'Kadasterdocument',sub:'Eigendomsakte, uittreksel'},
+    {key:'objectgegevens_plattegrond',icon:'📐',naam:'Plattegrond',sub:'Begane grond, verdieping'},
+    {key:'objectgegevens_bouwtekening',icon:'📏',naam:'Bouwtekeningen',sub:'Constructietekeningen'},
+    {key:'objectgegevens_luchtfoto',icon:'🛰️',naam:'Luchtfoto / situatietekening',sub:'Luchtfoto, situatieschets'},
+    {key:'objectgegevens_energielabel',icon:'⚡',naam:'Energielabel',sub:'EPA rapport, certificaat'},
+    {key:'objectgegevens_overig',icon:'📎',naam:'Overige documenten',sub:'Rapporten, VvE documenten'},
+  ];
   container.innerHTML=`
-    <div class="section-title">🏢 Hoofdstuk 1 — Objectgegevens</div>
-
-    <!-- BAG Gegevens -->
+    <div class="section-title">🏢 Objectgegevens</div>
     <div class="card" style="margin-bottom:14px;">
-      <div class="card-header">
-        <div class="card-icon" style="background:var(--blue-bg);">🏢</div>
-        <div>
-          <div style="font-weight:600;font-size:14px;">BAG Objectgegevens</div>
-          <div style="font-size:12px;color:var(--text3);">Basisregistratie Adressen en Gebouwen</div>
-        </div>
+      <div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">🏢</div>
+        <div><div style="font-weight:600;font-size:14px;">BAG Objectgegevens</div><div style="font-size:12px;color:var(--text3);">Basisregistratie Adressen en Gebouwen</div></div>
         <button class="btn btn-light btn-sm" style="margin-left:auto;" onclick="editObject('${obj.id}')">✎ Bewerken</button>
       </div>
       <div class="card-body">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-          ${renderInfoRij('Adres',obj.naam||'—')}
-          ${renderInfoRij('Type object',obj.type||'—')}
-          ${renderInfoRij('Bouwjaar',obj.jaar||'—')}
-          ${renderInfoRij('Oppervlakte',obj.opp?obj.opp+' m²':'—')}
-          ${renderInfoRij('Aantal eenheden',obj.eenheden||'—')}
-          ${renderInfoRij('Postcode & plaats',obj.postcode||'—')}
-          ${renderInfoRij('Aangemaakt door',obj.aangemaaktDoor||'—')}
+          ${renderInfoRij('Adres',obj.naam||'—')}${renderInfoRij('Type object',obj.type||'—')}
+          ${renderInfoRij('Bouwjaar',obj.jaar||'—')}${renderInfoRij('Oppervlakte',obj.opp?obj.opp+' m²':'—')}
+          ${renderInfoRij('Postcode & plaats',obj.postcode||'—')}${renderInfoRij('Aangemaakt door',obj.aangemaaktDoor||'—')}
           ${renderInfoRij('Context',obj.context||'—',true)}
         </div>
       </div>
     </div>
-
-    <!-- Documenten upload per type -->
     <div class="card" style="margin-bottom:14px;">
-      <div class="card-header">
-        <div class="card-icon" style="background:var(--amber-bg);">📄</div>
-        <div>
-          <div style="font-weight:600;font-size:14px;">Documenten & tekeningen</div>
-          <div style="font-size:12px;color:var(--text3);">Per type een apart uploadveld</div>
-        </div>
+      <div class="card-header"><div class="card-icon" style="background:var(--amber-bg);">📄</div>
+        <div><div style="font-weight:600;font-size:14px;">Documenten & tekeningen</div><div style="font-size:12px;color:var(--text3);">Per type een apart uploadveld</div></div>
       </div>
       <div class="card-body">
-        ${[
-          {key:'objectgegevens_kadaster', icon:'📋', naam:'Kadasterdocument', sub:'Eigendomsakte, uittreksel kadaster'},
-          {key:'objectgegevens_plattegrond', icon:'📐', naam:'Plattegrond', sub:'Plattegrond begane grond, verdieping'},
-          {key:'objectgegevens_bouwtekening', icon:'📏', naam:'Bouwtekeningen', sub:'Constructietekeningen, details'},
-          {key:'objectgegevens_luchtfoto', icon:'🛰️', naam:'Luchtfoto / situatietekening', sub:'Luchtfoto, situatieschets, bestemmingsplan'},
-          {key:'objectgegevens_energielabel', icon:'⚡', naam:'Energielabel', sub:'EPA rapport, energiecertificaat'},
-          {key:'objectgegevens_overig', icon:'📎', naam:'Overige documenten', sub:'Rapporten, inspecties, VvE documenten'},
-        ].map(({key,icon,naam,sub})=>{
+        ${DOCTYPES.map(({key,icon,naam,sub})=>{
           const fotos=opn.fotos[key]||[];
-          return `<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden;">
-            <div style="padding:10px 12px;background:var(--bg1);display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);">
-              <span style="font-size:18px;">${icon}</span>
-              <div style="flex:1;">
-                <div style="font-size:13px;font-weight:600;">${naam}</div>
-                <div style="font-size:11px;color:var(--text3);">${sub}</div>
-              </div>
+          return `<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:9px;overflow:hidden;">
+            <div style="padding:9px 12px;background:var(--bg1);display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--border);">
+              <span style="font-size:17px;">${icon}</span>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${naam}</div><div style="font-size:11px;color:var(--text3);">${sub}</div></div>
               ${fotos.length?`<span class="badge badge-green">${fotos.length} bestand${fotos.length>1?'en':''}</span>`:''}
             </div>
-            <div style="padding:10px 12px;">
-              <div class="foto-zone" id="fotozone-${key}" style="padding:12px;margin-bottom:0;"
+            <div style="padding:9px 12px;">
+              <div class="foto-zone" id="fotozone-${key}" style="padding:10px;margin-bottom:0;"
                 onclick="document.getElementById('foto-input-${key}').click()"
                 ondragover="event.preventDefault();document.getElementById('fotozone-${key}').classList.add('drag-over')"
                 ondragleave="document.getElementById('fotozone-${key}').classList.remove('drag-over')"
@@ -832,213 +687,39 @@ function renderObjectgegevens(container){
                 <input type="file" id="foto-input-${key}" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleFotoUpload(event,'${key}')"/>
               </div>
               ${fotos.length?`<div class="foto-grid-groot" style="margin-top:8px;">
-                ${fotos.map((f,i)=>`<div class="foto-groot-item">
-                  <img src="${f.dataUrl}" alt="${f.label||naam+' '+(i+1)}" loading="lazy"/>
+                ${fotos.map((f,i)=>`<div class="foto-groot-item"><img src="${f.dataUrl}" loading="lazy"/>
                   <span class="foto-nr">${i+1}</span>
                   <button class="foto-groot-del" onclick="verwijderFoto('${key}',${i})">×</button>
                   <div class="foto-groot-overlay"><input class="foto-groot-label" placeholder="Label..." value="${f.label||''}" onchange="updateFotoLabel('${key}',${i},this.value)"/></div>
-                </div>`).join('')}
-              </div>`:''}
+                </div>`).join('')}</div>`:''}
             </div>
           </div>`;
         }).join('')}
       </div>
     </div>
-
-    <!-- Luchtfoto / ligging -->
     <div class="card" style="margin-bottom:14px;">
-      <div class="card-header">
-        <div class="card-icon" style="background:var(--green-bg);">🗺️</div>
-        <div>
-          <div style="font-weight:600;font-size:14px;">Ligging & omgeving</div>
-          <div style="font-size:12px;color:var(--text3);">Omschrijving locatie en directe omgeving</div>
-        </div>
+      <div class="card-header"><div class="card-icon" style="background:var(--green-bg);">🗺️</div>
+        <div><div style="font-weight:600;font-size:14px;">Ligging & omgeving</div></div>
       </div>
       <div class="card-body">
-        <div class="field">
-          <label>Ligging en omgeving</label>
-          <textarea id="obj-ligging" rows="3" placeholder="Bijv. Vrijstaande woning gelegen aan een rustige woonstraat, omringd door soortgelijke bebouwing uit dezelfde periode..." oninput="saveObjExtra('ligging',this.value)">${escHtml(obj.ligging||'')}</textarea>
-        </div>
-        <div class="field">
-          <label>Bijzonderheden / aandachtspunten</label>
-          <textarea id="obj-bijzonderheden" rows="2" placeholder="Monumentenstatus, VvE, erfpacht, recente verbouwingen..." oninput="saveObjExtra('bijzonderheden',this.value)">${escHtml(obj.bijzonderheden||obj.context||'')}</textarea>
-        </div>
+        <div class="field"><label>Ligging en omgeving</label><textarea id="obj-ligging" rows="3" placeholder="Bijv. Vrijstaande woning aan rustige woonstraat..." oninput="saveObjExtra('ligging',this.value)">${escHtml(obj.ligging||'')}</textarea></div>
+        <div class="field"><label>Bijzonderheden</label><textarea id="obj-bijzonderheden" rows="2" placeholder="Monumentenstatus, VvE, erfpacht..." oninput="saveObjExtra('bijzonderheden',this.value)">${escHtml(obj.bijzonderheden||obj.context||'')}</textarea></div>
         <div class="grid2">
-          <div class="field">
-            <label>Perceeloppervlakte m²</label>
-            <input type="number" id="obj-perceel" placeholder="350" value="${obj.perceel||''}" oninput="saveObjExtra('perceel',this.value)"/>
-          </div>
-          <div class="field">
-            <label>Kadastrale aanduiding</label>
-            <input type="text" id="obj-kadaster" placeholder="MEPPEL A 1234" value="${escHtml(obj.kadaster||'')}" oninput="saveObjExtra('kadaster',this.value)"/>
-          </div>
+          <div class="field"><label>Perceeloppervlakte m²</label><input type="number" value="${obj.perceel||''}" oninput="saveObjExtra('perceel',this.value)"/></div>
+          <div class="field"><label>Kadastrale aanduiding</label><input type="text" value="${escHtml(obj.kadaster||'')}" placeholder="MEPPEL A 1234" oninput="saveObjExtra('kadaster',this.value)"/></div>
         </div>
       </div>
     </div>
-
-    <div class="btn-row">
-      <button class="btn btn-dark" onclick="navToChapter('gevels')">Volgende: Gevels & exterieur →</button>
-    </div>`;
+    <div class="btn-row"><button class="btn btn-dark" onclick="navToChapter('gebouwpaspoort')">Volgende: Gebouwpaspoort →</button></div>`;
 }
 
-function renderInfoRij(label, waarde, volleBreedte=false){
-  return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);${volleBreedte?'grid-column:1/-1;':''}">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">${label}</div>
-    <div style="font-size:13px;font-weight:500;">${waarde}</div>
-  </div>`;
+function renderInfoRij(label,waarde,volleBreedte=false){
+  return `<div style="padding:7px 0;border-bottom:0.5px solid var(--border);${volleBreedte?'grid-column:1/-1;':''}"><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">${label}</div><div style="font-size:13px;font-weight:500;">${waarde}</div></div>`;
 }
-
 window.saveObjExtra=async(key,val)=>{
   if(!currentObjId)return;
   await objDoc(currentObjId).set({[key]:val},{merge:true});
   if(currentObj)currentObj[key]=val;
-};
-
-// SNELLE INVOER
-function renderSnelInvoer(container){
-  const opn=getOpname();
-  const els=opn.elementen;
-  const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-
-  const condOpts=CONDITIE.slice(1).map((l,i)=>`<option value="${i+1}">${i+1} · ${l}</option>`).join('');
-  const condClass=['','c1','c2','c3','c4','c5'];
-
-  let rows=els.map((el,i)=>`
-    <div class="si-row" id="si-${el.id}">
-      <input type="text" value="${escHtml(el.subTab||el.chapterId||'')}" placeholder="Locatie" oninput="updateBev('${el.id}','subTab',this.value)"/>
-      <input type="text" value="${escHtml(el.element||'')}" placeholder="Element..." oninput="updateBev('${el.id}','element',this.value)"/>
-      <select class="si-cond ${condClass[el.conditie||3]}" onchange="updateBev('${el.id}','conditie',parseInt(this.value));this.className='si-cond ${condClass[1]}'.replace('c1',condClass[parseInt(this.value)]||'c3');renderKostenTotaal()">
-        ${CONDITIE.slice(1).map((l,i)=>`<option value="${i+1}" ${(el.conditie||3)==i+1?'selected':''}>${i+1} · ${l}</option>`).join('')}
-      </select>
-      <input type="text" value="${escHtml(el.hoeveelheid||'')} ${escHtml(el.eenheid||'')}" placeholder="850 m²" oninput="updateHoeveelheidSnel('${el.id}',this.value)"/>
-      <input type="number" value="${el.kosten||''}" placeholder="0" oninput="updateBev('${el.id}','kosten',parseFloat(this.value)||0);renderKostenTotaal();updateSITotaal()"/>
-      <input type="number" value="${el.kosten_vervanging||''}" placeholder="0" oninput="updateBev('${el.id}','kosten_vervanging',parseFloat(this.value)||0);updateSITotaal()"/>
-      <button onclick="verwijderBev('${el.id}')" style="width:28px;height:28px;border-radius:5px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:14px;">×</button>
-    </div>`).join('');
-
-  container.innerHTML=`
-    <div class="section-title">⚡ Snelle invoer — alle bevindingen</div>
-    <button class="btn btn-blue btn-sm" style="margin-bottom:12px;" onclick="analyseerSnelInvoer()">✦ Analyseer foto's en vul automatisch in</button>
-
-    <div class="si-header">
-      <span>Locatie</span>
-      <span>Element / bevinding</span>
-      <span>Conditie</span>
-      <span>Hoeveelheid</span>
-      <span>Herstel €</span>
-      <span>Vervanging €</span>
-      <span></span>
-    </div>
-
-    <div id="si-list">${rows}</div>
-
-    <div class="si-add">
-      <input type="text" id="si-new-loc" placeholder="Locatie..."/>
-      <input type="text" id="si-new-el" placeholder="Element / bevinding..."/>
-      <select class="si-cond c2" id="si-new-cond">${condOpts}</select>
-      <input type="text" id="si-new-hv" placeholder="850 m²"/>
-      <input type="number" id="si-new-h" placeholder="0"/>
-      <input type="number" id="si-new-v" placeholder="0"/>
-      <button class="si-add-btn" onclick="snelToevoegen()">+</button>
-    </div>
-
-    <div class="si-totaal">
-      <span style="font-size:12px;color:var(--text2);">Totaal herstel</span>
-      <span id="si-tot-h" style="font-size:15px;font-weight:600;">€ ${Math.round(totH).toLocaleString('nl-NL')}</span>
-      <span style="font-size:12px;color:var(--text2);margin-left:16px;">Totaal vervanging</span>
-      <span id="si-tot-v" style="font-size:15px;font-weight:600;color:var(--orange-text);">€ ${Math.round(totV).toLocaleString('nl-NL')}</span>
-    </div>
-
-    <div class="btn-row" style="margin-top:16px;">
-      <button class="btn btn-dark" onclick="navToChapter('gevels')">→ Naar uitgebreide bevindingen</button>
-      <button class="btn btn-light" onclick="navToChapter('kosten')">€ Kostenraming</button>
-    </div>`;
-}
-
-window.updateHoeveelheidSnel=async(id,val)=>{
-  const parts=val.trim().split(/\s+/);
-  const opn=getOpname();
-  const el=opn.elementen.find(e=>e.id===id);
-  if(!el)return;
-  // Splits bijv "850 m²" → hoeveelheid=850, eenheid=m²
-  if(parts.length>=2){el.hoeveelheid=parts[0];el.eenheid=parts.slice(1).join(' ');}
-  else{el.hoeveelheid=val;el.eenheid='';}
-  await saveOpnameData();
-};
-
-window.snelToevoegen=async()=>{
-  const loc=document.getElementById('si-new-loc').value.trim();
-  const el=document.getElementById('si-new-el').value.trim();
-  if(!el){showToast('Vul een element in');return;}
-  const cond=parseInt(document.getElementById('si-new-cond').value)||3;
-  const hvRaw=document.getElementById('si-new-hv').value.trim();
-  const parts=hvRaw.split(/\s+/);
-  const hv=parts[0]||'';
-  const eu=parts.slice(1).join(' ')||'';
-  const h=parseFloat(document.getElementById('si-new-h').value)||0;
-  const v=parseFloat(document.getElementById('si-new-v').value)||0;
-  const opn=getOpname();
-  opn.elementen.push({
-    id:'snel_'+Date.now(),
-    chapterId:'snellinvoer',subTab:loc,
-    element:el,materiaal:'',
-    hoeveelheid:hv,eenheid:eu,
-    conditie:cond,beschrijving:'',
-    kosten:h,kosten_onderbouwing:'',
-    kosten_vervanging:v,kosten_vervanging_onderbouwing:'',
-    isolatie:'',aiAnalyse:false
-  });
-  await saveOpnameData();
-  renderSnelInvoer(document.getElementById('page-chapter'));
-};
-
-window.updateSITotaal=()=>{
-  const opn=getOpname();
-  const totH=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const totV=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-  const h=document.getElementById('si-tot-h');
-  const v=document.getElementById('si-tot-v');
-  if(h)h.textContent='€ '+Math.round(totH).toLocaleString('nl-NL');
-  if(v)v.textContent='€ '+Math.round(totV).toLocaleString('nl-NL');
-};
-
-window.analyseerSnelInvoer=async()=>{
-  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');return;}
-  showToast('Foto\'s analyseren voor snelle invoer...');
-  const opn=getOpname();
-  // Verzamel alle foto's van alle gevels
-  const allefotos=[];
-  Object.entries(opn.fotos).forEach(([key,fotos])=>{
-    fotos.slice(0,2).forEach(f=>allefotos.push({...f,key}));
-  });
-  if(!allefotos.length){showToast('Upload eerst foto\'s in de hoofdstukken');return;}
-  try{
-    const content=allefotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
-    content.push({type:'text',text:`Geef een beknopte lijst van alle zichtbare bouwkundige elementen en gebreken. Per element één regel. Reageer ALLEEN als JSON:
-[{"locatie":"Voorgevel","element":"Metselwerk","conditie":3,"hoeveelheid":"450","eenheid":"m²","kosten_herstel":9000,"kosten_vervanging":36000}]`});
-    const raw=await callClaude(content);
-    const clean=raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
-    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
-    if(s>=0&&e>s){
-      const items=JSON.parse(clean.substring(s,e+1));
-      items.forEach((item,i)=>{
-        opn.elementen.push({
-          id:'ai_snel_'+Date.now()+'_'+i,
-          chapterId:'snellinvoer',subTab:item.locatie||'',
-          element:item.element||'',materiaal:'',
-          hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',
-          conditie:item.conditie||3,beschrijving:'',
-          kosten:item.kosten_herstel||0,kosten_onderbouwing:'',
-          kosten_vervanging:item.kosten_vervanging||0,kosten_vervanging_onderbouwing:'',
-          isolatie:'',aiAnalyse:true
-        });
-      });
-      await saveOpnameData();
-      showToast(`${items.length} elementen toegevoegd`);
-      renderSnelInvoer(document.getElementById('page-chapter'));
-    }
-  }catch(e){showToast('Analyse mislukt: '+e.message);}
 };
 
 // GEBOUWPASPOORT
@@ -1058,29 +739,24 @@ const GP_OPTIES={
   verwarming:['LBK met verwarming/koeling','Airco\'s','Vloerverwarming','(Gas)heaters','Overig'],
   lucht:['LBK met verwarming/koeling','Ventilatiesysteem zonder LBK'],
   cv:['Gasgestookte CV','Combi-ketel gas','Hybride CV / zonnecollectoren','Stadsverwarming','Overig'],
-  jannee:['Ja','Nee'],
+  jannee:['Ja','Nee','Onbekend'],
   label:['A++++','A+++','A++','A+','A','B','C','D','E','F','G','Onbekend'],
   isolatie:['Ja','Nee','Onbekend'],
 };
-
-function gpSelect(key,field,val=''){
+function gpSel(key,field,val=''){
   const opts=GP_OPTIES[key]||[];
-  return `<select oninput="saveGP('${field}',this.value)">
-    <option value="">— Kies —</option>
-    ${opts.map(o=>`<option ${val===o?'selected':''}>${escHtml(o)}</option>`).join('')}
-  </select>`;}
-
-function gpInp(field,val='',type='text',placeholder=''){
-  return `<input type="${type}" value="${escHtml(val)}" placeholder="${placeholder}" oninput="saveGP('${field}',this.value)"/>`;}
-
-function gpRow(label,html){return `<div class="field"><label>${label}</label>${html}</div>`;}
-function gpSub(label){return `<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:4px 0 2px;grid-column:1/-1;">${label}</div>`;}
+  return '<select oninput="saveGP(\''+field+'\',this.value)"><option value="">— Kies —</option>'+opts.map(o=>'<option '+(val===o?'selected':'')+'>'+escHtml(o)+'</option>').join('')+'</select>';
+}
+function gpInp(field,val='',type='text',ph=''){
+  return '<input type="'+type+'" value="'+escHtml(val)+'" placeholder="'+ph+'" oninput="saveGP(\''+field+'\',this.value)"/>';
+}
+function gpRow(label,html){return '<div class="field"><label>'+label+'</label>'+html+'</div>';}
+function gpSub(label){return '<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:5px 0 3px;grid-column:1/-1;">'+label+'</div>';}
 function gpSec(icon,titel,kleur,inhoud){
-  return `<div style="margin-bottom:14px;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;">
-    <div style="padding:9px 14px;font-size:12px;font-weight:600;color:#fff;background:${kleur};display:flex;align-items:center;gap:7px;">${icon} ${titel}</div>
-    <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">${inhoud}</div>
-  </div>`;}
-
+  return '<div style="margin-bottom:14px;border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">'+
+    '<div style="padding:8px 13px;font-size:12px;font-weight:600;color:#fff;background:'+kleur+';display:flex;align-items:center;gap:7px;">'+icon+' '+titel+'</div>'+
+    '<div style="padding:12px 13px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+inhoud+'</div></div>';
+}
 window.saveGP=async(field,val)=>{
   if(!currentObjId)return;
   await objDoc(currentObjId).set({gp:{[field]:val}},{merge:true});
@@ -1088,209 +764,123 @@ window.saveGP=async(field,val)=>{
 };
 
 function renderGebouwpaspoort(container){
-  const gp=currentObj?.gp||{};
-  const obj=currentObj||{};
-
-  container.innerHTML=`
-    <div class="section-title">📋 Hoofdstuk 2 — Gebouwpaspoort</div>
-
-    ${gpSec('🏢','Algemene gegevens','#185fa5',`
-      ${gpRow('Gebouwnaam',gpInp('naam',obj.naam||'','text','Gebouwnaam...'))}
-      ${gpRow('Eigenaar',gpInp('eigenaar',gp.eigenaar||'','text','Naam eigenaar...'))}
-      <div class="field" style="grid-column:1/-1">${`<label>Adres</label>`+gpInp('adres',obj.naam||'','text','Adres...')}</div>
-      ${gpRow('Postcode & plaats',gpInp('postcode',obj.postcode||'','text','Uit BAG...'))}
-      ${gpRow('Bouwjaar',gpInp('bouwjaar',obj.jaar||'','number','Uit BAG...'))}
-      ${gpRow('Gebruiksfunctie 1',gpInp('functie1',gp.functie1||'','text','Bijv. Winkelfunctie...'))}
-      ${gpRow('Gebruiksfunctie 2',gpInp('functie2',gp.functie2||'','text','Optioneel...'))}
-    `)}
-
-    ${gpSec('🏗','Bouw & constructie','#3b6d11',`
-      <div class="field" style="grid-column:1/-1"><label>Constructietype</label>${gpSelect('constructie','constructie',gp.constructie||'')}</div>
-      ${gpRow('Aantal verdiepingen',gpSelect('verdiepingen','verdiepingen',gp.verdiepingen||''))}
-      ${gpRow('Totale vloeroppervlakte (m²)',gpInp('opp',obj.opp||'','number','Uit BAG...'))}
-      ${gpSub('Vloerafwerking')}
-      ${gpRow('Type 1',gpSelect('vloer','vloer1',gp.vloer1||''))}
-      ${gpRow('Type 2',gpSelect('vloer','vloer2',gp.vloer2||''))}
-      ${gpSub('Materiaal gevels')}
-      ${gpRow('Type 1',gpSelect('gevel','gevel1',gp.gevel1||''))}
-      ${gpRow('Type 2',gpSelect('gevel','gevel2',gp.gevel2||''))}
-      ${gpSub('Dakafwerking')}
-      ${gpRow('Type 1',gpSelect('dak','dak1',gp.dak1||''))}
-      ${gpRow('Type 2',gpSelect('dak','dak2',gp.dak2||''))}
-    `)}
-
-    ${gpSec('🚪','Toegang & kozijnen','#854f0b',`
-      ${gpSub('Toegangsdeur / pui')}
-      ${gpRow('Type',gpSelect('toegang','toegang1',gp.toegang1||''))}
-      ${gpRow('Aantal',gpInp('toegang1_aantal',gp.toegang1_aantal||'','number','0'))}
-      ${gpSub('Deuren')}
-      ${gpRow('Type 1',gpSelect('deur','deur1',gp.deur1||''))}
-      ${gpRow('Aantal',gpInp('deur1_aantal',gp.deur1_aantal||'','number','0'))}
-      ${gpRow('Type 2',gpSelect('deur','deur2',gp.deur2||''))}
-      ${gpRow('Aantal',gpInp('deur2_aantal',gp.deur2_aantal||'','number','0'))}
-      ${gpSub('Kozijnen / ramen')}
-      ${gpRow('Type 1',gpSelect('kozijn','kozijn1',gp.kozijn1||''))}
-      ${gpRow('Aantal',gpInp('kozijn1_aantal',gp.kozijn1_aantal||'','number','0'))}
-      ${gpRow('Type 2',gpSelect('kozijn','kozijn2',gp.kozijn2||''))}
-      ${gpRow('Aantal',gpInp('kozijn2_aantal',gp.kozijn2_aantal||'','number','0'))}
-      ${gpSub('Overhead / magazijndeuren')}
-      ${gpRow('Type 1',gpSelect('overhead','overhead1',gp.overhead1||''))}
-      ${gpRow('Aantal',gpInp('overhead1_aantal',gp.overhead1_aantal||'','number','0'))}
-      ${gpRow('Type 2',gpSelect('overhead','overhead2',gp.overhead2||''))}
-      ${gpRow('Aantal',gpInp('overhead2_aantal',gp.overhead2_aantal||'','number','0'))}
-    `)}
-
-    ${gpSec('🌳','Buitenterrein','#993c1d',`
-      ${gpRow('Type verharding',gpSelect('verharding','verharding',gp.verharding||''))}
-      ${gpRow('Evt. hekwerk',gpSelect('hekwerk','hekwerk',gp.hekwerk||''))}
-      ${gpSub('Poorten')}
-      ${gpRow('Type 1',gpSelect('poort','poort1',gp.poort1||''))}
-      ${gpRow('Aantal',gpInp('poort1_aantal',gp.poort1_aantal||'','number','0'))}
-      ${gpRow('Type 2',gpSelect('poort','poort2',gp.poort2||''))}
-      ${gpRow('Aantal',gpInp('poort2_aantal',gp.poort2_aantal||'','number','0'))}
-      <div class="field" style="grid-column:1/-1"><label>Omschrijving groen</label>${gpInp('groen',gp.groen||'','text','Bijv. gazon rondom, bomen aan voorzijde...')}</div>
-    `)}
-
-    ${gpSec('⚙️','Installaties (HVAC & elektra)','#0f6e56',`
-      ${gpRow('Hoofdverwarming',gpSelect('verwarming','hoofdverwarming',gp.hoofdverwarming||''))}
-      ${gpRow('Overige verwarming',gpSelect('verwarming','overigeVerwarming',gp.overigeVerwarming||''))}
-      ${gpRow('Luchtbehandeling',gpSelect('lucht','lucht',gp.lucht||''))}
-      ${gpRow('Koelinstallatie',gpSelect('jannee','koeling',gp.koeling||''))}
-      ${gpRow('Luchtgordijn / sluis',gpSelect('jannee','luchtgordijn',gp.luchtgordijn||''))}
-      ${gpRow('Type CV-ketel',gpSelect('cv','cv',gp.cv||''))}
-      ${gpRow('Bouwjaar CV',gpInp('cvJaar',gp.cvJaar||'','number','2010'))}
-      ${gpRow('Onderhoudspartij',gpInp('onderhoudspartij',gp.onderhoudspartij||'','text','Naam...'))}
-    `)}
-
-    ${gpSec('♻️','Duurzaamheid','#534ab7',`
-      ${gpRow('Energielabel',gpSelect('label','energielabel',gp.energielabel||''))}
-      ${gpRow('Isolatie dak',gpSelect('isolatie','isolatieDak',gp.isolatieDak||''))}
-      ${gpRow('Isolatie gevels',gpSelect('isolatie','islatieGevels',gp.islatieGevels||''))}
-      ${gpRow('Zonnepanelen',gpSelect('jannee','zonnepanelen',gp.zonnepanelen||''))}
-      ${gpRow('Waterbesparende maatregelen',gpSelect('jannee','water',gp.water||''))}
-    `)}
-
-    ${gpSec('📎','Documentatie & certificaten','#444',`
-      ${gpRow('Tekeningen beschikbaar',gpSelect('jannee','tekeningen',gp.tekeningen||''))}
-      ${gpRow('Constructieberekeningen',gpSelect('jannee','berekeningen',gp.berekeningen||''))}
-      ${gpRow('Vergunningen',gpSelect('jannee','vergunningen',gp.vergunningen||''))}
-      ${gpRow('Handleidingen installaties',gpSelect('jannee','handleidingen',gp.handleidingen||''))}
-      <div class="field" style="grid-column:1/-1"><label>Overige certificaten</label>${gpInp('overigeCert',gp.overigeCert||'','text','Bijv. NEN-keuring, BREEAM...')}</div>
-    `)}
-
-    <div class="btn-row">
-      <button class="btn btn-dark" onclick="navToChapter('gevels')">Volgende: Gevels & exterieur →</button>
-    </div>`;
+  const gp=currentObj?.gp||{};const obj=currentObj||{};
+  container.innerHTML='<div class="section-title">📋 Gebouwpaspoort</div>'+
+    gpSec('🏢','Algemene gegevens','#185fa5',
+      gpRow('Gebouwnaam',gpInp('naam',obj.naam||'','text','Gebouwnaam...'))+
+      gpRow('Eigenaar',gpInp('eigenaar',gp.eigenaar||'','text','Naam eigenaar...'))+
+      '<div class="field" style="grid-column:1/-1"><label>Adres</label>'+gpInp('adres',obj.naam||'','text','Adres...')+'</div>'+
+      gpRow('Postcode & plaats',gpInp('postcode',obj.postcode||'','text','Uit BAG...'))+
+      gpRow('Bouwjaar',gpInp('bouwjaar',obj.jaar||'','number','Uit BAG...'))+
+      gpRow('Gebruiksfunctie 1',gpInp('functie1',gp.functie1||'','text','Bijv. Winkelfunctie...'))+
+      gpRow('Gebruiksfunctie 2',gpInp('functie2',gp.functie2||'','text','Optioneel...')))+
+    gpSec('🏗','Bouw & constructie','#3b6d11',
+      '<div class="field" style="grid-column:1/-1"><label>Constructietype</label>'+gpSel('constructie','constructie',gp.constructie||'')+'</div>'+
+      gpRow('Aantal verdiepingen',gpSel('verdiepingen','verdiepingen',gp.verdiepingen||''))+
+      gpRow('Totale vloeroppervlakte (m²)',gpInp('opp',obj.opp||'','number','Uit BAG...'))+
+      gpSub('Vloerafwerking')+gpRow('Type 1',gpSel('vloer','vloer1',gp.vloer1||''))+gpRow('Type 2',gpSel('vloer','vloer2',gp.vloer2||''))+
+      gpSub('Materiaal gevels')+gpRow('Type 1',gpSel('gevel','gevel1',gp.gevel1||''))+gpRow('Type 2',gpSel('gevel','gevel2',gp.gevel2||''))+
+      gpSub('Dakafwerking')+gpRow('Type 1',gpSel('dak','dak1',gp.dak1||''))+gpRow('Type 2',gpSel('dak','dak2',gp.dak2||'')))+
+    gpSec('🚪','Toegang & kozijnen','#854f0b',
+      gpSub('Toegangsdeur / pui')+gpRow('Type',gpSel('toegang','toegang1',gp.toegang1||''))+gpRow('Aantal',gpInp('toegang1_aantal',gp.toegang1_aantal||'','number','0'))+
+      gpSub('Deuren')+gpRow('Type 1',gpSel('deur','deur1',gp.deur1||''))+gpRow('Aantal',gpInp('deur1_aantal',gp.deur1_aantal||'','number','0'))+
+      gpRow('Type 2',gpSel('deur','deur2',gp.deur2||''))+gpRow('Aantal',gpInp('deur2_aantal',gp.deur2_aantal||'','number','0'))+
+      gpSub('Kozijnen / ramen')+gpRow('Type 1',gpSel('kozijn','kozijn1',gp.kozijn1||''))+gpRow('Aantal',gpInp('kozijn1_aantal',gp.kozijn1_aantal||'','number','0'))+
+      gpRow('Type 2',gpSel('kozijn','kozijn2',gp.kozijn2||''))+gpRow('Aantal',gpInp('kozijn2_aantal',gp.kozijn2_aantal||'','number','0'))+
+      gpSub('Overhead / magazijndeuren')+gpRow('Type 1',gpSel('overhead','overhead1',gp.overhead1||''))+gpRow('Aantal',gpInp('overhead1_aantal',gp.overhead1_aantal||'','number','0'))+
+      gpRow('Type 2',gpSel('overhead','overhead2',gp.overhead2||''))+gpRow('Aantal',gpInp('overhead2_aantal',gp.overhead2_aantal||'','number','0')))+
+    gpSec('🌳','Buitenterrein','#993c1d',
+      gpRow('Type verharding',gpSel('verharding','verharding',gp.verharding||''))+gpRow('Evt. hekwerk',gpSel('hekwerk','hekwerk',gp.hekwerk||''))+
+      gpSub('Poorten')+gpRow('Type 1',gpSel('poort','poort1',gp.poort1||''))+gpRow('Aantal',gpInp('poort1_aantal',gp.poort1_aantal||'','number','0'))+
+      gpRow('Type 2',gpSel('poort','poort2',gp.poort2||''))+gpRow('Aantal',gpInp('poort2_aantal',gp.poort2_aantal||'','number','0'))+
+      '<div class="field" style="grid-column:1/-1"><label>Omschrijving groen</label>'+gpInp('groen',gp.groen||'','text','Bijv. gazon rondom...')+'</div>')+
+    gpSec('⚙️','Installaties','#0f6e56',
+      gpRow('Hoofdverwarming',gpSel('verwarming','hoofdverwarming',gp.hoofdverwarming||''))+gpRow('Overige verwarming',gpSel('verwarming','overigeVerwarming',gp.overigeVerwarming||''))+
+      gpRow('Luchtbehandeling',gpSel('lucht','lucht',gp.lucht||''))+gpRow('Koelinstallatie',gpSel('jannee','koeling',gp.koeling||''))+
+      gpRow('Luchtgordijn / sluis',gpSel('jannee','luchtgordijn',gp.luchtgordijn||''))+gpRow('Type CV-ketel',gpSel('cv','cv',gp.cv||''))+
+      gpRow('Bouwjaar CV',gpInp('cvJaar',gp.cvJaar||'','number','2010'))+gpRow('Onderhoudspartij',gpInp('onderhoudspartij',gp.onderhoudspartij||'','text','Naam...')))+
+    gpSec('♻️','Duurzaamheid','#534ab7',
+      gpRow('Energielabel',gpSel('label','energielabel',gp.energielabel||''))+gpRow('Isolatie dak',gpSel('isolatie','isolatieDak',gp.isolatieDak||''))+
+      gpRow('Isolatie gevels',gpSel('isolatie','isolatieGevels',gp.isolatieGevels||''))+gpRow('Zonnepanelen',gpSel('jannee','zonnepanelen',gp.zonnepanelen||''))+
+      gpRow('Waterbesparende maatregelen',gpSel('jannee','water',gp.water||'')))+
+    gpSec('📎','Documentatie & certificaten','#444',
+      gpRow('Tekeningen beschikbaar',gpSel('jannee','tekeningen',gp.tekeningen||''))+gpRow('Constructieberekeningen',gpSel('jannee','berekeningen',gp.berekeningen||''))+
+      gpRow('Vergunningen',gpSel('jannee','vergunningen',gp.vergunningen||''))+gpRow('Handleidingen installaties',gpSel('jannee','handleidingen',gp.handleidingen||''))+
+      '<div class="field" style="grid-column:1/-1"><label>Overige certificaten</label>'+gpInp('overigeCert',gp.overigeCert||'','text','Bijv. NEN-keuring, BREEAM...')+'</div>')+
+    '<div class="btn-row"><button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Volgende: Inspectie → Gevels &amp; exterieur</button></div>';
 }
 
-// CHAPTER RENDER
+// INSPECTIE
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
-
   if(chId==='objectgegevens'){renderObjectgegevens(container);return;}
-  if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
   if(chId==='gebouwpaspoort'){renderGebouwpaspoort(container);return;}
+  if(chId==='onderhoud'){renderOnderhoud(container);return;}
+  if(chId==='mjop'){renderMJOP(container);return;}
+  if(chId==='kosten'){renderKosten(container);return;}
+  if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
+  if(chId==='rapportage'){renderRapportage(container);return;}
+  const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
+  if(!para)return;
+  renderInspectie(container,para);
+}
 
-  const ch=CHAPTERS.find(c=>c.id===chId);
-  if(!ch){return;}
+function renderInspectie(container,para){
   const opn=getOpname();
-  const subTabs=ch.gevels||null;
+  const subTabs=para.subtabs||null;
   const activeTab=currentSubTab||(subTabs?subTabs[0]:null);
   currentSubTab=activeTab;
-
-  let html=`<div class="section-title">${ch.icon} Hoofdstuk ${ch.nr} — ${ch.naam}</div>`;
-
+  let html='<div class="section-title">'+para.icon+' Inspectie — '+para.naam+'</div>';
   if(subTabs){
-    html+=`<div class="chapter-tabs">`;
+    html+='<div class="chapter-tabs">';
     subTabs.forEach(t=>{
-      const fotos=(opn.fotos[chId+'_'+t]||[]).length;
-      const bevs=opn.elementen.filter(e=>e.subTab===t&&e.chapterId===chId).length;
+      const fotos=(opn.fotos[para.id+'_'+t]||[]).length;
+      const bevs=opn.elementen.filter(e=>e.subTab===t&&e.chapterId===para.id).length;
       const hasData=fotos>0||bevs>0;
-      html+=`<button class="chapter-tab ${t===activeTab?'active':''} ${hasData?'has-data':''}" onclick="switchSubTab('${t}')">
-        ${t} ${fotos?'<span style="font-size:10px;opacity:.7;">'+fotos+'📷</span>':''}
-      </button>`;
+      html+='<button class="chapter-tab '+(t===activeTab?'active':'')+(hasData?' has-data':'')+'" onclick="switchSubTab(\''+t+'\')">'+t+(fotos?' <span style="font-size:10px;opacity:.7;">'+fotos+'📷</span>':'')+'</button>';
     });
-    html+=`<button class="chapter-tab" onclick="addSubTab('${chId}')" style="border-style:dashed;">+ Toevoegen</button>`;
-    html+=`</div>`;
-    html+=renderSubTabContent(chId,activeTab,opn);
+    html+='<button class="chapter-tab" onclick="addSubTab(\''+para.id+'\')" style="border-style:dashed;">+ Toevoegen</button></div>';
+    html+=renderInspectieTab(para.id,activeTab,opn);
   }else{
-    html+=renderSubTabContent(chId,null,opn);
+    html+=renderInspectieTab(para.id,null,opn);
   }
-
-  const chIdx=CHAPTERS.findIndex(c=>c.id===chId);
-  html+=`<div class="btn-row" style="margin-top:20px;">`;
-  if(chIdx>0)html+=`<button class="btn btn-light" onclick="navToChapter('${CHAPTERS[chIdx-1].id}')">← ${CHAPTERS[chIdx-1].naam}</button>`;
-  if(chIdx<CHAPTERS.length-1)html+=`<button class="btn btn-dark" onclick="navToChapter('${CHAPTERS[chIdx+1].id}')">Volgende: ${CHAPTERS[chIdx+1].naam} →</button>`;
-  else html+=`<button class="btn btn-dark" onclick="navToChapter('kosten')">→ Kostenraming</button>`;
-  html+=`</div>`;
-
+  const idx=INSP_PARAGRAFEN.findIndex(p=>p.id===para.id);
+  html+='<div class="btn-row" style="margin-top:18px;">';
+  if(idx>0)html+='<button class="btn btn-light" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx-1].id+'\')">← '+INSP_PARAGRAFEN[idx-1].naam+'</button>';
+  if(idx<INSP_PARAGRAFEN.length-1)html+='<button class="btn btn-dark" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx+1].id+'\')">Volgende: '+INSP_PARAGRAFEN[idx+1].naam+' →</button>';
+  else html+='<button class="btn btn-dark" onclick="navToChapter(\'onderhoud\')">→ Onderhoud & herstel</button>';
+  html+='</div>';
   container.innerHTML=html;
 }
 
-function renderSubTabContent(chId,subTab,opn){
+function renderInspectieTab(chId,subTab,opn){
   const fotoKey=subTab?chId+'_'+subTab:chId;
   const fotos=opn.fotos[fotoKey]||[];
   const elementen=opn.elementen.filter(e=>e.chapterId===chId&&(subTab?e.subTab===subTab:!e.subTab));
-
-  let html=``;
-
-  // Foto upload zone
-  html+=`<div class="foto-zone" id="fotozone-${fotoKey}"
-    onclick="document.getElementById('foto-input-${fotoKey}').click()"
-    ondragover="event.preventDefault();document.getElementById('fotozone-${fotoKey}').classList.add('drag-over')"
-    ondragleave="document.getElementById('fotozone-${fotoKey}').classList.remove('drag-over')"
-    ondrop="handleDrop(event,'${fotoKey}')">
-    <div class="foto-zone-icon">📷</div>
-    <div class="foto-zone-title">${fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden'}</div>
-    <div class="foto-zone-sub">${fotos.length?'Tik om meer te voegen · Sleep foto\'s hierheen':'Tik om te kiezen · Sleep foto\'s hierheen'}</div>
-    <input type="file" id="foto-input-${fotoKey}" accept="image/*" multiple style="display:none;" onchange="handleFotoUpload(event,'${fotoKey}')"/>
-  </div>`;
-
-  // Foto grid (groot)
+  let html='';
+  html+='<div class="foto-zone" id="fotozone-'+fotoKey+'" onclick="document.getElementById(\'foto-input-'+fotoKey+'\').click()" ondragover="event.preventDefault();document.getElementById(\'fotozone-'+fotoKey+'\').classList.add(\'drag-over\')" ondragleave="document.getElementById(\'fotozone-'+fotoKey+'\').classList.remove(\'drag-over\')" ondrop="handleDrop(event,\''+fotoKey+'\')"><div class="foto-zone-icon">📷</div><div class="foto-zone-title">'+(fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden')+'</div><div class="foto-zone-sub">'+(fotos.length?'Tik om meer toe te voegen':'Tik of sleep foto\'s hierheen')+'</div><input type="file" id="foto-input-'+fotoKey+'" accept="image/*" multiple style="display:none;" onchange="handleFotoUpload(event,\''+fotoKey+'\')"/></div>';
   if(fotos.length){
-    html+=`<div class="foto-grid-groot">`;
+    html+='<div class="foto-grid-groot">';
     fotos.forEach((f,i)=>{
-      html+=`<div class="foto-groot-item">
-        <img src="${f.dataUrl}" alt="Foto ${i+1}" loading="lazy"/>
-        <span class="foto-nr">${getFotoNr(chId,subTab,i)}</span>
-        <button class="foto-groot-del" onclick="verwijderFoto('${fotoKey}',${i})">×</button>
-        <div class="foto-groot-overlay">
-          <input class="foto-groot-label" placeholder="Label (optioneel)" value="${f.label||''}" onchange="updateFotoLabel('${fotoKey}',${i},this.value)"/>
-        </div>
-      </div>`;
+      const nr=getFotoNr(chId,subTab,i);
+      html+='<div class="foto-groot-item"><img src="'+f.dataUrl+'" loading="lazy"/><span class="foto-nr">'+nr+'</span><button class="foto-groot-del" onclick="verwijderFoto(\''+fotoKey+'\','+i+')">×</button><div class="foto-groot-overlay"><input class="foto-groot-label" placeholder="Label..." value="'+escHtml(f.label||'')+'" onchange="updateFotoLabel(\''+fotoKey+'\','+i+',this.value)"/></div></div>';
     });
-    html+=`</div>`;
-    html+=`<div style="display:flex;gap:8px;margin-bottom:16px;">
-      <button class="btn btn-blue btn-sm" onclick="analyseerFotos('${chId}','${subTab||''}')">✦ Analyseer foto's met AI</button>
-    </div>`;
+    html+='</div><div class="btn-row" style="margin-bottom:14px;"><button class="btn btn-blue btn-sm" onclick="analyseerFotos(\''+chId+'\',\''+(subTab||'')+'\')">✦ Analyseer foto\'s met AI</button></div>';
   }
-
-  // Bevindingen
-  html+=`<div class="section-title">Bevindingen (${elementen.length})</div>`;
-  if(elementen.length){
-    elementen.forEach(el=>{
-      html+=renderBevindingCard(el);
-    });
-  }else{
-    html+=`<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0;">Nog geen bevindingen. Upload foto's en analyseer met AI, of voeg handmatig toe.</div>`;
-  }
-  html+=`<button class="btn btn-light btn-full btn-sm" style="margin-top:4px;" onclick="voegBevindingToe('${chId}','${subTab||''}')">+ Bevinding handmatig toevoegen</button>`;
-
+  html+='<div class="section-title">Bevindingen ('+elementen.length+')</div>';
+  if(elementen.length){elementen.forEach(el=>{html+=renderBevindingCard(el);});}
+  else html+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:14px 0;">Nog geen bevindingen. Upload foto\'s en analyseer met AI, of voeg handmatig toe.</div>';
+  html+='<button class="btn btn-light btn-full btn-sm" style="margin-top:4px;" onclick="voegBevindingToe(\''+chId+'\',\''+(subTab||'')+'\')">+ Bevinding handmatig toevoegen</button>';
   return html;
 }
 
 function getFotoNr(chId,subTab,idx){
-  // Bereken globaal fotonummer over alle hoofdstukken
-  const opn=getOpname();
-  let nr=1;
-  for(const ch of CHAPTERS){
-    const tabs=ch.gevels||[null];
+  const opn=getOpname();let nr=1;
+  for(const p of INSP_PARAGRAFEN){
+    const tabs=p.subtabs||[null];
     for(const t of tabs){
-      const key=t?ch.id+'_'+t:ch.id;
-      const fotos=opn.fotos[key]||[];
-      if(ch.id===chId&&(t===subTab||(!t&&!subTab))){
-        return nr+idx;
-      }
+      const key=t?p.id+'_'+t:p.id;const fotos=opn.fotos[key]||[];
+      if(p.id===chId&&(t===subTab||(!t&&!subTab)))return nr+idx;
       nr+=fotos.length;
     }
   }
@@ -1303,37 +893,23 @@ function renderBevindingCard(el){
   const fotoKey=el.subTab?el.chapterId+'_'+el.subTab:el.chapterId;
   const fotos=opn.fotos[fotoKey]||[];
   const startNr=getFotoNr(el.chapterId,el.subTab,0);
-  const fotoRefs=fotos.length?fotos.map((f,i)=>`Foto ${startNr+i}${f.label&&f.label!==('Foto '+(startNr+i))?' ('+f.label+')':''}`).join(', '):'';
-  const kostenH=parseFloat(el.kosten)||0;
-  const kostenV=parseFloat(el.kosten_vervanging)||0;
-
+  const fotoRefs=fotos.length?fotos.map((f,i)=>'Foto '+(startNr+i)+(f.label&&f.label!==('Foto '+(startNr+i))?' ('+f.label+')':'')).join(', '):'';
+  const kostenH=parseFloat(el.kosten)||0;const kostenV=parseFloat(el.kosten_vervanging)||0;
   return '<div class="bevinding-card" id="bev-'+el.id+'">'+
-    '<div class="bev-header">'+
-      '<div style="flex:1;">'+
-        '<input class="bev-element-input" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
-        '<div class="bev-tags">'+
-          (fotoRefs?'<span class="bev-tag foto">📷 '+fotoRefs+'</span>':'')+
-          (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
-          (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+
-        '</div>'+
-      '</div>'+
+    '<div class="bev-header"><div style="flex:1;">'+
+      '<input class="bev-element-input" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
+      '<div class="bev-tags">'+(fotoRefs?'<span class="bev-tag foto">📷 '+fotoRefs+'</span>':'')+
+      (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
+      (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+'</div></div>'+
       '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
-      '<button onclick="verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>'+
-    '</div>'+
+      '<button onclick="verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button></div>'+
     '<div class="bev-body">'+
       (el.aiAnalyse?'<div class="ai-tag">✦ AI analyse</div>':'')+
-      '<div class="conditie-bar">'+
-        [1,2,3,4,5].map(n=>'<button class="conditie-opt '+(cond==n?'sel-'+n:'')+'" onclick="updateBev(\''+el.id+'\',\'conditie\','+n+');renderChapter(currentChapter)">'+n+'<br><span style="font-size:9px">'+CONDITIE[n]+'</span></button>').join('')+
-      '</div>'+
-      '<div class="field" style="margin-bottom:10px;">'+
-        '<label>Beschrijving en bevinding</label>'+
-        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'beschrijving\',this.value)">'+escHtml(el.beschrijving||'')+'</textarea>'+
-      '</div>'+
-
+      '<div class="conditie-bar">'+[1,2,3,4,5].map(n=>'<button class="conditie-opt '+(cond==n?'sel-'+n:'')+'" onclick="updateBev(\''+el.id+'\',\'conditie\','+n+');renderChapter(currentChapter)">'+n+'<br><span style="font-size:9px">'+CONDITIE[n]+'</span></button>').join('')+'</div>'+
+      '<div class="field" style="margin-bottom:10px;"><label>Beschrijving en bevinding</label><textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'beschrijving\',this.value)">'+escHtml(el.beschrijving||'')+'</textarea></div>'+
       '<div style="margin-bottom:8px;">'+
         '<div class="bev-sec-h">🔧 Herstel / onderhoud <span class="amt">'+(kostenH?'€ '+Math.round(kostenH).toLocaleString('nl-NL'):'')+'</span></div>'+
-        '<div class="field" style="margin-bottom:6px;"><label>Uit te voeren werkzaamheden</label>'+
-        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_onderbouwing\',this.value)">'+escHtml(el.kosten_onderbouwing||'')+'</textarea></div>'+
+        '<div class="field" style="margin-bottom:6px;"><label>Uit te voeren werkzaamheden</label><textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_onderbouwing\',this.value)">'+escHtml(el.kosten_onderbouwing||'')+'</textarea></div>'+
         '<div class="grid3" style="gap:6px;">'+
           '<div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="'+escHtml(el.hoeveelheid||'')+'" placeholder="850" oninput="updateBev(\''+el.id+'\',\'hoeveelheid\',this.value)"/></div>'+
           '<div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="'+escHtml(el.eenheid||'')+'" placeholder="m²" oninput="updateBev(\''+el.id+'\',\'eenheid\',this.value)"/></div>'+
@@ -1341,11 +917,9 @@ function renderBevindingCard(el){
         '</div>'+
         '<div class="field" style="margin-top:6px;margin-bottom:0;"><label>Totaal herstel €</label><input type="number" value="'+(kostenH||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten\',parseFloat(this.value)||0);renderKostenTotaal()"/></div>'+
       '</div>'+
-
       '<div>'+
         '<div class="bev-sec-v">🏗 Vervanging <span class="amt">'+(kostenV?'€ '+Math.round(kostenV).toLocaleString('nl-NL'):'')+'</span></div>'+
-        '<div class="field" style="margin-bottom:6px;"><label>Voorstel vervanging</label>'+
-        '<textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging_onderbouwing\',this.value)">'+escHtml(el.kosten_vervanging_onderbouwing||'')+'</textarea></div>'+
+        '<div class="field" style="margin-bottom:6px;"><label>Voorstel vervanging</label><textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging_onderbouwing\',this.value)">'+escHtml(el.kosten_vervanging_onderbouwing||'')+'</textarea></div>'+
         '<div class="grid3" style="gap:6px;">'+
           '<div class="field" style="margin-bottom:0;"><label>Hoeveelheid</label><input type="text" value="'+escHtml(el.hoeveelheid||'')+'" placeholder="850" oninput="updateBev(\''+el.id+'\',\'hoeveelheid\',this.value)"/></div>'+
           '<div class="field" style="margin-bottom:0;"><label>Eenheid</label><input type="text" value="'+escHtml(el.eenheid||'')+'" placeholder="m²" oninput="updateBev(\''+el.id+'\',\'eenheid\',this.value)"/></div>'+
@@ -1353,463 +927,398 @@ function renderBevindingCard(el){
         '</div>'+
         '<div class="field" style="margin-top:6px;margin-bottom:0;"><label>Totaal vervanging €</label><input type="number" value="'+(kostenV||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging\',parseFloat(this.value)||0)"/></div>'+
       '</div>'+
-
-      (el.isolatie?'<div class="isolatie-block" style="margin-top:10px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
-    '</div>'+
-  '</div>';
+      (el.isolatie?'<div class="isolatie-block" style="margin-top:9px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
+    '</div></div>';
 }
 
-
-window.switchSubTab=tab=>{
-  currentSubTab=tab;
-  renderChapter(currentChapter);
+window.switchSubTab=tab=>{currentSubTab=tab;renderChapter(currentChapter);};
+window.addSubTab=chId=>{
+  const naam=prompt('Naam voor nieuw onderdeel:');if(!naam)return;
+  const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
+  if(!para.subtabs)para.subtabs=[];
+  para.subtabs.push(naam);currentSubTab=naam;renderChapter(chId);
 };
 
-window.addSubTab=async chId=>{
-  const naam=prompt('Naam voor nieuw onderdeel:');
-  if(!naam)return;
-  const ch=CHAPTERS.find(c=>c.id===chId);
-  if(!ch.gevels)ch.gevels=[];
-  ch.gevels.push(naam);
-  currentSubTab=naam;
-  renderChapter(chId);
-};
-
-// FOTO UPLOAD
-async function verwerkFotos(files,fotoKey){
+// ONDERHOUD & HERSTEL
+function renderOnderhoud(container){
   const opn=getOpname();
-  if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
-  showToast(`${files.length} foto's verwerken...`);
-  for(const f of files){
-    const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
-    const compressed=await compressPhoto(url);
-    // Auto-nummering label
-    const nr=opn.fotos[fotoKey].length+1;
-    opn.fotos[fotoKey].push({dataUrl:compressed,label:`Foto ${nr}`});
+  const els=opn.elementen.filter(e=>e.chapterId!=='snellinvoer');
+  if(!els.length){
+    container.innerHTML='<div class="section-title">🔧 Onderhoud & herstel</div><div class="empty"><div class="empty-icon">🔧</div><p>Voer eerst inspecties uit in de paragrafen.<br>De bevindingen verschijnen hier automatisch.</p></div>'+
+      '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">→ Naar inspectie</button>';return;
   }
-  await saveOpnameData();
-  renderChapter(currentChapter);
-  showToast('Foto\'s opgeslagen');
+  let html='<div class="section-title">🔧 Onderhoud & herstel — alle bevindingen</div>';
+  INSP_PARAGRAFEN.forEach(para=>{
+    const paraEls=els.filter(e=>e.chapterId===para.id);if(!paraEls.length)return;
+    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--text2);">'+para.icon+' '+para.naam+'</div>';
+    paraEls.forEach(el=>{html+=renderBevindingCard(el);});
+  });
+  const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">'+
+    '<div class="kosten-totaal-banner"><div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div><div class="kosten-totaal-amt">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🔧</div></div>'+
+    '<div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);"><div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div><div style="font-size:24px;font-weight:600;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🏗</div></div>'+
+  '</div>'+
+  '<div class="btn-row" style="margin-top:14px;"><button class="btn btn-dark" onclick="navToChapter(\'mjop\')">→ MJOP genereren</button></div>';
+  container.innerHTML=html;
 }
 
-window.handleFotoUpload=async(event,key)=>{await verwerkFotos(Array.from(event.target.files),key);event.target.value='';};
-window.handleDrop=async(event,key)=>{
-  event.preventDefault();
-  document.getElementById('fotozone-'+key)?.classList.remove('drag-over');
-  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
-  if(files.length)await verwerkFotos(files,key);
-};
-
-window.verwijderFoto=async(key,idx)=>{
+// MJOP
+function renderMJOP(container){
   const opn=getOpname();
-  opn.fotos[key].splice(idx,1);
-  await saveOpnameData();
-  renderChapter(currentChapter);
-};
+  let html='<div class="section-title">📅 MJOP — Meerjaren onderhoudsplan</div>';
+  if(!opn.mjop||!opn.mjop.length){
+    html+='<p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">De AI genereert een meerjaren onderhoudsplan voor Dak, Schilderwerk, Kozijnen & Gevel en Bestrating op basis van de ingevoerde bevindingen.</p>';
+    html+='<button class="btn btn-dark btn-full" onclick="genereerMJOP()">✦ MJOP genereren met AI</button>';
+    html+='<div id="mjop-loading" style="display:none;margin-top:12px;"><div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span>MJOP berekenen...</span></div><div class="progress-wrap"><div class="progress-bar" id="mjop-pbar" style="width:0%"></div></div></div>';
+    container.innerHTML=html;return;
+  }
+  const totaal=opn.mjop.reduce((s,e)=>s+(e.kosten_totaal||0),0);
+  const jaarlijks=Math.round(totaal/10);
+  html+='<div class="mjop-banner">'+
+    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+Math.round(totaal).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+jaarlijks.toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val">'+opn.mjop.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
+  '</div>';
+  html+='<table class="mjop-table"><thead><tr><th>Element</th><th>Cyclus</th><th>Jaar 1–3</th><th>Jaar 4–7</th><th>Jaar 8–10</th><th>Totaal</th></tr></thead><tbody>';
+  opn.mjop.forEach(e=>{
+    html+='<tr><td><strong>'+escHtml(e.element)+'</strong><div style="font-size:11px;color:var(--text3);">'+escHtml(e.omschrijving||'')+'</div></td>'+
+      '<td>'+escHtml(e.cyclus||'—')+'</td>'+
+      '<td class="'+(e.jaar1_3?'mjop-amt-h':'')+'">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
+      '<td class="'+(e.jaar4_7?'mjop-amt-h':'')+'">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
+      '<td class="'+(e.jaar8_10?'mjop-amt-v':'')+'">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
+      '<td><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td></tr>';
+  });
+  html+='<tr><td><strong>Totaal</strong></td><td></td>'+
+    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td><strong>€ '+Math.round(totaal).toLocaleString('nl-NL')+'</strong></td></tr></tbody></table>';
+  html+='<div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">'+
+    '<div style="font-size:12px;font-weight:600;margin-bottom:4px;">📊 Jaarlijkse voorziening</div>'+
+    '<div style="font-size:13px;">Op basis van het 10-jaars MJOP dient jaarlijks <strong>€ '+jaarlijks.toLocaleString('nl-NL')+'</strong> gereserveerd te worden voor onderhoud en vervanging.</div>'+
+  '</div>';
+  html+='<div class="btn-row"><button class="btn btn-blue btn-sm" onclick="genereerMJOP()">↺ Herbereken MJOP</button><button class="btn btn-light btn-sm" onclick="downloadMJOPExcel()">⬇ Excel</button><button class="btn btn-light btn-sm" onclick="downloadMJOPPDF()">⬇ PDF</button></div>';
+  container.innerHTML=html;
+}
 
-window.updateFotoLabel=async(key,idx,val)=>{
+window.genereerMJOP=async()=>{
+  if(!getApiKey()){showToast('API-sleutel ontbreekt');navTo('settings');return;}
   const opn=getOpname();
-  if(opn.fotos[key]&&opn.fotos[key][idx])opn.fotos[key][idx].label=val;
-  await saveOpnameData();
-};
-
-// AI ANALYSE
-window.analyseerFotos=async(chId,subTab)=>{
-  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navTo('settings');return;}
-  const fotoKey=subTab?chId+'_'+subTab:chId;
-  const opn=getOpname();
-  const fotos=opn.fotos[fotoKey]||[];
-  if(!fotos.length){showToast('Upload eerst foto\'s');return;}
-  const ch=CHAPTERS.find(c=>c.id===chId);
-  const tabNaam=subTab||ch.naam;
-  showToast(`${tabNaam} analyseren...`);
-  // Voeg tijdelijke loading toe
-  const container=document.getElementById('page-chapter');
-  const analyzeBtn=container.querySelector('button[onclick*="analyseerFotos"]');
-  if(analyzeBtn){analyzeBtn.textContent='⏳ Analyseren...';analyzeBtn.disabled=true;}
+  const loadEl=document.getElementById('mjop-loading');const pbar=document.getElementById('mjop-pbar');
+  if(loadEl)loadEl.style.display='block';if(pbar)pbar.style.width='20%';
+  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): conditie '+CONDITIE[e.conditie||3]+' | herstel €'+( e.kosten||0)+' | vervanging €'+(e.kosten_vervanging||0)).join('\n');
+  const obj=currentObj;
   try{
-    const content=fotos.slice(0,8).map((f,i)=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
-    const startNr=getFotoNr(chId,subTab||null,0);
-    const fotoNummers=fotos.slice(0,8).map((f,i)=>`Foto ${startNr+i}`).join(', ');
-    content.push({type:'text',text:`Analyseer deze foto's van de ${tabNaam} (${ch.naam}) van een gebouw (bouwjaar ${currentObj?.jaar||'onbekend'}).
-Foto nummering: ${fotoNummers}
+    if(pbar)pbar.style.width='50%';
+    const raw=await callClaude([{type:'text',text:`Maak een meerjaren onderhoudsplan (MJOP) voor de volgende 10 jaar voor dit gebouw.
+Object: ${obj?.naam}, Bouwjaar: ${obj?.jaar||'?'}, Type: ${obj?.type||'?'}
+Bevindingen uit inspectie:\n${bevStr||'Geen bevindingen'}
 
-Geef een gedetailleerde bouwkundige opname. Per zichtbaar element:
-1. Naam element
-2. Materiaal en specificaties
-3. Hoeveelheid met eenheid (m², m¹, stuks, etc.) — wees specifiek
-4. Conditiescore 1-5 (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht)
-5. Beschrijving toestand en gebreken — verwijs naar fotonummers bijv. "zie foto 1, 2"
-6. Foto omschrijvingen — korte omschrijving per foto wat er te zien is
-7. Herstelkosten (alleen getal)
-8. Kostenspecificatie herstel EXACT in dit format: "uit te voeren werkzaamheden: [omschrijving werkzaamheden] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"
-9. Vervangingskosten (alleen getal)
-10. Kostenspecificatie vervanging EXACT in dit format: "vervanging: [omschrijving wat vervangen wordt] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"
-11. Voor gevels: spouwmuur/isolatie analyse met R-waarde
+Focus op deze 4 hoofdelementen: Dak, Schilderwerk, Kozijnen & gevel, Bestrating.
+Gebruik de bevindingen om inschatting te maken wanneer groot onderhoud/vervanging nodig is.
+Cyclus = terugkeerperiode in jaren.
+Verdeel kosten realistisch over de periodes jaar 1-3, jaar 4-7, jaar 8-10.
 
 Reageer ALLEEN als JSON array:
 [{
-  "element": "Golfplaten gevelbekleding",
-  "materiaal": "Stalen golfplaten verzinkt",
-  "hoeveelheid": "850",
-  "eenheid": "m²",
-  "conditie": 2,
-  "beschrijving": "Algemene staat redelijk, lichte corrosieschade zichtbaar op bevestigingspunten en naden, zie foto ${startNr}, ${startNr+1}",
-  "foto_omschrijvingen": ["Overzicht gevelbekleding", "Detail corrosie bevestigingspunten"],
-  "kosten": 42500,
-  "kosten_onderbouwing": "uit te voeren werkzaamheden: reiniging, behandeling corrosie, lokaal herstel (850 m² × €50/m² = €42.500)",
-  "kosten_vervanging": 127500,
-  "kosten_vervanging_onderbouwing": "vervanging: nieuwe geïsoleerde sandwichpanelen inclusief steigers en afvoer oud materiaal (850 m² × €150/m² = €127.500)",
-  "isolatie": "Geen isolatie zichtbaar in golfplaten. R-waarde ≈ 0.15 m²K/W"
+  "element": "Dak",
+  "omschrijving": "Platdak bitumen 320 m²",
+  "cyclus": "15 jaar",
+  "jaar1_3": 0,
+  "jaar4_7": 0,
+  "jaar8_10": 48000,
+  "kosten_totaal": 48000,
+  "toelichting": "Op basis van bouwjaar verwacht vervanging over 8-10 jaar"
 }]
-Alleen JSON, niets anders.`});
+Alleen JSON, niets anders.`}]);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+    if(s>=0&&e>s){
+      opn.mjop=JSON.parse(clean.substring(s,e+1));
+      await saveMjopData();
+      if(pbar)pbar.style.width='100%';
+      setTimeout(()=>renderChapter('mjop'),400);
+      showToast('MJOP gegenereerd');
+    }
+  }catch(err){showToast('Fout: '+err.message);if(loadEl)loadEl.style.display='none';}
+};
+
+// SNELLE INVOER
+function renderSnelInvoer(container){
+  const opn=getOpname();
+  const els=opn.elementen;
+  const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  const condOpts=CONDITIE.slice(1).map((l,i)=>'<option value="'+(i+1)+'">'+(i+1)+' · '+l+'</option>').join('');
+  const condClass=['','c1','c2','c3','c4','c5'];
+  const rows=els.map(el=>'<div class="si-row" id="si-'+el.id+'">'+
+    '<input type="text" value="'+escHtml(el.subTab||'')+'" placeholder="Locatie" oninput="updateBev(\''+el.id+'\',\'subTab\',this.value)"/>'+
+    '<input type="text" value="'+escHtml(el.element||'')+'" placeholder="Element..." oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
+    '<select class="si-cond '+condClass[el.conditie||3]+'" onchange="updateBev(\''+el.id+'\',\'conditie\',parseInt(this.value));this.className=\'si-cond \'+[\'c1\',\'c2\',\'c3\',\'c4\',\'c5\'][parseInt(this.value)-1]">'+CONDITIE.slice(1).map((l,i)=>'<option value="'+(i+1)+'" '+((el.conditie||3)==i+1?'selected':'')+'>'+( i+1)+' · '+l+'</option>').join('')+'</select>'+
+    '<input type="text" value="'+escHtml((el.hoeveelheid||'')+( el.eenheid?' '+el.eenheid:''))+'" placeholder="850 m²" oninput="updateHvSnel(\''+el.id+'\',this.value)"/>'+
+    '<input type="number" value="'+(el.kosten||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten\',parseFloat(this.value)||0);updateSITotaal()"/>'+
+    '<input type="number" value="'+(el.kosten_vervanging||'')+'" placeholder="0" oninput="updateBev(\''+el.id+'\',\'kosten_vervanging\',parseFloat(this.value)||0);updateSITotaal()"/>'+
+    '<button onclick="verwijderBev(\''+el.id+'\')" style="width:28px;height:28px;border-radius:5px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:14px;">×</button>'+
+  '</div>').join('');
+  container.innerHTML='<div class="section-title">⚡ Snelle invoer</div>'+
+    '<button class="btn btn-blue btn-sm" style="margin-bottom:12px;" onclick="analyseerSnelInvoer()">✦ AI analyse vanuit alle foto\'s</button>'+
+    '<div class="si-header"><span>Locatie</span><span>Element / bevinding</span><span>Conditie</span><span>Hoeveelheid</span><span>Herstel €</span><span>Vervanging €</span><span></span></div>'+
+    '<div id="si-list">'+rows+'</div>'+
+    '<div class="si-add">'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Locatie</div><input type="text" id="si-new-loc" placeholder="Locatie..."/></div>'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Element / bevinding</div><input type="text" id="si-new-el" placeholder="Element..."/></div>'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Conditie</div><select class="si-cond c2" id="si-new-cond">'+condOpts+'</select></div>'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Hoeveelheid</div><input type="text" id="si-new-hv" placeholder="850 m²"/></div>'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Herstel €</div><input type="number" id="si-new-h" placeholder="0"/></div>'+
+      '<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">Vervanging €</div><input type="number" id="si-new-v" placeholder="0"/></div>'+
+      '<button class="si-add-btn" onclick="snelToevoegen()">+</button>'+
+    '</div>'+
+    '<div class="si-totaal">'+
+      '<span style="font-size:12px;color:var(--text2);">Totaal herstel</span><span id="si-tot-h" style="font-size:15px;font-weight:600;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</span>'+
+      '<span style="font-size:12px;color:var(--text2);margin-left:14px;">Totaal vervanging</span><span id="si-tot-v" style="font-size:15px;font-weight:600;color:var(--orange-text);">€ '+Math.round(totV).toLocaleString('nl-NL')+'</span>'+
+    '</div>'+
+    '<div class="btn-row" style="margin-top:14px;"><button class="btn btn-dark" onclick="navToChapter(\'kosten\')">→ Kostenraming</button></div>';
+}
+
+window.updateHvSnel=async(id,val)=>{
+  const parts=val.trim().split(/\s+/);
+  const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(!el)return;
+  if(parts.length>=2){el.hoeveelheid=parts[0];el.eenheid=parts.slice(1).join(' ');}
+  else{el.hoeveelheid=val;el.eenheid='';}
+  await saveOpnameData();
+};
+window.snelToevoegen=async()=>{
+  const loc=document.getElementById('si-new-loc').value.trim();
+  const el=document.getElementById('si-new-el').value.trim();
+  if(!el){showToast('Vul een element in');return;}
+  const cond=parseInt(document.getElementById('si-new-cond').value)||3;
+  const hvRaw=document.getElementById('si-new-hv').value.trim();
+  const parts=hvRaw.split(/\s+/);
+  const h=parseFloat(document.getElementById('si-new-h').value)||0;
+  const v=parseFloat(document.getElementById('si-new-v').value)||0;
+  const opn=getOpname();
+  opn.elementen.push({id:'snel_'+Date.now(),chapterId:'gevels',subTab:loc||'Voorgevel',element:el,materiaal:'',hoeveelheid:parts[0]||'',eenheid:parts.slice(1).join(' ')||'',conditie:cond,beschrijving:'',kosten:h,kosten_onderbouwing:'',kosten_vervanging:v,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false});
+  await saveOpnameData();renderSnelInvoer(document.getElementById('page-chapter'));
+};
+window.updateSITotaal=()=>{
+  const opn=getOpname();
+  const totH=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  const h=document.getElementById('si-tot-h');const v=document.getElementById('si-tot-v');
+  if(h)h.textContent='€ '+Math.round(totH).toLocaleString('nl-NL');
+  if(v)v.textContent='€ '+Math.round(totV).toLocaleString('nl-NL');
+};
+window.analyseerSnelInvoer=async()=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');return;}
+  const opn=getOpname();
+  const allefotos=[];
+  Object.entries(opn.fotos).forEach(([key,fotos])=>{fotos.slice(0,2).forEach(f=>allefotos.push(f));});
+  if(!allefotos.length){showToast('Upload eerst foto\'s in de inspectie paragrafen');return;}
+  showToast('Analyseren...');
+  try{
+    const content=allefotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    content.push({type:'text',text:'Geef een beknopte lijst van alle zichtbare bouwkundige elementen. Reageer ALLEEN als JSON:\n[{"locatie":"Voorgevel","element":"Metselwerk","conditie":3,"hoeveelheid":"450","eenheid":"m²","kosten_herstel":9000,"kosten_vervanging":36000}]'});
     const raw=await callClaude(content);
     const clean=raw.replace(/```json|```/g,'').trim();
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
     if(s>=0&&e>s){
       const items=JSON.parse(clean.substring(s,e+1));
-      // Auto-label foto's op basis van AI omschrijvingen
-      items.forEach(item=>{
-        if(item.foto_omschrijvingen&&Array.isArray(item.foto_omschrijvingen)){
-          item.foto_omschrijvingen.forEach((label,fi)=>{
-            if(opn.fotos[fotoKey]&&opn.fotos[fotoKey][fi]){
-              // Overschrijf alleen als het nog een generiek label is
-              const huidig=opn.fotos[fotoKey][fi].label||'';
-              if(!huidig||/^Foto \d+$/.test(huidig)){
-                opn.fotos[fotoKey][fi].label=label;
-              }
-            }
-          });
-        }
-      });
-      // Verwijder bestaande AI-elementen van deze subtab
-      opn.elementen=opn.elementen.filter(el=>!(el.chapterId===chId&&el.subTab===(subTab||null)&&el.aiAnalyse));
-      const startNr=getFotoNr(chId,subTab||null,0);
-      items.forEach((item,i)=>{
-        let beschrijving=item.beschrijving||'';
-        // Voeg fotonummers toe als ze er nog niet in staan
-        if(fotos.length&&!beschrijving.toLowerCase().includes('foto')){
-          const nrs=fotos.slice(0,Math.min(3,fotos.length)).map((_,fi)=>startNr+fi).join(', ');
-          beschrijving+=` (zie foto ${nrs})`;
-        }
-        opn.elementen.push({
-          id:`${fotoKey}_${Date.now()}_${i}`,
-          chapterId:chId,subTab:subTab||null,aiAnalyse:true,
-          element:item.element||'Element',
-          materiaal:item.materiaal||'',
-          hoeveelheid:item.hoeveelheid||'',
-          eenheid:item.eenheid||'',
-          conditie:item.conditie||3,
-          beschrijving:beschrijving,
-          kosten:item.kosten||0,
-          kosten_onderbouwing:item.kosten_onderbouwing||'',
-          // Als AI geen vervangingskosten geeft: bereken als 3-4x herstelkosten
-          kosten_vervanging:item.kosten_vervanging||(item.kosten?(Math.round((item.kosten*3.5)/100)*100):0),
-          kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||
-            (item.kosten_vervanging?'':`vervanging: volledig vervangen ${item.element||'element'} (${item.hoeveelheid||'?'} ${item.eenheid||''} × €${item.kosten&&item.hoeveelheid?Math.round(item.kosten*3.5/parseFloat(item.hoeveelheid||1)):0}/stuk = €${item.kosten?Math.round(item.kosten*3.5).toLocaleString('nl-NL'):'?'})`),
-          isolatie:item.isolatie||'',
-        });
-      });
-      await saveOpnameData();
-      showToast(`${items.length} elementen gevonden`);
+      items.forEach((item,i)=>{opn.elementen.push({id:'ai_snel_'+Date.now()+'_'+i,chapterId:'gevels',subTab:item.locatie||'Voorgevel',element:item.element||'',materiaal:'',hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',conditie:item.conditie||3,beschrijving:'',kosten:item.kosten_herstel||0,kosten_onderbouwing:'',kosten_vervanging:item.kosten_vervanging||0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:true});});
+      await saveOpnameData();showToast(items.length+' elementen toegevoegd');
+      renderSnelInvoer(document.getElementById('page-chapter'));
     }
-  }catch(err){showToast('Analyse mislukt: '+err.message);}
-  renderChapter(currentChapter);
-};
-
-window.voegBevindingToe=async(chId,subTab)=>{
-  const opn=getOpname();
-  opn.elementen.push({
-    id:`handmatig_${Date.now()}`,chapterId:chId,subTab:subTab||null,
-    element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',
-    conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',isolatie:'',aiAnalyse:false
-  });
-  await saveOpnameData();
-  renderChapter(currentChapter);
-};
-
-window.updateBev=async(id,key,val)=>{
-  const opn=getOpname();
-  const el=opn.elementen.find(e=>e.id===id);
-  if(el){el[key]=val;await saveOpnameData();}
-};
-
-window.verwijderBev=async id=>{
-  const opn=getOpname();
-  opn.elementen=opn.elementen.filter(e=>e.id!==id);
-  await saveOpnameData();
-  renderChapter(currentChapter);
+  }catch(e){showToast('Analyse mislukt: '+e.message);}
 };
 
 // KOSTEN
 function renderKostenTotaal(){
-  // Herbereken totaal zonder volledige re-render
   const opn=getOpname();
   const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
   const el=document.getElementById('kosten-totaal-amt');
   if(el)el.textContent='€ '+Math.round(totaal).toLocaleString('nl-NL');
 }
-
-function renderKosten(){
+function renderKosten(container){
   const opn=getOpname();
-  const container=document.getElementById('page-chapter');
-  const totaalHerstel=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const totaalVervanging=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-
-  let html=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-      <div class="kosten-totaal-banner">
-        <div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div>
-        <div class="kosten-totaal-amt" id="kosten-totaal-amt">€ ${Math.round(totaalHerstel).toLocaleString('nl-NL')}</div></div>
-        <div style="font-size:20px;opacity:.4;">🔧</div>
-      </div>
-      <div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);">
-        <div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div>
-        <div style="font-size:26px;font-weight:600;">€ ${Math.round(totaalVervanging).toLocaleString('nl-NL')}</div></div>
-        <div style="font-size:20px;opacity:.4;">🏗</div>
-      </div>
-    </div>`;
-
-  CHAPTERS.forEach(ch=>{
-    const els=opn.elementen.filter(e=>e.chapterId===ch.id&&((parseFloat(e.kosten)||0)>0||(parseFloat(e.kosten_vervanging)||0)>0));
+  const totH=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  const totV=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  let html='<div class="section-title">€ Kostenraming</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'+
+      '<div class="kosten-totaal-banner"><div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div><div class="kosten-totaal-amt" id="kosten-totaal-amt">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🔧</div></div>'+
+      '<div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);"><div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div><div style="font-size:24px;font-weight:600;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🏗</div></div>'+
+    '</div>';
+  INSP_PARAGRAFEN.forEach(para=>{
+    const els=opn.elementen.filter(e=>e.chapterId===para.id&&((parseFloat(e.kosten)||0)>0||(parseFloat(e.kosten_vervanging)||0)>0));
     if(!els.length)return;
-    const subtotaalH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-    const subtotaalV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+    const subtH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const subtV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
     const maxCond=Math.max(...els.map(e=>e.conditie||1));
-    const accId='acc-'+ch.id;
-    html+=`<div class="kosten-accordion">
-      <div class="kosten-acc-header" onclick="toggleAcc('${accId}')">
-        <span class="kosten-acc-icon">${ch.icon}</span>
-        <span class="kosten-acc-naam">${ch.naam}</span>
-        <span class="badge badge-${maxCond}">${CONDITIE[maxCond]}</span>
-        <span style="font-size:12px;color:var(--text2);">🔧 € ${Math.round(subtotaalH).toLocaleString('nl-NL')}</span>
-        ${subtotaalV>0?`<span style="font-size:12px;color:var(--orange-text);">🏗 € ${Math.round(subtotaalV).toLocaleString('nl-NL')}</span>`:''}
-        <span class="kosten-acc-arrow" id="arrow-${accId}">›</span>
-      </div>
-      <div class="kosten-acc-body" id="${accId}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);padding:4px 0;border-bottom:0.5px solid var(--border);">🔧 Herstel / onderhoud</div>
-          <div style="font-size:11px;font-weight:600;color:var(--orange-text);padding:4px 0;border-bottom:0.5px solid var(--border);">🏗 Vervanging</div>
-        </div>
-        ${els.map(e=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <div>
-            <div style="font-size:13px;font-weight:500;">${escHtml(e.element)}</div>
-            <div style="font-size:11px;color:var(--text3);">${escHtml(e.kosten_onderbouwing||'—')}</div>
-            <div style="font-size:13px;font-weight:600;margin-top:2px;">€ ${Math.round(parseFloat(e.kosten)||0).toLocaleString('nl-NL')}</div>
-          </div>
-          <div>
-            <div style="font-size:13px;color:var(--text3);">${escHtml(e.kosten_vervanging_onderbouwing||'—')}</div>
-            <div style="font-size:13px;font-weight:600;color:var(--orange-text);margin-top:2px;">${e.kosten_vervanging?'€ '+Math.round(parseFloat(e.kosten_vervanging)).toLocaleString('nl-NL'):'—'}</div>
-          </div>
-        </div>`).join('')}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;font-weight:600;font-size:13px;">
-          <div>Subtotaal herstel: € ${Math.round(subtotaalH).toLocaleString('nl-NL')}</div>
-          <div style="color:var(--orange-text);">Subtotaal vervanging: € ${Math.round(subtotaalV).toLocaleString('nl-NL')}</div>
-        </div>
-      </div>
-    </div>`;
+    const accId='acc-'+para.id;
+    html+='<div class="kosten-accordion">'+
+      '<div class="kosten-acc-header" onclick="toggleAcc(\''+accId+'\')">'+
+        '<span style="font-size:16px;">'+para.icon+'</span>'+
+        '<span class="kosten-acc-naam">'+para.naam+'</span>'+
+        '<span class="badge badge-'+maxCond+'">'+CONDITIE[maxCond]+'</span>'+
+        '<span style="font-size:12px;color:var(--text2);margin-left:4px;">🔧 € '+Math.round(subtH).toLocaleString('nl-NL')+'</span>'+
+        (subtV>0?'<span style="font-size:12px;color:var(--orange-text);">🏗 € '+Math.round(subtV).toLocaleString('nl-NL')+'</span>':'')+
+        '<span class="kosten-acc-arrow" id="arrow-'+accId+'">›</span>'+
+      '</div>'+
+      '<div class="kosten-acc-body" id="'+accId+'">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+          '<div style="font-size:11px;font-weight:600;color:var(--text3);padding:4px 0;border-bottom:0.5px solid var(--border);">🔧 Herstel / onderhoud</div>'+
+          '<div style="font-size:11px;font-weight:600;color:var(--orange-text);padding:4px 0;border-bottom:0.5px solid var(--border);">🏗 Vervanging</div>'+
+        '</div>'+
+        els.map(e=>'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">'+
+          '<div><div style="font-size:13px;font-weight:500;">'+escHtml(e.element)+'</div><div style="font-size:11px;color:var(--text3);">'+escHtml(e.kosten_onderbouwing||'—')+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;">€ '+Math.round(parseFloat(e.kosten)||0).toLocaleString('nl-NL')+'</div></div>'+
+          '<div><div style="font-size:12px;color:var(--text3);">'+escHtml(e.kosten_vervanging_onderbouwing||'—')+'</div><div style="font-size:13px;font-weight:600;color:var(--orange-text);margin-top:2px;">'+(e.kosten_vervanging?'€ '+Math.round(parseFloat(e.kosten_vervanging)).toLocaleString('nl-NL'):'—')+'</div></div>'+
+        '</div>').join('')+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;font-weight:600;font-size:13px;">'+
+          '<div>Subtotaal: € '+Math.round(subtH).toLocaleString('nl-NL')+'</div>'+
+          '<div style="color:var(--orange-text);">Subtotaal: € '+Math.round(subtV).toLocaleString('nl-NL')+'</div>'+
+        '</div>'+
+      '</div></div>';
   });
-
-  html+=`<div class="btn-row" style="margin-top:16px;">
-    <button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button>
-    <button class="btn btn-dark btn-sm" onclick="navToChapter('rapport')">→ Rapport genereren</button>
-  </div>`;
+  html+='<div class="btn-row" style="margin-top:14px;"><button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button><button class="btn btn-dark btn-sm" onclick="navToChapter(\'rapportage\')">→ Rapportage</button></div>';
   container.innerHTML=html;
 }
-
 window.toggleAcc=id=>{
-  const body=document.getElementById(id);
-  const arrow=document.getElementById('arrow-'+id);
-  const open=body.classList.toggle('open');
-  arrow.classList.toggle('open',open);
+  const body=document.getElementById(id);const arrow=document.getElementById('arrow-'+id);
+  const open=body.classList.toggle('open');arrow.classList.toggle('open',open);
 };
 
-// RAPPORT
-function renderRapportPagina(){
-  const container=document.getElementById('page-chapter');
+// RAPPORTAGE
+function renderRapportage(container){
   const opn=getOpname();
-  const hasEl=opn.elementen.length>0;
-  let html=`<div class="section-title">📄 Rapport genereren</div>`;
+  let html='<div class="section-title">📄 Rapportage</div>'+
+    '<div class="rapport-keuze">'+
+      '<div class="rapport-opt" onclick="generateRapport(\'paspoort\')"><div class="rapport-opt-icon">📋</div><div class="rapport-opt-title">Gebouwpaspoort rapport</div><div class="rapport-opt-sub">Objectgegevens, paspoort en bijlagen. Geschikt voor archivering of overdracht.</div></div>'+
+      '<div class="rapport-opt" onclick="generateRapport(\'conditie\')"><div class="rapport-opt-icon">🔍</div><div class="rapport-opt-title">Conditiemeting rapport</div><div class="rapport-opt-sub">Alle bevindingen incl. foto\'s en kostenraming herstel per element.</div></div>'+
+      '<div class="rapport-opt" onclick="generateRapport(\'mjop\')"><div class="rapport-opt-icon">📅</div><div class="rapport-opt-title">MJOP export</div><div class="rapport-opt-sub">Meerjaren plan met jaarlijkse voorziening. Export naar Excel of PDF.</div></div>'+
+      '<div class="rapport-opt" onclick="generateRapport(\'volledig\')"><div class="rapport-opt-icon">📄</div><div class="rapport-opt-title">Volledig rapport</div><div class="rapport-opt-sub">Alles in één: paspoort, inspectie, kosten en MJOP.</div></div>'+
+    '</div>'+
+    '<div id="rapport-loading" style="display:none;"><div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-load-status">Rapport genereren...</span></div><div class="progress-wrap"><div class="progress-bar" id="rapport-pbar" style="width:0%"></div></div></div>';
   if(rapportTekst){
-    html+=`<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-dark btn-sm" onclick="generateRapport('kort')">↺ Kort rapport</button>
-      <button class="btn btn-dark btn-sm" onclick="generateRapport('uitgebreid')">↺ Uitgebreid rapport</button>
-      <button class="btn btn-light btn-sm" onclick="copyRapport()">Kopieer</button>
-      <button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>
-      <button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>
-      <button class="btn btn-light btn-sm" onclick="downloadRapportExcel()">⬇ Excel</button>
-    </div>
-    <div class="rapport-card" id="rapport-tekst">${renderRapportHtml(rapportTekst)}</div>`;
-  }else if(hasEl){
-    html+=`<p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">Er zijn ${opn.elementen.length} bevindingen met een totale kostenraming van €${Math.round(opn.elementen.reduce((s,e)=>s+(e.kosten||0),0)).toLocaleString('nl-NL')}. Kies een rapport type:</p>`;
-  }else{
-    html+=`<div class="empty"><div class="empty-icon">📄</div><p>Voeg eerst bevindingen toe via de hoofdstukken.</p></div>`;
-  }
-  if(hasEl||rapportTekst){
-    html+=`<div id="rapport-loading" style="display:none;">
-      <div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-load-status">Rapport genereren...</span></div>
-      <div class="progress-wrap"><div class="progress-bar" id="rapport-pbar" style="width:0%"></div></div>
-    </div>`;
-    if(!rapportTekst){
-      html+=`<div class="grid2">
-        <button class="btn btn-dark btn-full" onclick="generateRapport('kort')">✦ Kort rapport<br><span style="font-size:11px;font-weight:400;opacity:.7;">Samenvatting + overzicht</span></button>
-        <button class="btn btn-dark btn-full" onclick="generateRapport('uitgebreid')">✦ Uitgebreid rapport<br><span style="font-size:11px;font-weight:400;opacity:.7;">Volledig per hoofdstuk</span></button>
-      </div>`;
-    }
+    html+='<div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">'+
+      '<button class="btn btn-light btn-sm" onclick="copyRapport()">Kopieer</button>'+
+      '<button class="btn btn-light btn-sm" onclick="downloadPDF()">⬇ PDF</button>'+
+      '<button class="btn btn-light btn-sm" onclick="downloadWord()">⬇ Word</button>'+
+    '</div>'+
+    '<div class="rapport-card" id="rapport-tekst">'+renderRapportHtml(rapportTekst)+'</div>';
   }
   container.innerHTML=html;
 }
 
 window.generateRapport=async type=>{
   if(!getApiKey()){showToast('API-sleutel ontbreekt');navTo('settings');return;}
-  const opn=getOpname();
-  if(!opn.elementen.length){showToast('Geen bevindingen gevonden');return;}
-  const loadEl=document.getElementById('rapport-loading');
-  const pbar=document.getElementById('rapport-pbar');
-  const statusEl=document.getElementById('rapport-load-status');
+  const opn=getOpname();const obj=currentObj;
+  const loadEl=document.getElementById('rapport-loading');const pbar=document.getElementById('rapport-pbar');const statusEl=document.getElementById('rapport-load-status');
   const tekstEl=document.getElementById('rapport-tekst');
-  if(loadEl)loadEl.style.display='block';
-  if(tekstEl)tekstEl.style.display='none';
-  const obj=currentObj;
+  if(loadEl)loadEl.style.display='block';if(tekstEl)tekstEl.style.display='none';
+  if(pbar)pbar.style.width='20%';if(statusEl)statusEl.textContent='Rapport samenstellen...';
   const datum=new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
   const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const bevStr=opn.elementen.map(e=>`- ${e.element} (${CHAPTERS.find(c=>c.id===e.chapterId)?.naam||e.chapterId}): ${CONDITIE[e.conditie]||''} | ${e.hoeveelheid||'?'} ${e.eenheid||''} | €${e.kosten||0} | ${e.beschrijving||''}`).join('\n');
-  if(pbar)pbar.style.width='30%';
-  if(statusEl)statusEl.textContent='Rapport samenstellen...';
-  const kort=type==='kort';
-  const prompt=kort?
-    `Schrijf een beknopt bouwkundig inspectierapport (max 1 A4) in het Nederlands.
+  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): '+CONDITIE[e.conditie||3]+' | €'+( e.kosten||0)).join('\n');
+  const gp=obj?.gp||{};
+  const gpStr='Constructie: '+(gp.constructie||'?')+' | Dak: '+(gp.dak1||'?')+' | Gevel: '+(gp.gevel1||'?')+' | Energielabel: '+(gp.energielabel||'?');
+  let prompt='';
+  if(type==='paspoort'){
+    prompt=`Schrijf een professioneel Gebouwpaspoort rapport in het Nederlands.
 Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
-Bevindingen:\n${bevStr}\nTotaal: €${Math.round(totaal).toLocaleString('nl-NL')}
-
-Format:
-**SAMENVATTING**
-[3 zinnen]
-
-**OVERZICHT**
-| Onderdeel | Conditie | Prioriteit | Kosten |
+Gebouwpaspoort: ${gpStr}
+**1. ALGEMENE OBJECTGEGEVENS** [tabel met adres, type, bouwjaar, opp, eigenaar]
+**2. BOUWKUNDIGE OMSCHRIJVING** [constructie, gevels, dak, kozijnen]
+**3. INSTALLATIES** [verwarming, koeling, ventilatie]
+**4. DUURZAAMHEID** [energielabel, isolatie, zonnepanelen]
+**5. DOCUMENTATIE** [beschikbare documenten]
+**DISCLAIMER** Dit paspoort is gebaseerd op beschikbare gegevens.`;
+  }else if(type==='conditie'){
+    prompt=`Schrijf een professioneel conditiemetingrapport (NEN 2767 stijl) in het Nederlands.
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
+Bevindingen:\n${bevStr}\nTotaal indicatief: €${Math.round(totaal).toLocaleString('nl-NL')}
+**1. SAMENVATTING** [algehele staat 3-4 zinnen]
+**2. OVERZICHTSTABEL**
+| Onderdeel | Conditie | Bevinding | Kosten indicatief |
+|---|---|---|---|
+**3. BEVINDINGEN PER ONDERDEEL** [per paragraaf]
+**4. KOSTENRAMING HERSTEL**
+| Onderdeel | Maatregel | Hoeveelheid | Kosten |
 |---|---|---|---|
 **Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
-
-**URGENTE ACTIES**
-[max 5 bullets]
-
-**DISCLAIMER**
-Visuele inspectie op basis van fotodocumentatie.`
-    :
-    `Schrijf een professioneel bouwkundig inspectierapport in het Nederlands.
-Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Eenheden: ${obj?.eenheden||'?'} | Datum: ${datum}
-
-Bevindingen per hoofdstuk:\n${bevStr}
-
-Totale kostenraming: €${Math.round(totaal).toLocaleString('nl-NL')}
-
-Hoofdstukken:
-**1. ALGEMENE INFORMATIE** [objecttabel]
-**2. SAMENVATTING** [algehele staat 3-4 zinnen]
-**3. OVERZICHTSTABEL**
-| Onderdeel | Conditie | Prioriteit | Kosten |
-|---|---|---|---|
-**Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
-**4. BEVINDINGEN PER ONDERDEEL** [per hoofdstuk met hoeveelheden]
-**5. CONSTRUCTIE & ISOLATIE** [isolatiewaarden + spouwmuur]
-**6. KOSTENRAMING**
-| Onderdeel | Maatregel | Hoeveelheid | Kosten | Onderbouwing |
-|---|---|---|---|---|
-**Totaal: €${Math.round(totaal).toLocaleString('nl-NL')}**
-**7. AANBEVELINGEN** [geprioriteerd]
+**5. AANBEVELINGEN** [geprioriteerd]
 **DISCLAIMER** Visuele inspectie. Vervangt geen bouwkundig keuringsrapport.`;
-  if(pbar)pbar.style.width='60%';
+  }else if(type==='mjop'){
+    const mjopStr=opn.mjop?.map(e=>e.element+' ('+e.cyclus+'): jaar 1-3 €'+( e.jaar1_3||0)+', jaar 4-7 €'+(e.jaar4_7||0)+', jaar 8-10 €'+(e.jaar8_10||0)+', totaal €'+(e.kosten_totaal||0)).join('\n')||'Geen MJOP gegenereerd';
+    const totMJOP=opn.mjop?.reduce((s,e)=>s+(e.kosten_totaal||0),0)||0;
+    prompt=`Schrijf een professioneel MJOP rapport (Meerjaren Onderhoudsplan) in het Nederlands.
+Object: ${obj?.naam} | Bouwjaar: ${obj?.jaar||'?'} | Datum: ${datum}
+MJOP data:\n${mjopStr}\nTotaal 10 jaar: €${Math.round(totMJOP).toLocaleString('nl-NL')}
+Jaarlijkse voorziening: €${Math.round(totMJOP/10).toLocaleString('nl-NL')}
+**1. SAMENVATTING MJOP**
+**2. MEERJAREN PLANNINGSSTAAT**
+| Element | Omschrijving | Cyclus | Jaar 1–3 | Jaar 4–7 | Jaar 8–10 | Totaal |
+|---|---|---|---|---|---|---|
+**3. FINANCIËLE SAMENVATTING**
+Totaal 10 jaar: €${Math.round(totMJOP).toLocaleString('nl-NL')}
+Aanbevolen jaarlijkse voorziening: €${Math.round(totMJOP/10).toLocaleString('nl-NL')}
+**4. TOELICHTING PER ELEMENT**
+**DISCLAIMER** Indicatief MJOP op basis van visuele inspectie.`;
+  }else{
+    prompt=`Schrijf een volledig bouwkundig inspectierapport in het Nederlands.
+Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
+Gebouwpaspoort: ${gpStr}
+Bevindingen:\n${bevStr}
+Totaal herstel: €${Math.round(totaal).toLocaleString('nl-NL')}
+**1. OBJECTGEGEVENS** [tabel]
+**2. GEBOUWPASPOORT** [bouwkundige omschrijving]
+**3. SAMENVATTING** [algehele staat]
+**4. OVERZICHTSTABEL**
+| Onderdeel | Conditie | Prioriteit | Kosten |
+|---|---|---|---|
+**5. BEVINDINGEN PER ONDERDEEL** [per paragraaf]
+**6. KOSTENRAMING**
+| Onderdeel | Maatregel | Kosten herstel | Kosten vervanging |
+|---|---|---|---|
+**7. AANBEVELINGEN**
+**DISCLAIMER** Visuele inspectie.`;
+  }
+  if(pbar)pbar.style.width='50%';
   try{
     const tekst=await callClaude([{type:'text',text:prompt}]);
     rapportTekst=tekst;
     await dataDoc(currentObjId,currentOpnameId,'rapport').set({tekst,aangemaaktOp:serverTimestamp()});
     if(pbar)pbar.style.width='100%';
-    setTimeout(()=>{if(loadEl)loadEl.style.display='none';renderRapportPagina();},400);
-  }catch(err){
-    if(loadEl)loadEl.style.display='none';
-    showToast('Fout: '+err.message);
-  }
+    setTimeout(()=>{if(loadEl)loadEl.style.display='none';renderRapportage(document.getElementById('page-chapter'));},400);
+  }catch(err){if(loadEl)loadEl.style.display='none';showToast('Fout: '+err.message);}
 };
 
 function renderRapportHtml(text){
-  // Verwerk tabellen eerst — groepeer tabelrijen
-  let h = text;
-
-  // Verwijder --- separator lijnen
-  h = h.replace(/^[-]{3,}$/gm, '');
-
-  // Koppen
-  h = h.replace(/^### (.*)/gm, '<h3>$1</h3>');
-  h = h.replace(/^## (.*)/gm, '<h2>$1</h2>');
-  h = h.replace(/^# (.*)/gm, '<h2>$1</h2>');
-
-  // Vet
-  h = h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-  // Bullets
-  h = h.replace(/^- (.*)/gm, '<li>$1</li>');
-  h = h.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul style="padding-left:18px;margin:6px 0;">${m}</ul>`);
-
-  // Tabellen — verwerk per blok
-  const lines = h.split('\n');
-  const result = [];
-  let tableLines = [];
-  let inTable = false;
-
-  for (const line of lines) {
-    const isTableRow = /^\|.+\|/.test(line.trim());
-    const isSeparator = /^\|[\s\-|:]+\|/.test(line.trim());
-
-    if (isTableRow && !isSeparator) {
-      inTable = true;
-      const cells = line.trim().split('|').filter((c,i,a) => i>0 && i<a.length-1).map(c=>c.trim());
-      tableLines.push('<tr>' + cells.map(c=>`<td style="padding:7px 10px;border:0.5px solid var(--border);font-size:13px;">${c}</td>`).join('') + '</tr>');
-    } else if (isSeparator) {
-      // Maak header van vorige rij
-      if (tableLines.length > 0) {
-        const last = tableLines[tableLines.length-1];
-        tableLines[tableLines.length-1] = last.replace(/<td/g,'<th style="padding:7px 10px;border:0.5px solid var(--border);font-size:12px;font-weight:600;background:var(--bg2);text-align:left;"').replace(/<\/td>/g,'</th>');
-      }
-    } else {
-      if (inTable && tableLines.length > 0) {
-        result.push(`<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">${tableLines.join('')}</table>`);
-        tableLines = [];
-        inTable = false;
-      }
-      result.push(line);
-    }
+  let h=text;
+  h=h.replace(/^[-]{3,}$/gm,'');
+  h=h.replace(/^### (.*)/gm,'<h3>$1</h3>').replace(/^## (.*)/gm,'<h2>$1</h2>').replace(/^# (.*)/gm,'<h2>$1</h2>');
+  h=h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/^- (.*)/gm,'<li>$1</li>');
+  h=h.replace(/(<li>.*<\/li>\n?)+/g,m=>'<ul style="padding-left:18px;margin:6px 0;">'+m+'</ul>');
+  const lines=h.split('\n');const result=[];let tableLines=[];let inTable=false;
+  for(const line of lines){
+    const isRow=/^\|.+\|/.test(line.trim());const isSep=/^\|[\s\-|:]+\|/.test(line.trim());
+    if(isRow&&!isSep){inTable=true;const cells=line.trim().split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());tableLines.push('<tr>'+cells.map(c=>'<td style="padding:7px 10px;border:0.5px solid var(--border);font-size:13px;">'+c+'</td>').join('')+'</tr>');}
+    else if(isSep){if(tableLines.length>0){const last=tableLines[tableLines.length-1];tableLines[tableLines.length-1]=last.replace(/<td/g,'<th style="padding:7px 10px;border:0.5px solid var(--border);font-size:12px;font-weight:600;background:var(--bg2);text-align:left;"').replace(/<\/td>/g,'</th>');}}
+    else{if(inTable&&tableLines.length>0){result.push('<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">'+tableLines.join('')+'</table>');tableLines=[];inTable=false;}result.push(line);}
   }
-
-  if (tableLines.length > 0) {
-    result.push(`<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">${tableLines.join('')}</table>`);
-  }
-
-  h = result.join('\n');
-
-  // Regeleinden opruimen
-  h = h.replace(/\n{3,}/g, '\n\n');
-  h = h.replace(/\n\n/g, '<br>');
-  h = h.replace(/\n/g, '<br>');
-
-  // Dubbele <br> voor en na tabellen verwijderen
-  h = h.replace(/<br>\s*(<table)/g, '$1');
-  h = h.replace(/<\/table>\s*<br>/g, '</table>');
-
+  if(tableLines.length>0)result.push('<table style="width:100%;border-collapse:collapse;margin:8px 0 14px;">'+tableLines.join('')+'</table>');
+  h=result.join('\n');
+  h=h.replace(/\n{3,}/g,'\n\n').replace(/\n\n/g,'<br>').replace(/\n/g,'<br>');
+  h=h.replace(/<br>\s*(<table)/g,'$1').replace(/<\/table>\s*<br>/g,'</table>');
   return h;
 }
 
 window.copyRapport=()=>navigator.clipboard.writeText(rapportTekst||'').then(()=>showToast('Gekopieerd'));
-
 window.downloadPDF=()=>{
   const win=window.open('','_blank');
   const html=document.getElementById('rapport-tekst')?.innerHTML||'';
-  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Rapport ${currentObj?.naam||''}</title>
-  <style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;margin:10pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td{border:1px solid #ccc;padding:5pt 7pt;}@media print{body{margin:1.5cm;}}</style>
-  </head><body><h1 style="font-size:16pt;text-align:center;">${currentObj?.naam||''}</h1><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('nl-NL')}</p>${html}</body></html>`);
+  win.document.write('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>'+( currentObj?.naam||'')+'</title><style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.6;}h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:14pt 0 6pt;}h3{font-size:12pt;margin:10pt 0 4pt;}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}td,th{border:1px solid #ccc;padding:5pt 7pt;}@media print{body{margin:1.5cm;}}</style></head><body><h1 style="font-size:16pt;text-align:center;">'+( currentObj?.naam||'')+'</h1><p style="text-align:center;color:#666;">'+new Date().toLocaleDateString('nl-NL')+'</p>'+html+'</body></html>');
   win.document.close();setTimeout(()=>win.print(),600);
 };
-
 window.downloadWord=async()=>{
   showToast('Word aanmaken...');
   try{
@@ -1826,47 +1335,138 @@ window.downloadWord=async()=>{
     const docFile=new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
     const buffer=await Packer.toBuffer(docFile);
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
-    a.download=`Rapport_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.docx`;a.click();showToast('Word gedownload');
+    a.download='Rapport_'+(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.docx';a.click();showToast('Word gedownload');
   }catch(e){showToast('Fout: '+e.message);}
 };
 
 async function loadXLSX(){if(!window.XLSX){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}}
 
 window.downloadKostenExcel=async()=>{
-  await loadXLSX();
-  const opn=getOpname();const wb=XLSX.utils.book_new();
+  await loadXLSX();const opn=getOpname();const wb=XLSX.utils.book_new();
   const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const rows=[
-    [`Kostenraming — ${currentObj?.naam||''}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],
-    ['Hoofdstuk','Element','Conditie','Hoeveelheid','Eenheid','Kosten (€)','Onderbouwing'],
-    ...opn.elementen.map(e=>[CHAPTERS.find(c=>c.id===e.chapterId)?.naam||e.chapterId,e.element,CONDITIE[e.conditie]||'',e.hoeveelheid||'',e.eenheid||'',e.kosten||0,e.kosten_onderbouwing||'']),
-    [],[],[`Totaal indicatief`,'','','','',totaal,'']
-  ];
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:20},{wch:28},{wch:12},{wch:12},{wch:8},{wch:12},{wch:30}];
+  const rows=[['Kostenraming — '+(currentObj?.naam||'')],['Datum: '+new Date().toLocaleDateString('nl-NL')],[],
+    ['Paragraaf','Element','Conditie','Hoeveelheid','Eenheid','Herstel (€)','Vervanging (€)','Onderbouwing'],
+    ...opn.elementen.map(e=>[INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId,e.element,CONDITIE[e.conditie]||'',e.hoeveelheid||'',e.eenheid||'',e.kosten||0,e.kosten_vervanging||0,e.kosten_onderbouwing||'']),
+    [],[],['Totaal herstel indicatief','','','','',totaal,'','']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:20},{wch:28},{wch:12},{wch:12},{wch:8},{wch:12},{wch:12},{wch:30}];
   XLSX.utils.book_append_sheet(wb,ws,'Kostenraming');
-  XLSX.writeFile(wb,`Kosten_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
-  showToast('Excel gedownload');
+  XLSX.writeFile(wb,'Kosten_'+(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.xlsx');showToast('Excel gedownload');
 };
 
-window.downloadRapportExcel=async()=>{
-  await loadXLSX();
-  const wb=XLSX.utils.book_new();
-  const rapEl=document.getElementById('rapport-tekst');
-  if(!rapEl){showToast('Genereer eerst een rapport');return;}
-  const tables=rapEl.querySelectorAll('table');
-  const namen=['Overzicht','Kostenraming','Extra'];
-  tables.forEach((t,i)=>{
-    const rows=[];
-    t.querySelectorAll('tr').forEach(tr=>{const row=[];tr.querySelectorAll('td,th').forEach(td=>row.push(td.innerText.trim()));if(row.some(c=>c))rows.push(row);});
-    if(rows.length>1){const ws=XLSX.utils.aoa_to_sheet([[`${currentObj?.naam||''} — ${namen[i]||'Tabel'}`],[`Datum: ${new Date().toLocaleDateString('nl-NL')}`],[],...rows]);ws['!cols']=rows[0]?.map(()=>({wch:22}));XLSX.utils.book_append_sheet(wb,ws,namen[i]||'Tabel '+(i+1));}
-  });
-  if(!wb.SheetNames.length){showToast('Geen tabellen gevonden');return;}
-  XLSX.writeFile(wb,`Rapport_${(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')}.xlsx`);
-  showToast('Excel gedownload');
+window.downloadMJOPExcel=async()=>{
+  await loadXLSX();const opn=getOpname();const wb=XLSX.utils.book_new();
+  const totaal=opn.mjop?.reduce((s,e)=>s+(e.kosten_totaal||0),0)||0;
+  const rows=[['MJOP — '+(currentObj?.naam||'')],['Datum: '+new Date().toLocaleDateString('nl-NL')],['Periode: 10 jaar'],[],
+    ['Element','Omschrijving','Cyclus','Jaar 1–3','Jaar 4–7','Jaar 8–10','Totaal','Toelichting'],
+    ...(opn.mjop||[]).map(e=>[e.element,e.omschrijving||'',e.cyclus||'',e.jaar1_3||0,e.jaar4_7||0,e.jaar8_10||0,e.kosten_totaal||0,e.toelichting||'']),
+    [],[],['Totaal 10 jaar','','','','','',totaal,''],
+    ['Jaarlijkse voorziening','','','','','',Math.round(totaal/10),'']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:18},{wch:22},{wch:10},{wch:12},{wch:12},{wch:12},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'MJOP');
+  XLSX.writeFile(wb,'MJOP_'+(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.xlsx');showToast('MJOP Excel gedownload');
 };
 
-// API
+window.downloadMJOPPDF=()=>{
+  const opn=getOpname();const totaal=opn.mjop?.reduce((s,e)=>s+(e.kosten_totaal||0),0)||0;
+  const win=window.open('','_blank');
+  let tabel='<table style="width:100%;border-collapse:collapse;font-size:10pt;margin:12pt 0;"><tr style="background:#f0f0f0;"><th style="border:1px solid #ccc;padding:5pt;">Element</th><th style="border:1px solid #ccc;padding:5pt;">Cyclus</th><th style="border:1px solid #ccc;padding:5pt;">Jaar 1–3</th><th style="border:1px solid #ccc;padding:5pt;">Jaar 4–7</th><th style="border:1px solid #ccc;padding:5pt;">Jaar 8–10</th><th style="border:1px solid #ccc;padding:5pt;">Totaal</th></tr>';
+  (opn.mjop||[]).forEach(e=>{tabel+='<tr><td style="border:1px solid #ccc;padding:5pt;">'+e.element+'</td><td style="border:1px solid #ccc;padding:5pt;text-align:center;">'+( e.cyclus||'—')+'</td><td style="border:1px solid #ccc;padding:5pt;text-align:right;">'+(e.jaar1_3?'€ '+e.jaar1_3.toLocaleString('nl-NL'):'—')+'</td><td style="border:1px solid #ccc;padding:5pt;text-align:right;">'+(e.jaar4_7?'€ '+e.jaar4_7.toLocaleString('nl-NL'):'—')+'</td><td style="border:1px solid #ccc;padding:5pt;text-align:right;">'+(e.jaar8_10?'€ '+e.jaar8_10.toLocaleString('nl-NL'):'—')+'</td><td style="border:1px solid #ccc;padding:5pt;text-align:right;font-weight:bold;">€ '+(e.kosten_totaal||0).toLocaleString('nl-NL')+'</td></tr>';});
+  tabel+='<tr style="font-weight:bold;background:#f0f0f0;"><td style="border:1px solid #ccc;padding:5pt;">Totaal</td><td></td><td></td><td></td><td></td><td style="border:1px solid #ccc;padding:5pt;text-align:right;">€ '+totaal.toLocaleString('nl-NL')+'</td></tr></table>';
+  win.document.write('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>MJOP '+( currentObj?.naam||'')+'</title><style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5;}@media print{body{margin:1.5cm;}}</style></head><body>'+
+    '<h1 style="font-size:16pt;text-align:center;">Meerjaren Onderhoudsplan</h1>'+
+    '<h2 style="font-size:13pt;text-align:center;font-weight:normal;">'+( currentObj?.naam||'')+'</h2>'+
+    '<p style="text-align:center;color:#666;">'+new Date().toLocaleDateString('nl-NL')+'</p>'+
+    tabel+
+    '<div style="background:#f5f5f5;padding:12pt;border-radius:6pt;margin-top:12pt;">'+
+      '<strong>Financiële samenvatting</strong><br>'+
+      'Totaal 10 jaar: <strong>€ '+totaal.toLocaleString('nl-NL')+'</strong><br>'+
+      'Aanbevolen jaarlijkse voorziening: <strong>€ '+Math.round(totaal/10).toLocaleString('nl-NL')+'</strong>'+
+    '</div>'+
+    '<p style="font-size:9pt;color:#999;margin-top:24pt;">Indicatief MJOP op basis van visuele inspectie.</p>'+
+  '</body></html>');
+  win.document.close();setTimeout(()=>win.print(),600);
+};
+
+// FOTO UPLOAD
+async function verwerkFotos(files,fotoKey){
+  const opn=getOpname();if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
+  showToast(files.length+' foto\'s verwerken...');
+  for(const f of files){
+    const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
+    const compressed=await compressPhoto(url);
+    const nr=opn.fotos[fotoKey].length+1;
+    opn.fotos[fotoKey].push({dataUrl:compressed,label:'Foto '+nr});
+  }
+  await saveOpnameData();renderChapter(currentChapter);showToast('Foto\'s opgeslagen');
+}
+window.handleFotoUpload=async(event,key)=>{await verwerkFotos(Array.from(event.target.files),key);event.target.value='';};
+window.handleDrop=async(event,key)=>{
+  event.preventDefault();document.getElementById('fotozone-'+key)?.classList.remove('drag-over');
+  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(files.length)await verwerkFotos(files,key);
+};
+window.verwijderFoto=async(key,idx)=>{const opn=getOpname();opn.fotos[key].splice(idx,1);await saveOpnameData();renderChapter(currentChapter);};
+window.updateFotoLabel=async(key,idx,val)=>{const opn=getOpname();if(opn.fotos[key]&&opn.fotos[key][idx])opn.fotos[key][idx].label=val;await saveOpnameData();};
+
+// AI ANALYSE
+window.analyseerFotos=async(chId,subTab)=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navTo('settings');return;}
+  const fotoKey=subTab?chId+'_'+subTab:chId;
+  const opn=getOpname();const fotos=opn.fotos[fotoKey]||[];
+  if(!fotos.length){showToast('Upload eerst foto\'s');return;}
+  const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
+  const tabNaam=subTab||para.naam;
+  showToast(tabNaam+' analyseren...');
+  const container=document.getElementById('page-chapter');
+  const analyzeBtn=container.querySelector('button[onclick*="analyseerFotos"]');
+  if(analyzeBtn){analyzeBtn.textContent='⏳ Analyseren...';analyzeBtn.disabled=true;}
+  try{
+    const content=fotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+    const startNr=getFotoNr(chId,subTab||null,0);
+    const fotoNummers=fotos.slice(0,8).map((f,i)=>'Foto '+(startNr+i)).join(', ');
+    content.push({type:'text',text:'Analyseer deze foto\'s van de '+tabNaam+' ('+para.naam+') van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\nFoto nummering: '+fotoNummers+'\n\nGeef een gedetailleerde bouwkundige opname. Per zichtbaar element:\n1. Naam element\n2. Materiaal en specificaties\n3. Hoeveelheid met eenheid (m², m¹, stuks)\n4. Conditiescore 1-5\n5. Beschrijving toestand — verwijs naar fotonummers\n6. Foto omschrijvingen per foto\n7. Herstelkosten (getal)\n8. Kostenspecificatie herstel: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n9. Vervangingskosten (getal)\n10. Kostenspecificatie vervanging: "vervanging: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n11. Isolatie/R-waarde indien van toepassing\n\nReageer ALLEEN als JSON array:\n[{"element":"Metselwerk voorgevel","materiaal":"Gebakken baksteen","hoeveelheid":"450","eenheid":"m²","conditie":3,"beschrijving":"Voegwerkschade, zie foto '+startNr+'","foto_omschrijvingen":["Overzicht gevel","Detail schade"],"kosten":9000,"kosten_onderbouwing":"uit te voeren werkzaamheden: hervoegen (450 m² × €20/m² = €9.000)","kosten_vervanging":36000,"kosten_vervanging_onderbouwing":"vervanging: nieuw metselwerk (450 m² × €80/m² = €36.000)","isolatie":""}]\nAlleen JSON, niets anders.'});
+    const raw=await callClaude(content);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+    if(s>=0&&e>s){
+      const items=JSON.parse(clean.substring(s,e+1));
+      items.forEach((item,fi)=>{
+        if(item.foto_omschrijvingen&&Array.isArray(item.foto_omschrijvingen)){
+          item.foto_omschrijvingen.forEach((label,li)=>{
+            if(opn.fotos[fotoKey]&&opn.fotos[fotoKey][li]&&/^Foto \d+$/.test(opn.fotos[fotoKey][li].label||'')){opn.fotos[fotoKey][li].label=label;}
+          });
+        }
+      });
+      opn.elementen=opn.elementen.filter(el=>!(el.chapterId===chId&&el.subTab===(subTab||null)&&el.aiAnalyse));
+      const startNrCalc=getFotoNr(chId,subTab||null,0);
+      items.forEach((item,i)=>{
+        let beschrijving=item.beschrijving||'';
+        if(fotos.length&&!beschrijving.toLowerCase().includes('foto')){const nrs=fotos.slice(0,Math.min(3,fotos.length)).map((_,fi)=>startNrCalc+fi).join(', ');beschrijving+=' (zie foto '+nrs+')';}
+        opn.elementen.push({
+          id:fotoKey+'_'+Date.now()+'_'+i,chapterId:chId,subTab:subTab||null,aiAnalyse:true,
+          element:item.element||'Element',materiaal:item.materiaal||'',hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',
+          conditie:item.conditie||3,beschrijving,
+          kosten:item.kosten||0,kosten_onderbouwing:item.kosten_onderbouwing||'',
+          kosten_vervanging:item.kosten_vervanging||(item.kosten?Math.round(item.kosten*3.5/100)*100:0),
+          kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||(item.kosten_vervanging?'':'vervanging: volledig vervangen '+( item.element||'element')+' (indicatie 3.5× herstelkosten = €'+(item.kosten?Math.round(item.kosten*3.5).toLocaleString('nl-NL'):'?')+')'),
+          isolatie:item.isolatie||'',prijs_herstel:'',prijs_vervanging:'',
+        });
+      });
+      await saveOpnameData();showToast(items.length+' elementen gevonden');
+    }
+  }catch(err){showToast('Analyse mislukt: '+err.message);}
+  renderChapter(currentChapter);
+};
+
+window.voegBevindingToe=async(chId,subTab)=>{
+  const opn=getOpname();
+  opn.elementen.push({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false});
+  await saveOpnameData();renderChapter(currentChapter);
+};
+window.updateBev=async(id,key,val)=>{const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(el){el[key]=val;await saveOpnameData();}};
+window.verwijderBev=async id=>{const opn=getOpname();opn.elementen=opn.elementen.filter(e=>e.id!==id);await saveOpnameData();renderChapter(currentChapter);};
+
+// API & SETTINGS
 function getApiKey(){return localStorage.getItem('vi-apikey')||'';}
 window.saveApiKey=()=>{const v=document.getElementById('api-key-inp').value.trim();if(!v){showToast('Vul sleutel in');return;}localStorage.setItem('vi-apikey',v);document.getElementById('api-status').textContent='Actief: '+v.substring(0,16)+'...';showToast('Opgeslagen');};
 window.saveWorker=()=>{const v=document.getElementById('worker-inp').value.trim();if(!v){showToast('Vul URL in');return;}localStorage.setItem('vi-worker',v);document.getElementById('worker-status').textContent='✓ Opgeslagen';showToast('Opgeslagen');};
@@ -1881,7 +1481,6 @@ function initSettings(){
   const k=getApiKey();if(k){document.getElementById('api-key-inp').value=k;document.getElementById('api-status').textContent='Actief: '+k.substring(0,16)+'...';}
   const w=localStorage.getItem('vi-worker');if(w){document.getElementById('worker-inp').value=w;document.getElementById('worker-status').textContent='✓ Actief';}
 }
-
 async function callClaude(content){
   const key=getApiKey();if(!key)throw new Error('Geen API-sleutel');
   const url=localStorage.getItem('vi-worker');if(!url)throw new Error('Geen Worker URL');
@@ -1890,33 +1489,27 @@ async function callClaude(content){
   const d=await r.json();return d.content?.map(b=>b.text||'').join('')||'';
 }
 
-// SYNC STATUS
+// UTILS
 function setSyncStatus(status,text){
   const dot=document.getElementById('sync-dot');const txt=document.getElementById('sync-text');
   if(dot)dot.className='sync-dot'+(status==='syncing'?' syncing':'');
   if(txt)txt.textContent=text;
 }
-
-// BAG
 let bagTimer=null;
 window.bagSuggest=q=>{clearTimeout(bagTimer);if(!q||q.length<3){hideBagDd();return;}bagTimer=setTimeout(()=>_bagFetch(q),280);};
 async function _bagFetch(q){
-  const dd=document.getElementById('bag-dd');dd.style.display='block';dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Zoeken...</div>';
-  const w=localStorage.getItem('vi-worker')||'';
-  if(!w){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
-  try{
-    const r=await fetch(w.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam');
-    const d=await r.json();const docs=d?.response?.docs||[];
-    if(!docs.length){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
-    dd.innerHTML=docs.map(x=>`<div class="bag-dd-item" onclick="bagSelect('${x.id}','${escHtml(x.weergavenaam)}')">${escHtml(x.weergavenaam)}</div>`).join('');
-  }catch(e){dd.innerHTML='<div style="padding:10px 13px;font-size:13px;color:var(--text3);">Fout</div>';}
+  const dd=document.getElementById('bag-dd');dd.style.display='block';dd.innerHTML='<div style="padding:9px 12px;font-size:13px;color:var(--text3);">Zoeken...</div>';
+  const w=localStorage.getItem('vi-worker')||'';if(!w){dd.innerHTML='<div style="padding:9px 12px;font-size:13px;color:var(--text3);">Stel Worker URL in</div>';return;}
+  try{const r=await fetch(w.replace(/\/$/,'')+'/bag/suggest?q='+encodeURIComponent(q)+'&fq=type:(adres)&rows=8&fl=id,weergavenaam');const d=await r.json();const docs=d?.response?.docs||[];
+    if(!docs.length){dd.innerHTML='<div style="padding:9px 12px;font-size:13px;color:var(--text3);">Geen resultaten</div>';return;}
+    dd.innerHTML=docs.map(x=>'<div class="bag-dd-item" onclick="bagSelect(\''+x.id+'\',\''+escHtml(x.weergavenaam)+'\')">'+escHtml(x.weergavenaam)+'</div>').join('');
+  }catch(e){dd.innerHTML='<div style="padding:9px 12px;font-size:13px;color:var(--text3);">Fout</div>';}
 }
 window.bagSelect=async(id,naam)=>{
   hideBagDd();document.getElementById('f-bag').value=naam;document.getElementById('f-naam').value=naam;
-  const st=document.getElementById('bag-status');st.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:5px;">BAG data ophalen...</div>';
+  const st=document.getElementById('bag-status');st.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:4px;">BAG data ophalen...</div>';
   const w=localStorage.getItem('vi-worker')||'';if(!w)return;
-  try{
-    const r=await fetch(w.replace(/\/$/,'')+'/bag/lookup?id='+id);const d=await r.json();const doc=d?.response?.docs?.[0];
+  try{const r=await fetch(w.replace(/\/$/,'')+'/bag/lookup?id='+id);const d=await r.json();const doc=d?.response?.docs?.[0];
     if(!doc){st.innerHTML='<div class="bag-badge fail">Geen data</div>';return;}
     const g=[];
     if(doc.postcode&&doc.woonplaatsnaam)document.getElementById('f-postcode').value=doc.postcode+' '+doc.woonplaatsnaam;
@@ -1924,31 +1517,17 @@ window.bagSelect=async(id,naam)=>{
     if(doc.oppervlakte_min){document.getElementById('f-opp').value=doc.oppervlakte_min;document.getElementById('f-opp-badge').textContent='✓ BAG';g.push('opp. '+doc.oppervlakte_min+'m²');}
     if(doc.aantal_eenheden)document.getElementById('f-eenheden').value=doc.aantal_eenheden;
     if(doc.gebruiksdoel){const gd=Array.isArray(doc.gebruiksdoel)?doc.gebruiksdoel[0]:doc.gebruiksdoel;const map={'kantoorfunctie':'Kantoorpand','woonfunctie':'Eengezinswoning','winkelfunctie':'Winkelruimte','industriefunctie':'Bedrijfshal'};const m=Object.entries(map).find(([k])=>gd.toLowerCase().includes(k));if(m)document.getElementById('f-type').value=m[1];}
-    st.innerHTML=g.length?`<div class="bag-badge">✓ BAG: ${g.join(' · ')}</div>`:'<div class="bag-badge fail">Beperkte data</div>';
+    st.innerHTML=g.length?'<div class="bag-badge">✓ BAG: '+g.join(' · ')+'</div>':'<div class="bag-badge fail">Beperkte data</div>';
   }catch(e){st.innerHTML='<div class="bag-badge fail">BAG mislukt</div>';}
 };
 function hideBagDd(){const dd=document.getElementById('bag-dd');if(dd){dd.style.display='none';dd.innerHTML='';}}
 document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagDd();});
-
-// MOBILE SIDEBAR
-window.toggleSidebar=()=>{
-  const sb=document.getElementById('sidebar');const ov=document.getElementById('sb-overlay');
-  sb.classList.toggle('open');ov.classList.toggle('show');
-};
-window.closeSidebar=()=>{
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sb-overlay').classList.remove('show');
-};
-
-// UTILS
+window.toggleSidebar=()=>{const sb=document.getElementById('sidebar');const ov=document.getElementById('sb-overlay');sb.classList.toggle('open');ov.classList.toggle('show');};
+window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('show');};
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
 window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
-
-// SERVICE WORKER
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-
-// INIT — begin met login pagina, sidebar en topbar verborgen
 document.getElementById('sidebar').style.display='none';
 document.getElementById('topbar').style.display='none';
 </script>
