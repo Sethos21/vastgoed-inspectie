@@ -915,6 +915,7 @@ function renderBevindingCard(el){
         '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
         (kostenH?'<span class="bev-kpill">🔧 € '+Math.round(kostenH).toLocaleString('nl-NL')+'</span>':'')+
         (kostenV?'<span class="bev-kpill" style="color:var(--orange-text);">🏗 € '+Math.round(kostenV).toLocaleString('nl-NL')+'</span>':'')+
+        '<button onclick="event.stopPropagation();verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:3px 4px;border-radius:4px;line-height:1;" title="Verwijderen">🗑</button>'+
         '<span class="bev-chevron" id="chv-'+uid+'">›</span>'+
       '</div>'+
     '</div>'+
