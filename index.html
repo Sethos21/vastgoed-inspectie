@@ -434,7 +434,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 // HOOFDSTUKKEN definitie
 const CHAPTERS=[
   {id:'objectgegevens',nr:1,naam:'Objectgegevens',icon:'🏢'},
-  {id:'snellinvoer',nr:2,naam:'Snelle invoer',icon:'⚡'},
+  {id:'gebouwpaspoort',nr:2,naam:'Gebouwpaspoort',icon:'📋'},
   {id:'gevels',nr:3,naam:'Gevels & exterieur',icon:'🧱',gevels:['Voorgevel','Achtergevel','Linkerzijgevel','Rechterzijgevel','Overig exterieur']},
   {id:'dak',nr:4,naam:'Dak & dakrand',icon:'🏗',gevels:['Dakvlak','Dakrand & goten','Dakdoorvoeren','Schoorstenen']},
   {id:'kozijnen',nr:5,naam:'Kozijnen & beglazing',icon:'🪟',gevels:['Voorzijde','Achterzijde','Zijkanten']},
@@ -659,6 +659,7 @@ function updateSidebar(opnameList){
     <div class="sb-section-label">Hoofdstukken</div>
     ${CHAPTERS.map(c=>`<div class="sb-item" onclick="navToChapter('${c.id}')" data-chapter="${c.id}"><div class="sb-num">${c.nr}</div>${c.naam}</div>`).join('')}
     <div class="sb-section-label">Samenvatting</div>
+    <div class="sb-item" onclick="navToChapter('snellinvoer')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>
     <div class="sb-item" onclick="navToChapter('kosten')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>
     <div class="sb-item" onclick="navToChapter('rapport')" data-chapter="rapport"><div class="sb-num">📄</div>Rapport genereren</div>`;
 }
@@ -748,7 +749,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const ch=currentChapter==='kosten'?{naam:'Kostenraming',icon:'€'}:currentChapter==='rapport'?{naam:'Rapport genereren',icon:'📄'}:CHAPTERS.find(c=>c.id===currentChapter);
+    const ch=currentChapter==='kosten'?{naam:'Kostenraming',icon:'€'}:currentChapter==='rapport'?{naam:'Rapport genereren',icon:'📄'}:currentChapter==='snellinvoer'?{naam:'Snelle invoer',icon:'⚡'}:CHAPTERS.find(c=>c.id===currentChapter);
     document.getElementById('topbar-title').textContent=(ch?.icon||'')+' '+( ch?.naam||'Hoofdstuk');
     document.getElementById('topbar-sub').textContent=currentObj?.naam||'';
   }else if(page==='objects'){
@@ -1040,12 +1041,155 @@ window.analyseerSnelInvoer=async()=>{
   }catch(e){showToast('Analyse mislukt: '+e.message);}
 };
 
+// GEBOUWPASPOORT
+const GP_OPTIES={
+  constructie:['Trad. metsel / zadeldak (pannen)','Trad. Metsel plat dak','Staalconstructie / plat dak / sandwichgevels','Staalconstr. / zadeldak / sandwichgevels','Overig'],
+  verdiepingen:['1','2','3','meer dan 3'],
+  vloer:['Beton (gevlinderd)','Tegels','Straatwerk','Vloerbedekking','Hout','PVC'],
+  gevel:['Trad. Metsel spouw','Trad. Metsel zonder spouw','Sandwich','Damwand','Overig'],
+  dak:['Zadeldak met pannen','Zadeldak met sandwichpanelen','Platdak met isolatie en bitumen','Platdak met isolatie en PVC','Platdak met isolatie en overig kunststof','Kanaalplaten / glas / lichtdoorlatend','Overig'],
+  toegang:['In/uitgang schuifdeur','Dubbele schuifpui met luchtsluis','Draaideur','Overig'],
+  deur:['Aluminium industriedeur','Aluminium deur met glas','Hout industriedeur','Hout met glas','Kunststof','Kunststof met glas','Overig'],
+  kozijn:['Hout met glas','Hout met vulling','Kunststof met glas','Kunststof met vulling','Aluminium met glas','Aluminium met vulling','Overig'],
+  overhead:['Overhead automatisch','Overhead handmatig','Schuifdeur automatisch','Schuifdeur handmatig','Overig'],
+  verharding:['Straatwerk met parkeervakken','Asfalt / straatwerk met parkeervakken','Overig'],
+  hekwerk:['Gaashekwerk','Spijlenvakken','Schutting hout / overig','Geen'],
+  poort:['Schuifpoort automatisch','Schuifpoort handmatig','Draaipoort automatisch','Draaipoort handmatig','Slagboom automatisch','Tourniquette','Overig'],
+  verwarming:['LBK met verwarming/koeling','Airco\'s','Vloerverwarming','(Gas)heaters','Overig'],
+  lucht:['LBK met verwarming/koeling','Ventilatiesysteem zonder LBK'],
+  cv:['Gasgestookte CV','Combi-ketel gas','Hybride CV / zonnecollectoren','Stadsverwarming','Overig'],
+  jannee:['Ja','Nee'],
+  label:['A++++','A+++','A++','A+','A','B','C','D','E','F','G','Onbekend'],
+  isolatie:['Ja','Nee','Onbekend'],
+};
+
+function gpSelect(key,field,val=''){
+  const opts=GP_OPTIES[key]||[];
+  return `<select oninput="saveGP('${field}',this.value)">
+    <option value="">— Kies —</option>
+    ${opts.map(o=>`<option ${val===o?'selected':''}>${escHtml(o)}</option>`).join('')}
+  </select>`;}
+
+function gpInp(field,val='',type='text',placeholder=''){
+  return `<input type="${type}" value="${escHtml(val)}" placeholder="${placeholder}" oninput="saveGP('${field}',this.value)"/>`;}
+
+function gpRow(label,html){return `<div class="field"><label>${label}</label>${html}</div>`;}
+function gpSub(label){return `<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:4px 0 2px;grid-column:1/-1;">${label}</div>`;}
+function gpSec(icon,titel,kleur,inhoud){
+  return `<div style="margin-bottom:14px;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;">
+    <div style="padding:9px 14px;font-size:12px;font-weight:600;color:#fff;background:${kleur};display:flex;align-items:center;gap:7px;">${icon} ${titel}</div>
+    <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">${inhoud}</div>
+  </div>`;}
+
+window.saveGP=async(field,val)=>{
+  if(!currentObjId)return;
+  await objDoc(currentObjId).set({gp:{[field]:val}},{merge:true});
+  if(currentObj){if(!currentObj.gp)currentObj.gp={};currentObj.gp[field]=val;}
+};
+
+function renderGebouwpaspoort(container){
+  const gp=currentObj?.gp||{};
+  const obj=currentObj||{};
+
+  container.innerHTML=`
+    <div class="section-title">📋 Hoofdstuk 2 — Gebouwpaspoort</div>
+
+    ${gpSec('🏢','Algemene gegevens','#185fa5',`
+      ${gpRow('Gebouwnaam',gpInp('naam',obj.naam||'','text','Gebouwnaam...'))}
+      ${gpRow('Eigenaar',gpInp('eigenaar',gp.eigenaar||'','text','Naam eigenaar...'))}
+      <div class="field" style="grid-column:1/-1">${`<label>Adres</label>`+gpInp('adres',obj.naam||'','text','Adres...')}</div>
+      ${gpRow('Postcode & plaats',gpInp('postcode',obj.postcode||'','text','Uit BAG...'))}
+      ${gpRow('Bouwjaar',gpInp('bouwjaar',obj.jaar||'','number','Uit BAG...'))}
+      ${gpRow('Gebruiksfunctie 1',gpInp('functie1',gp.functie1||'','text','Bijv. Winkelfunctie...'))}
+      ${gpRow('Gebruiksfunctie 2',gpInp('functie2',gp.functie2||'','text','Optioneel...'))}
+    `)}
+
+    ${gpSec('🏗','Bouw & constructie','#3b6d11',`
+      <div class="field" style="grid-column:1/-1"><label>Constructietype</label>${gpSelect('constructie','constructie',gp.constructie||'')}</div>
+      ${gpRow('Aantal verdiepingen',gpSelect('verdiepingen','verdiepingen',gp.verdiepingen||''))}
+      ${gpRow('Totale vloeroppervlakte (m²)',gpInp('opp',obj.opp||'','number','Uit BAG...'))}
+      ${gpSub('Vloerafwerking')}
+      ${gpRow('Type 1',gpSelect('vloer','vloer1',gp.vloer1||''))}
+      ${gpRow('Type 2',gpSelect('vloer','vloer2',gp.vloer2||''))}
+      ${gpSub('Materiaal gevels')}
+      ${gpRow('Type 1',gpSelect('gevel','gevel1',gp.gevel1||''))}
+      ${gpRow('Type 2',gpSelect('gevel','gevel2',gp.gevel2||''))}
+      ${gpSub('Dakafwerking')}
+      ${gpRow('Type 1',gpSelect('dak','dak1',gp.dak1||''))}
+      ${gpRow('Type 2',gpSelect('dak','dak2',gp.dak2||''))}
+    `)}
+
+    ${gpSec('🚪','Toegang & kozijnen','#854f0b',`
+      ${gpSub('Toegangsdeur / pui')}
+      ${gpRow('Type',gpSelect('toegang','toegang1',gp.toegang1||''))}
+      ${gpRow('Aantal',gpInp('toegang1_aantal',gp.toegang1_aantal||'','number','0'))}
+      ${gpSub('Deuren')}
+      ${gpRow('Type 1',gpSelect('deur','deur1',gp.deur1||''))}
+      ${gpRow('Aantal',gpInp('deur1_aantal',gp.deur1_aantal||'','number','0'))}
+      ${gpRow('Type 2',gpSelect('deur','deur2',gp.deur2||''))}
+      ${gpRow('Aantal',gpInp('deur2_aantal',gp.deur2_aantal||'','number','0'))}
+      ${gpSub('Kozijnen / ramen')}
+      ${gpRow('Type 1',gpSelect('kozijn','kozijn1',gp.kozijn1||''))}
+      ${gpRow('Aantal',gpInp('kozijn1_aantal',gp.kozijn1_aantal||'','number','0'))}
+      ${gpRow('Type 2',gpSelect('kozijn','kozijn2',gp.kozijn2||''))}
+      ${gpRow('Aantal',gpInp('kozijn2_aantal',gp.kozijn2_aantal||'','number','0'))}
+      ${gpSub('Overhead / magazijndeuren')}
+      ${gpRow('Type 1',gpSelect('overhead','overhead1',gp.overhead1||''))}
+      ${gpRow('Aantal',gpInp('overhead1_aantal',gp.overhead1_aantal||'','number','0'))}
+      ${gpRow('Type 2',gpSelect('overhead','overhead2',gp.overhead2||''))}
+      ${gpRow('Aantal',gpInp('overhead2_aantal',gp.overhead2_aantal||'','number','0'))}
+    `)}
+
+    ${gpSec('🌳','Buitenterrein','#993c1d',`
+      ${gpRow('Type verharding',gpSelect('verharding','verharding',gp.verharding||''))}
+      ${gpRow('Evt. hekwerk',gpSelect('hekwerk','hekwerk',gp.hekwerk||''))}
+      ${gpSub('Poorten')}
+      ${gpRow('Type 1',gpSelect('poort','poort1',gp.poort1||''))}
+      ${gpRow('Aantal',gpInp('poort1_aantal',gp.poort1_aantal||'','number','0'))}
+      ${gpRow('Type 2',gpSelect('poort','poort2',gp.poort2||''))}
+      ${gpRow('Aantal',gpInp('poort2_aantal',gp.poort2_aantal||'','number','0'))}
+      <div class="field" style="grid-column:1/-1"><label>Omschrijving groen</label>${gpInp('groen',gp.groen||'','text','Bijv. gazon rondom, bomen aan voorzijde...')}</div>
+    `)}
+
+    ${gpSec('⚙️','Installaties (HVAC & elektra)','#0f6e56',`
+      ${gpRow('Hoofdverwarming',gpSelect('verwarming','hoofdverwarming',gp.hoofdverwarming||''))}
+      ${gpRow('Overige verwarming',gpSelect('verwarming','overigeVerwarming',gp.overigeVerwarming||''))}
+      ${gpRow('Luchtbehandeling',gpSelect('lucht','lucht',gp.lucht||''))}
+      ${gpRow('Koelinstallatie',gpSelect('jannee','koeling',gp.koeling||''))}
+      ${gpRow('Luchtgordijn / sluis',gpSelect('jannee','luchtgordijn',gp.luchtgordijn||''))}
+      ${gpRow('Type CV-ketel',gpSelect('cv','cv',gp.cv||''))}
+      ${gpRow('Bouwjaar CV',gpInp('cvJaar',gp.cvJaar||'','number','2010'))}
+      ${gpRow('Onderhoudspartij',gpInp('onderhoudspartij',gp.onderhoudspartij||'','text','Naam...'))}
+    `)}
+
+    ${gpSec('♻️','Duurzaamheid','#534ab7',`
+      ${gpRow('Energielabel',gpSelect('label','energielabel',gp.energielabel||''))}
+      ${gpRow('Isolatie dak',gpSelect('isolatie','isolatieDak',gp.isolatieDak||''))}
+      ${gpRow('Isolatie gevels',gpSelect('isolatie','islatieGevels',gp.islatieGevels||''))}
+      ${gpRow('Zonnepanelen',gpSelect('jannee','zonnepanelen',gp.zonnepanelen||''))}
+      ${gpRow('Waterbesparende maatregelen',gpSelect('jannee','water',gp.water||''))}
+    `)}
+
+    ${gpSec('📎','Documentatie & certificaten','#444',`
+      ${gpRow('Tekeningen beschikbaar',gpSelect('jannee','tekeningen',gp.tekeningen||''))}
+      ${gpRow('Constructieberekeningen',gpSelect('jannee','berekeningen',gp.berekeningen||''))}
+      ${gpRow('Vergunningen',gpSelect('jannee','vergunningen',gp.vergunningen||''))}
+      ${gpRow('Handleidingen installaties',gpSelect('jannee','handleidingen',gp.handleidingen||''))}
+      <div class="field" style="grid-column:1/-1"><label>Overige certificaten</label>${gpInp('overigeCert',gp.overigeCert||'','text','Bijv. NEN-keuring, BREEAM...')}</div>
+    `)}
+
+    <div class="btn-row">
+      <button class="btn btn-dark" onclick="navToChapter('gevels')">Volgende: Gevels & exterieur →</button>
+    </div>`;
+}
+
 // CHAPTER RENDER
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
 
   if(chId==='objectgegevens'){renderObjectgegevens(container);return;}
   if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
+  if(chId==='gebouwpaspoort'){renderGebouwpaspoort(container);return;}
 
   const ch=CHAPTERS.find(c=>c.id===chId);
   if(!ch){return;}
@@ -1359,8 +1503,10 @@ Alleen JSON, niets anders.`});
           beschrijving:beschrijving,
           kosten:item.kosten||0,
           kosten_onderbouwing:item.kosten_onderbouwing||'',
-          kosten_vervanging:item.kosten_vervanging||0,
-          kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||'',
+          // Als AI geen vervangingskosten geeft: bereken als 3-4x herstelkosten
+          kosten_vervanging:item.kosten_vervanging||(item.kosten?(Math.round((item.kosten*3.5)/100)*100):0),
+          kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||
+            (item.kosten_vervanging?'':`vervanging: volledig vervangen ${item.element||'element'} (${item.hoeveelheid||'?'} ${item.eenheid||''} × €${item.kosten&&item.hoeveelheid?Math.round(item.kosten*3.5/parseFloat(item.hoeveelheid||1)):0}/stuk = €${item.kosten?Math.round(item.kosten*3.5).toLocaleString('nl-NL'):'?'})`),
           isolatie:item.isolatie||'',
         });
       });
