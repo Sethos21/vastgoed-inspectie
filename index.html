@@ -134,10 +134,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .foto-groot-label::placeholder{color:rgba(255,255,255,.6);}
 .foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-.bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
-.bev-header{padding:10px 13px;display:flex;align-items:flex-start;gap:8px;border-bottom:0.5px solid var(--border);background:var(--bg1);}
-.bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);font-family:inherit;outline:none;}
-.bev-body{padding:11px 13px;}
+.bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
+.bev-header{display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;background:var(--bg1);user-select:none;}
+.bev-header:hover{background:var(--bg2);}
+.bev-element-input{flex:1;background:none;border:none;font-size:14px;font-weight:500;color:var(--text);font-family:inherit;outline:none;cursor:text;}
+.bev-body{display:none;padding:12px 13px;border-top:0.5px solid var(--border);}
+.bev-body.open{display:block;}
+.bev-chevron{font-size:14px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+.bev-chevron.open{transform:rotate(90deg);}
+.bev-kpill{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);white-space:nowrap;}
 .bev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .bev-tag{font-size:11px;padding:2px 7px;border-radius:99px;border:0.5px solid var(--border);}
 .bev-tag.foto{background:var(--blue-bg);color:var(--blue-text);border-color:transparent;}
@@ -894,17 +899,31 @@ function renderBevindingCard(el){
   const fotos=opn.fotos[fotoKey]||[];
   const startNr=getFotoNr(el.chapterId,el.subTab,0);
   const fotoRefs=fotos.length?fotos.map((f,i)=>'Foto '+(startNr+i)+(f.label&&f.label!==('Foto '+(startNr+i))?' ('+f.label+')':'')).join(', '):'';
-  const kostenH=parseFloat(el.kosten)||0;const kostenV=parseFloat(el.kosten_vervanging)||0;
-  return '<div class="bevinding-card" id="bev-'+el.id+'">'+
-    '<div class="bev-header"><div style="flex:1;">'+
-      '<input class="bev-element-input" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
-      '<div class="bev-tags">'+(fotoRefs?'<span class="bev-tag foto">📷 '+fotoRefs+'</span>':'')+
-      (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
-      (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+'</div></div>'+
-      '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
-      '<button onclick="verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button></div>'+
-    '<div class="bev-body">'+
+  const kostenH=parseFloat(el.kosten)||0;
+  const kostenV=parseFloat(el.kosten_vervanging)||0;
+  const uid='bev-'+el.id;
+  return '<div class="bevinding-card" id="'+uid+'">'+
+    '<div class="bev-header" onclick="toggleBev(\''+uid+'\')">'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(el.element||'Naamloos')+'</div>'+
+        '<div class="bev-tags">'+
+          (fotoRefs?'<span class="bev-tag foto">📷 '+fotoRefs+'</span>':'')+
+          (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
+          (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+'</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">'+
+        '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
+        (kostenH?'<span class="bev-kpill">🔧 € '+Math.round(kostenH).toLocaleString('nl-NL')+'</span>':'')+
+        (kostenV?'<span class="bev-kpill" style="color:var(--orange-text);">🏗 € '+Math.round(kostenV).toLocaleString('nl-NL')+'</span>':'')+
+        '<span class="bev-chevron" id="chv-'+uid+'">›</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bev-body" id="body-'+uid+'">'+
       (el.aiAnalyse?'<div class="ai-tag">✦ AI analyse</div>':'')+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'+
+        '<input class="bev-element-input" style="font-size:14px;font-weight:500;padding:4px 8px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
+        '<button onclick="verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0;flex-shrink:0;">×</button>'+
+      '</div>'+
       '<div class="conditie-bar">'+[1,2,3,4,5].map(n=>'<button class="conditie-opt '+(cond==n?'sel-'+n:'')+'" onclick="updateBev(\''+el.id+'\',\'conditie\','+n+');renderChapter(currentChapter)">'+n+'<br><span style="font-size:9px">'+CONDITIE[n]+'</span></button>').join('')+'</div>'+
       '<div class="field" style="margin-bottom:10px;"><label>Beschrijving en bevinding</label><textarea rows="2" style="font-size:13px;" oninput="updateBev(\''+el.id+'\',\'beschrijving\',this.value)">'+escHtml(el.beschrijving||'')+'</textarea></div>'+
       '<div style="margin-bottom:8px;">'+
@@ -930,6 +949,14 @@ function renderBevindingCard(el){
       (el.isolatie?'<div class="isolatie-block" style="margin-top:9px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
     '</div></div>';
 }
+
+window.toggleBev=uid=>{
+  const body=document.getElementById('body-'+uid);
+  const chv=document.getElementById('chv-'+uid);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(chv)chv.classList.toggle('open',open);
+};
 
 window.switchSubTab=tab=>{currentSubTab=tab;renderChapter(currentChapter);};
 window.addSubTab=chId=>{
