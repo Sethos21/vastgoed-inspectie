@@ -1423,6 +1423,13 @@ function renderBevindingCard(el){
     '</div></div>';
 }
 
+window.toggleBev=uid=>{
+  const body=document.getElementById('body-'+uid);
+  const chv=document.getElementById('chv-'+uid);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(chv)chv.classList.toggle('open',open);
+};
 window.toggleBevSec=(id,type)=>{
   const opn=getOpname();
   const el=opn.elementen.find(e=>e.id===id);if(!el)return;
