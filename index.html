@@ -1002,7 +1002,7 @@ function renderSidebarNav(){
   const eig=eigenaren.find(e=>e.id===currentObj?.eigenaarId);
   const nav=document.getElementById('sb-nav');
   let html='<div class="sb-section-label">Navigatie</div>'+
-    '<div class="sb-item" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num"><i class="ti ti-arrow-left" aria-hidden="true"></i></div>Terug naar overzicht</div>';
+    '<div class="sb-item" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num">←</div>Terug naar overzicht</div>';
 
   if(eig){
     html+='<div class="sb-section-label">Eigenaar</div>'+
@@ -1015,7 +1015,7 @@ function renderSidebarNav(){
     '<div class="sb-item" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
 
   html+='<div class="sb-section-label">Inspecties</div>'+
-    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num"><i class="ti ti-clipboard-check" aria-hidden="true"></i></div>Alle opnames<span class="sb-chev"><i class="ti ti-chevron-right" aria-hidden="true"></i></span></div>'+
+    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num">📋</div>Alle opnames<span class="sb-chev">›</span></div>'+
     '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe opname aanmaken</button>';
 
   if(inspectiesOpen){
@@ -1024,11 +1024,11 @@ function renderSidebarNav(){
       const menuOpen=openOpnameMenu===o.id;
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
         '<div class="opname-head" onclick="switchOpname(\''+o.id+'\')">'+
-          '<i class="ti ti-calendar" aria-hidden="true"></i> '+escHtml(o.naam)+' — '+escHtml(o.datum)+
-          '<i class="ti ti-dots gear" aria-hidden="true" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')"></i>'+
+          '📅 '+escHtml(o.naam)+' — '+escHtml(o.datum)+
+          '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')">⋯</span>'+
         '</div>';
       if(menuOpen){
-        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')"><i class="ti ti-trash" aria-hidden="true"></i> Inspectie verwijderen</div></div>';
+        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Inspectie verwijderen</div></div>';
       }
       html+='</div>';
       if(isActive){
@@ -1623,7 +1623,7 @@ function renderBevindingCard(el){
       '</div>'+
 
       (el.isolatie?'<div class="isolatie-block" style="margin-top:8px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
-      '<div class="bev-savebar" id="savebar-'+el.id+'"><button class="bev-save-btn" onclick="bevestigOpslaan(\''+el.id+'\')"><i class="ti ti-device-floppy" aria-hidden="true"></i> Wijzigingen opslaan</button></div>'+
+      '<div class="bev-savebar" id="savebar-'+el.id+'"><button class="bev-save-btn" onclick="bevestigOpslaan(\''+el.id+'\')">💾 Wijzigingen opslaan</button></div>'+
     '</div></div>';
 }
 
@@ -2263,7 +2263,7 @@ window.bevestigOpslaan=async id=>{
   if(!btn)return;
   const origineel=btn.innerHTML;
   btn.classList.add('saved');
-  btn.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Opgeslagen';
+  btn.innerHTML='✓ Opgeslagen';
   setTimeout(()=>{btn.classList.remove('saved');btn.innerHTML=origineel;},1800);
 };
 window.verwijderBev=async id=>{const opn=getOpname();opn.elementen=opn.elementen.filter(e=>e.id!==id);renderChapter(currentChapter);try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}};
