@@ -144,6 +144,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bev-sec-toggle .chev.open{transform:rotate(90deg);}
 .bev-sec-content{display:none;}
 .bev-sec-content.open{display:block;}
+.bev-savebar{display:flex;justify-content:flex-end;padding-top:6px;margin-top:4px;border-top:0.5px solid var(--border);}
+.bev-save-btn{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;border:0.5px solid var(--border-strong);background:none;font-size:11px;color:var(--text2);font-family:inherit;cursor:pointer;}
+.bev-save-btn:active{transform:scale(.97);}
+.bev-save-btn.saved{border-color:var(--green-text);color:var(--green-text);}
 .foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
 .bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
@@ -1420,6 +1424,7 @@ function renderBevindingCard(el){
       '</div>'+
 
       (el.isolatie?'<div class="isolatie-block" style="margin-top:8px;"><strong>🏠 Isolatie indicatie</strong>'+escHtml(el.isolatie)+'</div>':'')+
+      '<div class="bev-savebar" id="savebar-'+el.id+'"><button class="bev-save-btn" onclick="bevestigOpslaan(\''+el.id+'\')"><i class="ti ti-device-floppy" aria-hidden="true"></i> Wijzigingen opslaan</button></div>'+
     '</div></div>';
 }
 
@@ -2011,6 +2016,15 @@ window.voegBevindingToe=async(chId,subTab)=>{
   await saveOpnameData();renderChapter(currentChapter);
 };
 window.updateBev=async(id,key,val)=>{const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(el){el[key]=val;await saveOpnameData();}};
+window.bevestigOpslaan=async id=>{
+  await saveOpnameData();
+  const btn=document.querySelector('#savebar-'+id+' .bev-save-btn');
+  if(!btn)return;
+  const origineel=btn.innerHTML;
+  btn.classList.add('saved');
+  btn.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Opgeslagen';
+  setTimeout(()=>{btn.classList.remove('saved');btn.innerHTML=origineel;},1800);
+};
 window.verwijderBev=async id=>{const opn=getOpname();opn.elementen=opn.elementen.filter(e=>e.id!==id);await saveOpnameData();renderChapter(currentChapter);};
 
 // API & SETTINGS
