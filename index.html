@@ -74,6 +74,12 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .opname-menu{padding:3px;border-top:0.5px solid var(--border);background:var(--bg);}
 .opname-menu-item{padding:6px 9px;font-size:11px;color:var(--red-text);cursor:pointer;display:flex;align-items:center;gap:5px;border-radius:5px;}
 .opname-menu-item:hover{background:var(--red-bg);}
+.para-x{margin-left:auto;color:var(--text3);cursor:pointer;font-size:13px;padding:1px 5px;border-radius:4px;}
+.para-x:hover{background:var(--red-bg);color:var(--red-text);}
+.confirm-box{margin:4px 14px 6px 30px;padding:8px 10px;background:var(--red-bg);border-radius:7px;font-size:11px;color:var(--red-text);line-height:1.5;}
+.confirm-row{display:flex;gap:6px;margin-top:6px;}
+.confirm-btn{padding:4px 10px;border-radius:5px;border:0.5px solid var(--border2);background:var(--bg);font-size:11px;cursor:pointer;font-family:inherit;color:var(--text);}
+.confirm-btn.danger{background:var(--red-text);color:#fff;border-color:transparent;}
 .sb-footer{padding:10px 14px;border-top:0.5px solid var(--border);flex-shrink:0;}
 .sb-user{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #topbar{padding:calc(var(--safe-top)+10px) 16px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
@@ -990,6 +996,8 @@ function updateSidebar(opnameList){
   renderSidebarNav();
 }
 
+let confirmVerwijderParagraaf=null;
+
 function renderSidebarNav(){
   const opn=getOpname();
   const inGevuld=(opnId,chId)=>{
@@ -1028,12 +1036,24 @@ function renderSidebarNav(){
           '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')">⋯</span>'+
         '</div>';
       if(menuOpen){
-        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Inspectie verwijderen</div></div>';
+        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Hele inspectie verwijderen</div></div>';
       }
       html+='</div>';
       if(isActive){
         INSP_PARAGRAFEN.forEach(p=>{
-          html+='<div class="sb-item sub" onclick="navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(inGevuld(o.id,p.id)?'done':'')+'"></div>'+p.naam+'</div>';
+          const gevuld=inGevuld(o.id,p.id);
+          html+='<div class="sb-item sub" onclick="navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
+          if(gevuld){
+            html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Paragraaf verwijderen uit deze opname">×</span>';
+          }
+          html+='</div>';
+          if(confirmVerwijderParagraaf&&confirmVerwijderParagraaf.opnId===o.id&&confirmVerwijderParagraaf.chId===p.id){
+            html+='<div class="confirm-box">"'+p.naam+'" verwijderen uit deze opname? Foto\'s en bevindingen gaan verloren.'+
+              '<div class="confirm-row">'+
+                '<button class="confirm-btn danger" onclick="verwijderParagraaf(\''+o.id+'\',\''+p.id+'\')">Verwijderen</button>'+
+                '<button class="confirm-btn" onclick="toggleParagraafConfirm(null,null)">Annuleren</button>'+
+              '</div></div>';
+          }
         });
       }
     });
@@ -1052,7 +1072,36 @@ function renderSidebarNav(){
 }
 
 window.toggleInspecties=()=>{inspectiesOpen=!inspectiesOpen;renderSidebarNav();};
-window.toggleOpnameMenu=id=>{openOpnameMenu=openOpnameMenu===id?null:id;renderSidebarNav();};
+window.toggleOpnameMenu=id=>{
+  openOpnameMenu=(openOpnameMenu===id)?null:id;
+  confirmVerwijderParagraaf=null;
+  renderSidebarNav();
+};
+window.toggleParagraafConfirm=(opnId,chId)=>{
+  if(opnId===null||(confirmVerwijderParagraaf&&confirmVerwijderParagraaf.opnId===opnId&&confirmVerwijderParagraaf.chId===chId)){
+    confirmVerwijderParagraaf=null;
+  }else{
+    confirmVerwijderParagraaf={opnId,chId};
+  }
+  renderSidebarNav();
+};
+window.verwijderParagraaf=async(opnId,chId)=>{
+  const data=opnames[opnId];if(!data)return;
+  const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
+  const tabs=para?.subtabs||[null];
+  tabs.forEach(t=>{const key=t?chId+'_'+t:chId;delete data.fotos[key];});
+  data.elementen=data.elementen.filter(e=>e.chapterId!==chId);
+  confirmVerwijderParagraaf=null;
+  try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
+  renderSidebarNav();
+  if(currentChapter===chId)renderChapter(chId);
+  showToast(para?.naam+' verwijderd uit deze opname');
+};
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.opname-head')&&!e.target.closest('.opname-menu')&&openOpnameMenu){
+    openOpnameMenu=null;renderSidebarNav();
+  }
+});
 window.verwijderOpname=async id=>{
   if(opnamesLijst.length<=1){showToast('De laatste opname kan niet verwijderd worden');return;}
   const o=opnamesLijst.find(x=>x.id===id);
