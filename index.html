@@ -151,12 +151,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bev-add-row{width:100%;border:0.5px dashed var(--border2);border-radius:var(--radius);padding:9px 12px;display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--text2);font-size:13px;font-family:inherit;background:none;margin-bottom:6px;text-align:left;}
 .bev-add-row:active{background:var(--bg1);}
 .bev-add-row i{font-style:normal;font-size:15px;}
-.bev-col-hdr{display:flex;align-items:center;gap:6px;padding:0 0 4px 0;}
-.bev-col-hdr-spacer{flex:1;}
+.bev-col-hdr{display:flex;align-items:center;gap:10px;padding:0 13px 4px;}
+.bev-col-hdr-spacer{flex:1;min-width:0;}
 .bev-col-hdr-badge{width:46px;flex-shrink:0;}
 .bev-col-hdr span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;width:64px;text-align:center;flex-shrink:0;}
-.bev-col-hdr-trash{width:22px;flex-shrink:0;}
-.bev-col-hdr-chev{width:13px;flex-shrink:0;}
+.bev-col-hdr-trash{width:24px;flex-shrink:0;}
+.bev-col-hdr-chev{width:14px;flex-shrink:0;}
 .foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
 .bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
@@ -2028,7 +2028,7 @@ window.analyseerFotos=async(chId,subTab)=>{
 
 window.voegBevindingToe=async(chId,subTab)=>{
   const opn=getOpname();
-  opn.elementen.push({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false,_nieuw:true});
+  opn.elementen.unshift({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false,_nieuw:true});
   renderChapter(currentChapter);
   try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
 };
