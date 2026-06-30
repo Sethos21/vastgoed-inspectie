@@ -712,13 +712,12 @@ function renderEigDashContent(panden){
       '</div></div></div>';
     if(!panden.length){el.innerHTML=koppelHtml+'<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen panden gekoppeld aan deze eigenaar.</p></div>';return;}
     let html=koppelHtml+'<div class="card"><div class="card-body">'+
-      '<div class="pand-row pand-hdr-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;"><span>Adres</span><span>Type</span><span>Conditie</span><span>Huur p/j</span><span>Marktwaarde</span><span></span></div>';
+      '<div class="pand-row pand-hdr-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;"><span>Adres</span><span>Type</span><span>Laatste inspectie</span><span>Huur p/j</span><span>Marktwaarde</span><span></span></div>';
     panden.forEach(p=>{
-      const cond=schatPandConditie(p);
-      html+='<div class="pand-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;">'+
+      html+='<div class="pand-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;" id="pand-row-'+p.id+'">'+
         '<div style="cursor:pointer;" onclick="selectObject(\''+p.id+'\')"><div style="font-weight:500;">'+escHtml(p.naam||'')+'</div><div style="font-size:11px;color:var(--text3);">'+(p.jaar?p.jaar+' · ':'')+(p.opp?p.opp+' m²':'')+'</div></div>'+
         '<div>'+escHtml(p.type||'—')+'</div>'+
-        '<div>'+(cond?'<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>':'<span class="badge badge-gray">Niet geïnspecteerd</span>')+'</div>'+
+        '<div id="pand-insp-'+p.id+'"><span class="badge badge-gray">Laden...</span></div>'+
         '<div>'+(sumHuurcontracten(p)?'€ '+Math.round(sumHuurcontracten(p)).toLocaleString('nl-NL'):'—')+'</div>'+
         '<div>'+(p.tax?.marktwaarde?'€ '+Math.round(p.tax.marktwaarde).toLocaleString('nl-NL'):'—')+'</div>'+
         '<button onclick="event.stopPropagation();ontkoppelPandVanEigenaar(\''+p.id+'\')" title="Loskoppelen" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;">🗑</button>'+
@@ -726,6 +725,7 @@ function renderEigDashContent(panden){
     });
     html+='</div></div>';
     el.innerHTML=html;
+    panden.forEach(p=>laadLaatsteInspectieDatum(p.id));
   }else if(eigDashTab==='huur'){
     if(!panden.length){el.innerHTML='<div class="empty"><p>Geen panden om huurcontracten voor te beheren.</p></div>';return;}
     let html='';
@@ -780,9 +780,18 @@ function renderEigDashContent(panden){
     el.innerHTML=html;
   }
 }
-function schatPandConditie(pand){
-  // Placeholder: conditie wordt pas bekend nadat opname-data is geladen; hier geven we null terug tenzij elders bijgehouden
-  return pand.laatsteConditie||null;
+async function laadLaatsteInspectieDatum(pandId){
+  const target=document.getElementById('pand-insp-'+pandId);
+  if(!target)return;
+  try{
+    const snap=await db.collection('objects').doc(pandId).collection('meta').doc('opnames').get();
+    const lijst=snap.exists?snap.data().lijst||[]:[];
+    if(!lijst.length){target.innerHTML='<span class="badge badge-gray">Niet geïnspecteerd</span>';return;}
+    const meestRecent=lijst.reduce((a,b)=>(b.aangemaakt||0)>(a.aangemaakt||0)?b:a,lijst[0]);
+    target.innerHTML='<span class="badge badge-blue">'+escHtml(meestRecent.datum||'—')+'</span>';
+  }catch(e){
+    if(target)target.innerHTML='<span class="badge badge-gray">—</span>';
+  }
 }
 window.koppelPandAanEigenaar=async()=>{
   const sel=document.getElementById('eig-pand-select');
