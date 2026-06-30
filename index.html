@@ -169,6 +169,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bev-chevron.open{transform:rotate(90deg);}
 .bev-kpill{font-size:11px;padding:2px 6px;border-radius:99px;background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);white-space:nowrap;width:64px;text-align:center;flex-shrink:0;box-sizing:border-box;}
 .bev-kpill.live{animation:bevFlash .6s ease;}
+.bev-foto-picker{display:flex;gap:5px;flex-wrap:wrap;}
+.bev-foto-chip{display:flex;align-items:center;gap:4px;padding:3px 8px 3px 3px;border-radius:99px;border:0.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:11px;color:var(--text2);font-family:inherit;}
+.bev-foto-chip.sel{background:var(--blue-bg);border-color:transparent;color:var(--blue-text);}
+.bev-foto-chip-thumb{width:17px;height:17px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg2);}
+.bev-foto-chip-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.bev-foto-add{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;border:0.5px dashed var(--border2);background:none;cursor:pointer;font-size:11px;color:var(--text2);font-family:inherit;}
 @keyframes bevFlash{0%{background:var(--green-bg);}100%{background:var(--bg2);}}
 .bev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .bev-tag{font-size:11px;padding:2px 7px;border-radius:99px;border:0.5px solid var(--border);}
@@ -1384,7 +1390,9 @@ function renderBevindingCard(el){
   const fotoKey=el.subTab?el.chapterId+'_'+el.subTab:el.chapterId;
   const fotos=opn.fotos[fotoKey]||[];
   const startNr=getFotoNr(el.chapterId,el.subTab,0);
-  const fotoKort=fotos.length?'Foto '+fotos.map((f,i)=>startNr+i).join(', '):'';
+  const gekoppeld=Array.isArray(el.fotoIndices)?el.fotoIndices:null;
+  const tonenIndices=gekoppeld!==null?gekoppeld:(el.aiAnalyse?fotos.map((_,i)=>i):[]);
+  const fotoKort=tonenIndices.length?'Foto '+tonenIndices.map(i=>startNr+i).join(', '):'';
   const kostenH=parseFloat(el.kosten)||0;
   const kostenV=parseFloat(el.kosten_vervanging)||0;
   const uid='bev-'+el.id;
@@ -1399,7 +1407,7 @@ function renderBevindingCard(el){
       '<div style="flex:1;min-width:0;">'+
         '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(el.element||'Naamloos')+'</div>'+
         '<div class="bev-tags">'+
-          (fotoKort?'<span class="bev-tag foto">📷 '+fotoKort+'</span>':'')+
+          '<span class="bev-tag foto">📷 '+(fotoKort||'Geen foto\'s gekoppeld')+'</span>'+
           (el.materiaal?'<span class="bev-tag info">'+escHtml(el.materiaal)+'</span>':'')+
           (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+'</div>'+
       '</div>'+
@@ -1416,6 +1424,11 @@ function renderBevindingCard(el){
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'+
         '<input class="bev-element-input" style="font-size:13px;font-weight:500;padding:4px 8px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
       '</div>'+
+      '<div class="field" style="margin-bottom:7px;"><label>Foto\'s bij deze bevinding</label><div class="bev-foto-picker">'+
+        fotos.map((f,i)=>'<button class="bev-foto-chip'+(tonenIndices.includes(i)?' sel':'')+'" onclick="toggleBevFoto(\''+el.id+'\','+i+')"><span class="bev-foto-chip-thumb"><img src="'+f.dataUrl+'"/></span>Foto '+(startNr+i)+'</button>').join('')+
+        '<button class="bev-foto-add" onclick="document.getElementById(\'eigenfoto-'+el.id+'\').click()">+ Eigen foto</button>'+
+        '<input type="file" id="eigenfoto-'+el.id+'" accept="image/*" style="display:none;" onchange="voegEigenFotoToe(\''+el.id+'\',\''+fotoKey+'\',event)"/>'+
+      '</div></div>'+
       '<div class="conditie-bar">'+[1,2,3,4,5].map(n=>'<button class="conditie-opt '+(cond==n?'sel-'+n:'')+'" onclick="updateBev(\''+el.id+'\',\'conditie\','+n+');renderChapter(currentChapter)">'+n+'<br><span style="font-size:9px">'+CONDITIE[n]+'</span></button>').join('')+'</div>'+
       '<div class="field" style="margin-bottom:7px;"><label>Beschrijving en bevinding</label><textarea rows="3" style="font-size:12px;" oninput="updateBev(\''+el.id+'\',\'beschrijving\',this.value)">'+escHtml(el.beschrijving||'')+'</textarea></div>'+
 
@@ -2028,9 +2041,31 @@ window.analyseerFotos=async(chId,subTab)=>{
 
 window.voegBevindingToe=async(chId,subTab)=>{
   const opn=getOpname();
-  opn.elementen.unshift({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false,_nieuw:true});
+  opn.elementen.unshift({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false,fotoIndices:[],_nieuw:true});
   renderChapter(currentChapter);
   try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
+};
+window.toggleBevFoto=async(id,idx)=>{
+  const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(!el)return;
+  if(!Array.isArray(el.fotoIndices))el.fotoIndices=el.aiAnalyse?(opn.fotos[el.subTab?el.chapterId+'_'+el.subTab:el.chapterId]||[]).map((_,i)=>i):[];
+  const pos=el.fotoIndices.indexOf(idx);
+  if(pos>=0)el.fotoIndices.splice(pos,1);else el.fotoIndices.push(idx);
+  try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
+  renderChapter(currentChapter);
+};
+window.voegEigenFotoToe=async(id,fotoKey,event)=>{
+  const file=event.target.files[0];if(!file)return;
+  const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(!el)return;
+  showToast('Foto toevoegen...');
+  const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(file);});
+  const compressed=await compressPhoto(url);
+  if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
+  const nieuweIdx=opn.fotos[fotoKey].length;
+  opn.fotos[fotoKey].push({dataUrl:compressed,label:'Foto '+(nieuweIdx+1)});
+  if(!Array.isArray(el.fotoIndices))el.fotoIndices=[];
+  el.fotoIndices.push(nieuweIdx);
+  try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
+  renderChapter(currentChapter);
 };
 window.updateBev=async(id,key,val)=>{
   const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);
