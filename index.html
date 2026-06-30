@@ -975,7 +975,21 @@ function renderOnderhoud(container){
     container.innerHTML='<div class="section-title">🔧 Onderhoud & herstel</div><div class="empty"><div class="empty-icon">🔧</div><p>Voer eerst inspecties uit in de paragrafen.<br>De bevindingen verschijnen hier automatisch.</p></div>'+
       '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">→ Naar inspectie</button>';return;
   }
+  // Detecteer dubbele elementnamen over verschillende paragrafen heen
+  const naamMap={};
+  els.forEach(e=>{
+    const naam=(e.element||'').toLowerCase().trim();if(!naam)return;
+    if(!naamMap[naam])naamMap[naam]=[];
+    naamMap[naam].push(e);
+  });
+  const dubbeleGroepen=Object.values(naamMap).filter(g=>g.length>1&&new Set(g.map(e=>e.chapterId)).size>1);
   let html='<div class="section-title">🔧 Onderhoud & herstel — alle bevindingen</div>';
+  if(dubbeleGroepen.length){
+    html+='<div style="background:var(--amber-bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--amber-text);">'+
+      '⚠️ <strong>'+dubbeleGroepen.length+' element(en) komen mogelijk dubbel voor</strong> in meerdere paragrafen — dit kan tot dubbele kosten leiden. Controleer: '+
+      dubbeleGroepen.map(g=>escHtml(g[0].element)+' ('+g.map(e=>INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId).join(', ')+')').join('; ')+
+    '</div>';
+  }
   INSP_PARAGRAFEN.forEach(para=>{
     const paraEls=els.filter(e=>e.chapterId===para.id);if(!paraEls.length)return;
     html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--text2);">'+para.icon+' '+para.naam+'</div>';
@@ -1452,7 +1466,7 @@ window.analyseerFotos=async(chId,subTab)=>{
     const content=fotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
     const startNr=getFotoNr(chId,subTab||null,0);
     const fotoNummers=fotos.slice(0,8).map((f,i)=>'Foto '+(startNr+i)).join(', ');
-    content.push({type:'text',text:'Analyseer deze foto\'s van de '+tabNaam+' ('+para.naam+') van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\nFoto nummering: '+fotoNummers+'\n\nGeef een gedetailleerde bouwkundige opname. Per zichtbaar element:\n1. Naam element\n2. Materiaal en specificaties\n3. Hoeveelheid met eenheid (m², m¹, stuks)\n4. Conditiescore 1-5\n5. Beschrijving toestand — verwijs naar fotonummers\n6. Foto omschrijvingen per foto\n7. Herstelkosten (getal)\n8. Kostenspecificatie herstel: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n9. Vervangingskosten (getal)\n10. Kostenspecificatie vervanging: "vervanging: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n11. Isolatie/R-waarde indien van toepassing\n\nReageer ALLEEN als JSON array:\n[{"element":"Metselwerk voorgevel","materiaal":"Gebakken baksteen","hoeveelheid":"450","eenheid":"m²","conditie":3,"beschrijving":"Voegwerkschade, zie foto '+startNr+'","foto_omschrijvingen":["Overzicht gevel","Detail schade"],"kosten":9000,"kosten_onderbouwing":"uit te voeren werkzaamheden: hervoegen (450 m² × €20/m² = €9.000)","kosten_vervanging":36000,"kosten_vervanging_onderbouwing":"vervanging: nieuw metselwerk (450 m² × €80/m² = €36.000)","isolatie":""}]\nAlleen JSON, niets anders.'});
+    content.push({type:'text',text:'Analyseer deze foto\'s van de '+tabNaam+' ('+para.naam+') van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\nFoto nummering: '+fotoNummers+'\n\nBELANGRIJK — Conditiescore en beschrijving MOETEN consistent zijn:\n- Conditie 1 (Goed): geen zichtbare gebreken, recent of uitstekend onderhouden\n- Conditie 2 (Redelijk): lichte cosmetische gebreken, geen actie nodig op korte termijn\n- Conditie 3 (Matig): zichtbare slijtage of schade, onderhoud op middellange termijn gewenst\n- Conditie 4 (Slecht): duidelijke gebreken die op korte termijn hersteld moeten worden\n- Conditie 5 (Zeer slecht): ernstige schade, directe actie vereist\nALS de beschrijving aangeeft dat een element in goede staat is ("geen gebreken", "goede staat", "geen actie nodig"), geef dan ALTIJD conditie 1 of 2 — nooit 4 of 5. De conditiescore moet logisch volgen uit de beschrijving, niet andersom.\n\nBELANGRIJK — Scope: beschrijf ALLEEN elementen die bij \''+para.naam+'\' horen. Sla elementen over die beter bij een andere paragraaf passen (bijv. dakdetails horen bij Dak, niet bij Constructie).\n\nGeef een gedetailleerde bouwkundige opname. Per zichtbaar element:\n1. Naam element\n2. Materiaal en specificaties\n3. Hoeveelheid met eenheid (m², m¹, stuks)\n4. Conditiescore 1-5 — consistent met de beschrijving zoals hierboven uitgelegd\n5. Beschrijving toestand — verwijs naar fotonummers, en laat de toon (positief/negatief) overeenkomen met de conditiescore\n6. Foto omschrijvingen per foto\n7. Herstelkosten (getal) — 0 als conditie 1 of 2 en er geen onderhoud nodig is\n8. Kostenspecificatie herstel: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])" — leeg laten als kosten 0 zijn\n9. Vervangingskosten (getal)\n10. Kostenspecificatie vervanging: "vervanging: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n11. Isolatie/R-waarde indien van toepassing\n\nReageer ALLEEN als JSON array:\n[{"element":"Metselwerk voorgevel","materiaal":"Gebakken baksteen","hoeveelheid":"450","eenheid":"m²","conditie":3,"beschrijving":"Voegwerkschade, zie foto '+startNr+'","foto_omschrijvingen":["Overzicht gevel","Detail schade"],"kosten":9000,"kosten_onderbouwing":"uit te voeren werkzaamheden: hervoegen (450 m² × €20/m² = €9.000)","kosten_vervanging":36000,"kosten_vervanging_onderbouwing":"vervanging: nieuw metselwerk (450 m² × €80/m² = €36.000)","isolatie":""}]\nAlleen JSON, niets anders.'});
     const raw=await callClaude(content);
     const clean=raw.replace(/```json|```/g,'').trim();
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
@@ -1480,7 +1494,14 @@ window.analyseerFotos=async(chId,subTab)=>{
           isolatie:item.isolatie||'',prijs_herstel:'',prijs_vervanging:'',
         });
       });
-      await saveOpnameData();showToast(items.length+' elementen gevonden');
+      await saveOpnameData();
+      // Detecteer mogelijke duplicaten in andere paragrafen
+      const dubbels=items.filter(item=>opn.elementen.some(e=>e.chapterId!==chId&&e.element&&item.element&&e.element.toLowerCase().trim()===item.element.toLowerCase().trim()));
+      if(dubbels.length){
+        showToast(items.length+' elementen gevonden — let op: '+dubbels.length+' lijkt al elders te bestaan');
+      }else{
+        showToast(items.length+' elementen gevonden');
+      }
     }
   }catch(err){showToast('Analyse mislukt: '+err.message);}
   renderChapter(currentChapter);
