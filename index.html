@@ -151,8 +151,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bev-add-row{width:100%;border:0.5px dashed var(--border2);border-radius:var(--radius);padding:9px 12px;display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--text2);font-size:13px;font-family:inherit;background:none;margin-bottom:6px;text-align:left;}
 .bev-add-row:active{background:var(--bg1);}
 .bev-add-row i{font-style:normal;font-size:15px;}
-.bev-col-hdr{display:flex;justify-content:flex-end;align-items:center;gap:0;padding:0 84px 4px 0;margin-bottom:2px;}
-.bev-col-hdr span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;width:74px;text-align:center;}
+.bev-col-hdr{display:flex;align-items:center;gap:6px;padding:0 0 4px 0;}
+.bev-col-hdr-spacer{flex:1;}
+.bev-col-hdr-badge{width:46px;flex-shrink:0;}
+.bev-col-hdr span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;width:64px;text-align:center;flex-shrink:0;}
+.bev-col-hdr-trash{width:22px;flex-shrink:0;}
+.bev-col-hdr-chev{width:13px;flex-shrink:0;}
 .foto-groot-del{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .foto-nr{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
 .bevinding-card{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
@@ -163,7 +167,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bev-body.open{display:block;}
 .bev-chevron{font-size:14px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
 .bev-chevron.open{transform:rotate(90deg);}
-.bev-kpill{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);white-space:nowrap;}
+.bev-kpill{font-size:11px;padding:2px 6px;border-radius:99px;background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);white-space:nowrap;width:64px;text-align:center;flex-shrink:0;box-sizing:border-box;}
+.bev-kpill.live{animation:bevFlash .6s ease;}
+@keyframes bevFlash{0%{background:var(--green-bg);}100%{background:var(--bg2);}}
 .bev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .bev-tag{font-size:11px;padding:2px 7px;border-radius:99px;border:0.5px solid var(--border);}
 .bev-tag.foto{background:var(--blue-bg);color:var(--blue-text);border-color:transparent;}
@@ -1352,7 +1358,7 @@ function renderInspectieTab(chId,subTab,opn){
   html+='<div class="section-title">Bevindingen ('+elementen.length+')</div>';
   html+='<button class="bev-add-row" onclick="voegBevindingToe(\''+chId+'\',\''+(subTab||'')+'\')"><i>+</i> Bevinding handmatig toevoegen</button>';
   if(elementen.length){
-    html+='<div class="bev-col-hdr"><span>Herstel</span><span>Vervanging</span></div>';
+    html+='<div class="bev-col-hdr"><div class="bev-col-hdr-spacer"></div><div class="bev-col-hdr-badge"></div><span>Herstel</span><span>Vervanging</span><div class="bev-col-hdr-trash"></div><div class="bev-col-hdr-chev"></div></div>';
     elementen.forEach(el=>{html+=renderBevindingCard(el);});
   }
   else html+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:14px 0;">Nog geen bevindingen. Upload foto\'s en analyseer met AI, of voeg handmatig toe.</div>';
@@ -1398,9 +1404,9 @@ function renderBevindingCard(el){
           (el.hoeveelheid?'<span class="bev-tag info">'+escHtml(el.hoeveelheid)+' '+escHtml(el.eenheid||'')+'</span>':'')+'</div>'+
       '</div>'+
       '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'+
-        '<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>'+
-        (kostenH?'<span class="bev-kpill">🔧 € '+Math.round(kostenH).toLocaleString('nl-NL')+'</span>':'')+
-        (kostenV?'<span class="bev-kpill" style="color:var(--orange-text);">🏗 € '+Math.round(kostenV).toLocaleString('nl-NL')+'</span>':'')+
+        '<span class="badge badge-'+cond+'" style="width:46px;text-align:center;flex-shrink:0;box-sizing:border-box;">'+CONDITIE[cond]+'</span>'+
+        '<span class="bev-kpill" id="kp-h-'+el.id+'">'+(kostenH?'🔧 €'+Math.round(kostenH).toLocaleString('nl-NL'):'—')+'</span>'+
+        '<span class="bev-kpill" id="kp-v-'+el.id+'" style="color:var(--orange-text);">'+(kostenV?'🏗 €'+Math.round(kostenV).toLocaleString('nl-NL'):'—')+'</span>'+
         '<button onclick="event.stopPropagation();verwijderBev(\''+el.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px 4px;border-radius:4px;line-height:1;" title="Verwijderen">🗑</button>'+
         '<span class="bev-chevron'+chevOpen+'" id="chv-'+uid+'">›</span>'+
       '</div>'+
@@ -2023,9 +2029,29 @@ window.analyseerFotos=async(chId,subTab)=>{
 window.voegBevindingToe=async(chId,subTab)=>{
   const opn=getOpname();
   opn.elementen.push({id:'handmatig_'+Date.now(),chapterId:chId,subTab:subTab||null,element:'Nieuw element',materiaal:'',hoeveelheid:'',eenheid:'',conditie:3,beschrijving:'',kosten:0,kosten_onderbouwing:'',kosten_vervanging:0,kosten_vervanging_onderbouwing:'',isolatie:'',aiAnalyse:false,_nieuw:true});
-  await saveOpnameData();renderChapter(currentChapter);
+  renderChapter(currentChapter);
+  try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
 };
-window.updateBev=async(id,key,val)=>{const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);if(el){el[key]=val;await saveOpnameData();}};
+window.updateBev=async(id,key,val)=>{
+  const opn=getOpname();const el=opn.elementen.find(e=>e.id===id);
+  if(el){
+    el[key]=val;
+    await saveOpnameData();
+    if(key==='kosten'||key==='kosten_vervanging'){
+      const isH=key==='kosten';
+      const pill=document.getElementById((isH?'kp-h-':'kp-v-')+id);
+      if(pill){
+        const bedrag=parseFloat(val)||0;
+        pill.textContent=bedrag?(isH?'🔧 €':'🏗 €')+Math.round(bedrag).toLocaleString('nl-NL'):'—';
+        pill.classList.remove('live');void pill.offsetWidth;pill.classList.add('live');
+      }
+    }
+    if(key==='conditie'){
+      const badge=document.querySelector('#'+'bev-'+id+' .badge');
+      if(badge){badge.className='badge badge-'+val;badge.style.cssText='width:46px;text-align:center;flex-shrink:0;box-sizing:border-box;';badge.textContent=CONDITIE[val];}
+    }
+  }
+};
 window.bevestigOpslaan=async id=>{
   await saveOpnameData();
   const btn=document.querySelector('#savebar-'+id+' .bev-save-btn');
@@ -2035,7 +2061,7 @@ window.bevestigOpslaan=async id=>{
   btn.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Opgeslagen';
   setTimeout(()=>{btn.classList.remove('saved');btn.innerHTML=origineel;},1800);
 };
-window.verwijderBev=async id=>{const opn=getOpname();opn.elementen=opn.elementen.filter(e=>e.id!==id);await saveOpnameData();renderChapter(currentChapter);};
+window.verwijderBev=async id=>{const opn=getOpname();opn.elementen=opn.elementen.filter(e=>e.id!==id);renderChapter(currentChapter);try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}};
 
 // API & SETTINGS
 function getApiKey(){return localStorage.getItem('vi-apikey')||'';}
