@@ -1332,7 +1332,7 @@ function renderInspectieTab(chId,subTab,opn){
       const nr=getFotoNr(chId,subTab,i);
       html+='<div class="foto-groot-item-cap">'+
         '<div class="foto-groot-item">'+
-          '<img src="'+f.dataUrl+'" loading="lazy" ondblclick="window.open(\''+f.dataUrl+'\',\'_blank\')" style="cursor:zoom-in;" title="Dubbelklik voor volledig formaat"/>'+
+          '<img src="'+f.dataUrl+'" loading="lazy" ondblclick="openFotoVolledig(this.src)" style="cursor:zoom-in;" title="Dubbelklik voor volledig formaat"/>'+
           '<span class="foto-nr">'+nr+'</span>'+
           '<button class="foto-groot-del" onclick="verwijderFoto(\''+fotoKey+'\','+i+')">×</button>'+
         '</div>'+
@@ -1930,10 +1930,21 @@ window.handleDrop=async(event,key)=>{
   const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
   if(files.length)await verwerkFotos(files,key);
 };
+window.openFotoVolledig=dataUrl=>{
+  const win=window.open('','_blank');
+  if(!win){showToast('Pop-up geblokkeerd door browser');return;}
+  win.document.write('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Foto</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;object-fit:contain;}</style></head><body><img src="'+dataUrl+'"/></body></html>');
+  win.document.close();
+};
 window.verwijderFoto=async(key,idx)=>{const opn=getOpname();opn.fotos[key].splice(idx,1);await saveOpnameData();renderChapter(currentChapter);};
 window.updateFotoLabel=async(key,idx,val)=>{const opn=getOpname();if(opn.fotos[key]&&opn.fotos[key][idx])opn.fotos[key][idx].label=val;await saveOpnameData();};
 
 // AI ANALYSE
+function trefwoordNaarConditie(trefwoord){
+  if(!trefwoord)return null;
+  const idx=CONDITIE.findIndex(c=>c&&c.toLowerCase()===String(trefwoord).toLowerCase().trim());
+  return idx>0?idx:null;
+}
 window.analyseerFotos=async(chId,subTab)=>{
   if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navTo('settings');return;}
   const fotoKey=subTab?chId+'_'+subTab:chId;
@@ -1949,7 +1960,7 @@ window.analyseerFotos=async(chId,subTab)=>{
     const content=fotos.slice(0,8).map(f=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
     const startNr=getFotoNr(chId,subTab||null,0);
     const fotoNummers=fotos.slice(0,8).map((f,i)=>'Foto '+(startNr+i)).join(', ');
-    content.push({type:'text',text:'Analyseer deze foto\'s van de '+tabNaam+' ('+para.naam+') van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\nFoto nummering: '+fotoNummers+'\n\nBELANGRIJK — Conditiescore en beschrijving MOETEN consistent zijn:\n- Conditie 1 (Goed): geen zichtbare gebreken, recent of uitstekend onderhouden\n- Conditie 2 (Redelijk): lichte cosmetische gebreken, geen actie nodig op korte termijn\n- Conditie 3 (Matig): zichtbare slijtage of schade, onderhoud op middellange termijn gewenst\n- Conditie 4 (Slecht): duidelijke gebreken die op korte termijn hersteld moeten worden\n- Conditie 5 (Zeer slecht): ernstige schade, directe actie vereist\nALS de beschrijving aangeeft dat een element in goede staat is ("geen gebreken", "goede staat", "geen actie nodig"), geef dan ALTIJD conditie 1 of 2 — nooit 4 of 5. De conditiescore moet logisch volgen uit de beschrijving, niet andersom.\n\nBELANGRIJK — Scope: beschrijf ALLEEN elementen die bij \''+para.naam+'\' horen. Sla elementen over die beter bij een andere paragraaf passen (bijv. dakdetails horen bij Dak, niet bij Constructie).\n\nGeef een gedetailleerde bouwkundige opname. Per zichtbaar element:\n1. Naam element\n2. Materiaal en specificaties\n3. Hoeveelheid met eenheid (m², m¹, stuks)\n4. Conditiescore 1-5 — consistent met de beschrijving zoals hierboven uitgelegd\n5. Beschrijving toestand — verwijs naar fotonummers, en laat de toon (positief/negatief) overeenkomen met de conditiescore\n6. Foto omschrijvingen per foto\n7. Herstelkosten (getal) — 0 als conditie 1 of 2 en er geen onderhoud nodig is\n8. Kostenspecificatie herstel: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])" — leeg laten als kosten 0 zijn\n9. Vervangingskosten (getal)\n10. Kostenspecificatie vervanging: "vervanging: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n11. Isolatie/R-waarde indien van toepassing\n\nReageer ALLEEN als JSON array:\n[{"element":"Metselwerk voorgevel","materiaal":"Gebakken baksteen","hoeveelheid":"450","eenheid":"m²","conditie":3,"beschrijving":"Voegwerkschade, zie foto '+startNr+'","foto_omschrijvingen":["Overzicht gevel","Detail schade"],"kosten":9000,"kosten_onderbouwing":"uit te voeren werkzaamheden: hervoegen (450 m² × €20/m² = €9.000)","kosten_vervanging":36000,"kosten_vervanging_onderbouwing":"vervanging: nieuw metselwerk (450 m² × €80/m² = €36.000)","isolatie":""}]\nAlleen JSON, niets anders.'});
+    content.push({type:'text',text:'Analyseer deze foto\'s van de '+tabNaam+' ('+para.naam+') van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\nFoto nummering: '+fotoNummers+'\n\nBELANGRIJK — Conditiewoord en beschrijving MOETEN consistent zijn. Kies EERST het conditiewoord op basis van wat je in de beschrijving schrijft, en gebruik daarna exact dat woord — schrijf nooit een beschrijving die een ander woord impliceert dan het gekozen conditiewoord:\n- "Goed": geen zichtbare gebreken, recent of uitstekend onderhouden\n- "Redelijk": lichte cosmetische gebreken, geen actie nodig op korte termijn\n- "Matig": zichtbare slijtage of schade, onderhoud op middellange termijn gewenst\n- "Slecht": duidelijke gebreken die op korte termijn hersteld moeten worden\n- "Zeer slecht": ernstige schade, directe actie vereist\nControleer aan het eind: lees je eigen beschrijving terug en vraag jezelf af welk conditiewoord een lezer daaruit zou afleiden. Als dat woord niet overeenkomt met je gekozen conditie_trefwoord, pas dan het trefwoord aan zodat het wel klopt.\n\nBELANGRIJK — Scope: beschrijf ALLEEN elementen die bij \''+para.naam+'\' horen. Sla elementen over die beter bij een andere paragraaf passen (bijv. dakdetails horen bij Dak, niet bij Constructie).\n\nGeef een gedetailleerde bouwkundige opname. Per zichtbaar element:\n1. Naam element\n2. Materiaal en specificaties\n3. Hoeveelheid met eenheid (m², m¹, stuks)\n4. conditie_trefwoord — EXACT een van: "Goed", "Redelijk", "Matig", "Slecht", "Zeer slecht"\n5. Beschrijving toestand — verwijs naar fotonummers, en de toon moet exact overeenkomen met conditie_trefwoord\n6. Foto omschrijvingen per foto\n7. Herstelkosten (getal) — 0 als conditie_trefwoord Goed of Redelijk is en er geen onderhoud nodig is\n8. Kostenspecificatie herstel: "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])" — leeg laten als kosten 0 zijn\n9. Vervangingskosten (getal)\n10. Kostenspecificatie vervanging: "vervanging: [omschrijving] ([hoeveelheid] [eenheid] × €[prijs]/[eenheid] = €[totaal])"\n11. Isolatie/R-waarde indien van toepassing\n\nReageer ALLEEN als JSON array:\n[{"element":"Metselwerk voorgevel","materiaal":"Gebakken baksteen","hoeveelheid":"450","eenheid":"m²","conditie_trefwoord":"Matig","beschrijving":"Voegwerkschade, zie foto '+startNr+'","foto_omschrijvingen":["Overzicht gevel","Detail schade"],"kosten":9000,"kosten_onderbouwing":"uit te voeren werkzaamheden: hervoegen (450 m² × €20/m² = €9.000)","kosten_vervanging":36000,"kosten_vervanging_onderbouwing":"vervanging: nieuw metselwerk (450 m² × €80/m² = €36.000)","isolatie":""}]\nAlleen JSON, niets anders.'});
     const raw=await callClaude(content);
     const clean=raw.replace(/```json|```/g,'').trim();
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
@@ -1974,7 +1985,7 @@ window.analyseerFotos=async(chId,subTab)=>{
         opn.elementen.push({
           id:fotoKey+'_'+Date.now()+'_'+i,chapterId:chId,subTab:subTab||null,aiAnalyse:true,
           element:item.element||'Element',materiaal:item.materiaal||'',hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',
-          conditie:item.conditie||3,beschrijving,
+          conditie:trefwoordNaarConditie(item.conditie_trefwoord)||item.conditie||3,beschrijving,
           kosten:item.kosten||0,kosten_onderbouwing:item.kosten_onderbouwing||'',
           kosten_vervanging:item.kosten_vervanging||(item.kosten?Math.round(item.kosten*3.5/100)*100:0),
           kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||(item.kosten_vervanging?'':'vervanging: volledig vervangen '+( item.element||'element')+' (indicatie 3.5× herstelkosten = €'+(item.kosten?Math.round(item.kosten*3.5).toLocaleString('nl-NL'):'?')+')'),
