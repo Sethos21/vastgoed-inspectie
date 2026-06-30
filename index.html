@@ -60,6 +60,20 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .sb-dot{width:7px;height:7px;border-radius:50%;background:var(--bg3);flex-shrink:0;}
 .sb-dot.done{background:var(--green);}
 .sb-dot.active{background:var(--blue);}
+.insp-toggle{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;color:var(--text2);font-size:13px;}
+.insp-toggle:hover{background:var(--bg2);}
+.insp-toggle .sb-chev{margin-left:auto;font-size:13px;color:var(--text3);transition:transform .15s;}
+.insp-toggle.open .sb-chev{transform:rotate(90deg);}
+.sb-new-opname{width:calc(100% - 28px);margin:2px 14px 6px;padding:6px 10px;border:0.5px dashed var(--border2);border-radius:7px;background:none;color:var(--text3);font-size:11px;font-family:inherit;cursor:pointer;text-align:left;}
+.opname-block{margin:4px 10px;border:0.5px solid var(--border);border-radius:8px;overflow:hidden;}
+.opname-block.active{border-color:var(--blue);}
+.opname-head{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);font-size:12px;font-weight:500;cursor:pointer;}
+.opname-block.active .opname-head{background:var(--blue-bg);color:var(--blue-text);}
+.opname-head .gear{margin-left:auto;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;flex-shrink:0;}
+.opname-head .gear:hover{background:var(--bg3);}
+.opname-menu{padding:3px;border-top:0.5px solid var(--border);background:var(--bg);}
+.opname-menu-item{padding:6px 9px;font-size:11px;color:var(--red-text);cursor:pointer;display:flex;align-items:center;gap:5px;border-radius:5px;}
+.opname-menu-item:hover{background:var(--red-bg);}
 .sb-footer{padding:10px 14px;border-top:0.5px solid var(--border);flex-shrink:0;}
 .sb-user{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #topbar{padding:calc(var(--safe-top)+10px) 16px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
@@ -475,6 +489,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 
 // STATE
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
+let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null;
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
 // FIREBASE HELPERS
@@ -965,36 +980,101 @@ window.selectObject=async id=>{
   updateSidebar(lijst);
   currentOpnameId=lijst[0].id;
   await loadOpnameData(id,currentOpnameId);
-  document.getElementById('sb-opname-select').style.display='block';
   navToChapter('objectgegevens');
 };
 
 function updateSidebar(opnameList){
+  opnamesLijst=opnameList;
   document.getElementById('sb-object-name').textContent=currentObj?.naam||'Object';
   document.getElementById('sb-object-sub').textContent=(currentObj?.type||'')+(currentObj?.jaar?', '+currentObj.jaar:'');
-  const sel=document.getElementById('sb-opname-select');
-  sel.innerHTML=opnameList.map(o=>`<option value="${o.id}">${o.naam} — ${o.datum}</option>`).join('')+'<option value="__nieuw">+ Nieuwe opname aanmaken</option>';
-  const opn=getOpname();
-  // Bereken voortgang dots
-  const inGevuld=id=>{const para=INSP_PARAGRAFEN.find(p=>p.id===id);if(!para)return false;const tabs=para.subtabs||[null];return tabs.some(t=>{const key=t?id+'_'+t:id;return(opn.fotos[key]||[]).length>0||opn.elementen.some(e=>e.chapterId===id);});};
-  const nav=document.getElementById('sb-nav');
-  nav.innerHTML=`
-    <div class="sb-section-label">Navigatie</div>
-    <div class="sb-item" onclick="navTo('objects')" data-page="objects"><div class="sb-num">←</div>Alle objecten</div>
-    <div class="sb-section-label">Object</div>
-    <div class="sb-item" onclick="navToChapter('objectgegevens')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot ${currentObj?.naam?'done':''}" style="margin-left:auto;"></div></div>
-    <div class="sb-item" onclick="navToChapter('gebouwpaspoort')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot ${currentObj?.gp?'done':''}" style="margin-left:auto;"></div></div>
-    <div class="sb-section-label">Inspectie</div>
-    ${INSP_PARAGRAFEN.map(p=>`<div class="sb-item sub" onclick="navToChapter('${p.id}')" data-chapter="${p.id}"><div class="sb-dot ${inGevuld(p.id)?'done':''}"></div>${p.naam}</div>`).join('')}
-    <div class="sb-section-label">Onderhoud & herstel</div>
-    <div class="sb-item sub" onclick="navToChapter('onderhoud')" data-chapter="onderhoud"><div class="sb-dot ${opn.elementen.some(e=>e.kosten>0)?'done':''}"></div>Bevindingen & kosten</div>
-    <div class="sb-section-label">MJOP</div>
-    <div class="sb-item sub" onclick="navToChapter('mjop')" data-chapter="mjop"><div class="sb-dot ${opn.mjop&&opn.mjop.length?'done':''}"></div>Meerjaren plan</div>
-    <div class="sb-section-label">Samenvatting</div>
-    <div class="sb-item" onclick="navToChapter('snellinvoer')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>
-    <div class="sb-item" onclick="navToChapter('kosten')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>
-    <div class="sb-item" onclick="navToChapter('rapportage')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>`;
+  renderSidebarNav();
 }
+
+function renderSidebarNav(){
+  const opn=getOpname();
+  const inGevuld=(opnId,chId)=>{
+    const data=opnId===currentOpnameId?opn:null;
+    if(!data)return false;
+    const para=INSP_PARAGRAFEN.find(p=>p.id===chId);if(!para)return false;
+    const tabs=para.subtabs||[null];
+    return tabs.some(t=>{const key=t?chId+'_'+t:chId;return(data.fotos[key]||[]).length>0||data.elementen.some(e=>e.chapterId===chId);});
+  };
+  const eig=eigenaren.find(e=>e.id===currentObj?.eigenaarId);
+  const nav=document.getElementById('sb-nav');
+  let html='<div class="sb-section-label">Navigatie</div>'+
+    '<div class="sb-item" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num"><i class="ti ti-arrow-left" aria-hidden="true"></i></div>Terug naar overzicht</div>';
+
+  if(eig){
+    html+='<div class="sb-section-label">Eigenaar</div>'+
+      '<div class="sb-item" onclick="openEigenaarDash(\''+eig.id+'\')"><div class="sb-num">👤</div>'+escHtml(eig.naam)+'</div>';
+  }
+
+  html+='<div class="sb-section-label">Object</div>'+
+    '<div class="sb-item" onclick="navToChapter(\'objectgegevens\')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot '+(currentObj?.naam?'done':'')+'" style="margin-left:auto;"></div></div>'+
+    '<div class="sb-item" onclick="navToChapter(\'gebouwpaspoort\')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot '+(currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>'+
+    '<div class="sb-item" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
+
+  html+='<div class="sb-section-label">Inspecties</div>'+
+    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num"><i class="ti ti-clipboard-check" aria-hidden="true"></i></div>Alle opnames<span class="sb-chev"><i class="ti ti-chevron-right" aria-hidden="true"></i></span></div>'+
+    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe opname aanmaken</button>';
+
+  if(inspectiesOpen){
+    opnamesLijst.forEach(o=>{
+      const isActive=o.id===currentOpnameId;
+      const menuOpen=openOpnameMenu===o.id;
+      html+='<div class="opname-block'+(isActive?' active':'')+'">'+
+        '<div class="opname-head" onclick="switchOpname(\''+o.id+'\')">'+
+          '<i class="ti ti-calendar" aria-hidden="true"></i> '+escHtml(o.naam)+' — '+escHtml(o.datum)+
+          '<i class="ti ti-dots gear" aria-hidden="true" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')"></i>'+
+        '</div>';
+      if(menuOpen){
+        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')"><i class="ti ti-trash" aria-hidden="true"></i> Inspectie verwijderen</div></div>';
+      }
+      html+='</div>';
+      if(isActive){
+        INSP_PARAGRAFEN.forEach(p=>{
+          html+='<div class="sb-item sub" onclick="navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(inGevuld(o.id,p.id)?'done':'')+'"></div>'+p.naam+'</div>';
+        });
+      }
+    });
+  }
+
+  html+='<div class="sb-section-label">Onderhoud &amp; herstel</div>'+
+    '<div class="sb-item sub" onclick="navToChapter(\'onderhoud\')" data-chapter="onderhoud"><div class="sb-dot '+(opn.elementen.some(e=>e.kosten>0)?'done':'')+'"></div>Bevindingen &amp; kosten</div>'+
+    '<div class="sb-section-label">MJOP</div>'+
+    '<div class="sb-item sub" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
+    '<div class="sb-section-label">Samenvatting</div>'+
+    '<div class="sb-item" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
+    '<div class="sb-item" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
+    '<div class="sb-item" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
+
+  nav.innerHTML=html;
+}
+
+window.toggleInspecties=()=>{inspectiesOpen=!inspectiesOpen;renderSidebarNav();};
+window.toggleOpnameMenu=id=>{openOpnameMenu=openOpnameMenu===id?null:id;renderSidebarNav();};
+window.verwijderOpname=async id=>{
+  if(opnamesLijst.length<=1){showToast('De laatste opname kan niet verwijderd worden');return;}
+  const o=opnamesLijst.find(x=>x.id===id);
+  if(!confirm('Weet je zeker dat je "'+(o?.naam||'deze inspectie')+'" wilt verwijderen? Alle foto\'s en bevindingen in deze opname gaan verloren. Dit kan niet ongedaan gemaakt worden.'))return;
+  try{
+    await dataDoc(currentObjId,id,'fotos').delete().catch(()=>{});
+    await dataDoc(currentObjId,id,'elementen').delete().catch(()=>{});
+    await dataDoc(currentObjId,id,'mjop').delete().catch(()=>{});
+    await dataDoc(currentObjId,id,'rapport').delete().catch(()=>{});
+    opnamesLijst=opnamesLijst.filter(x=>x.id!==id);
+    await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').set({lijst:opnamesLijst});
+    delete opnames[id];
+    if(currentOpnameId===id){
+      currentOpnameId=opnamesLijst[0].id;
+      await loadOpnameData(currentObjId,currentOpnameId);
+    }
+    openOpnameMenu=null;
+    renderSidebarNav();
+    renderChapter(currentChapter);
+    showToast('Inspectie verwijderd');
+  }catch(err){showToast('Verwijderen mislukt: '+err.message);}
+};
 
 function resetSidebar(){
   document.getElementById('sb-object-name').textContent='VastgoedInspectie';
@@ -1007,18 +1087,19 @@ function resetSidebar(){
 
 window.switchOpname=async val=>{
   if(val==='__nieuw'){
-    const naam=prompt('Naam voor de nieuwe opname:','Opname 2');if(!naam)return;
+    const naam=prompt('Naam voor de nieuwe opname:','Opname '+(opnamesLijst.length+1));if(!naam)return;
     const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
     const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
     lijst.push(nieuw);
     await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').set({lijst});
-    updateSidebar(lijst);currentOpnameId=nieuw.id;
-    document.getElementById('sb-opname-select').value=nieuw.id;
+    opnamesLijst=lijst;currentOpnameId=nieuw.id;
     opnames[nieuw.id]={fotos:{},elementen:[],mjop:[]};
+    renderSidebarNav();
     renderChapter(currentChapter);showToast('Nieuwe opname aangemaakt');return;
   }
-  currentOpnameId=val;await loadOpnameData(currentObjId,val);renderChapter(currentChapter);
+  if(val===currentOpnameId){renderSidebarNav();return;}
+  currentOpnameId=val;await loadOpnameData(currentObjId,val);renderSidebarNav();renderChapter(currentChapter);
 };
 
 async function loadOpnameData(objId,opnId){
@@ -1076,7 +1157,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
     const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
@@ -1305,11 +1386,92 @@ function renderGebouwpaspoort(container){
     '<div class="btn-row"><button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Volgende: Inspectie → Gevels &amp; exterieur</button></div>';
 }
 
+// HUUR & TAXATIE (objectniveau)
+function renderHuurTaxatie(container){
+  const obj=currentObj||{};
+  const tax=obj.tax||{};
+  const contracten=obj.huurcontracten||[];
+  const huurJ=(contracten||[]).reduce((s,h)=>s+((parseFloat(h.huurprijs)||0)*12),0);
+  const exploitatie=huurJ*0.2;
+  const nettoHuur=huurJ-exploitatie;
+  const bar=tax.marktwaarde?((huurJ/tax.marktwaarde)*100):0;
+  const nar=tax.marktwaarde?((nettoHuur/tax.marktwaarde)*100):0;
+
+  let html='<div class="section-title">€ Huur &amp; taxatie</div>'+
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">🏢</div>'+
+        '<div style="flex:1;font-weight:600;font-size:13px;">'+escHtml(obj.naam||'')+'</div></div>'+
+      '<div class="card-body">'+
+        '<div class="section-title" style="margin-top:0;">Huurcontracten</div>'+
+        '<button class="btn btn-light btn-sm" style="margin-bottom:10px;" onclick="addHuurcontractObj()">+ Contract toevoegen</button>';
+  if(!contracten.length){html+='<div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Geen huurcontracten geregistreerd.</div>';}
+  else{
+    html+='<div class="huur-row pand-hdr-row"><span>Huurder</span><span>Huur p/m</span><span>Ingangsdatum</span><span>Einddatum</span><span>Status</span></div>';
+    contracten.forEach((h,i)=>{
+      const vandaag=new Date();const eind=h.einddatum?new Date(h.einddatum):null;
+      const status=!h.huurder?'leeg':( eind&&eind<vandaag?'verlopen':'lopend');
+      const statusBadge=status==='leeg'?'<span class="badge badge-gray">Leeg</span>':status==='verlopen'?'<span class="badge badge-3">Verlopen</span>':'<span class="badge badge-1">Lopend</span>';
+      html+='<div class="huur-row">'+
+        '<input type="text" value="'+escHtml(h.huurder||'')+'" placeholder="Huurder..." oninput="updateHuurcontractObj('+i+',\'huurder\',this.value)" style="border:none;background:none;font-size:12px;padding:0;"/>'+
+        '<input type="number" value="'+(h.huurprijs||'')+'" placeholder="0" oninput="updateHuurcontractObj('+i+',\'huurprijs\',this.value)" style="border:none;background:none;font-size:12px;padding:0;"/>'+
+        '<input type="date" value="'+(h.ingangsdatum||'')+'" oninput="updateHuurcontractObj('+i+',\'ingangsdatum\',this.value)" style="border:none;background:none;font-size:11px;padding:0;"/>'+
+        '<input type="date" value="'+(h.einddatum||'')+'" oninput="updateHuurcontractObj('+i+',\'einddatum\',this.value)" style="border:none;background:none;font-size:11px;padding:0;"/>'+
+        '<div style="display:flex;align-items:center;gap:6px;">'+statusBadge+'<button onclick="verwijderHuurcontractObj('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;">×</button></div>'+
+      '</div>';
+    });
+  }
+  html+='</div></div>';
+
+  html+='<div class="card" style="margin-bottom:14px;"><div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">💰</div>'+
+    '<div style="flex:1;font-weight:600;font-size:13px;">Taxatiewaarden</div></div><div class="card-body">'+
+    '<div class="tax-grid">'+
+      '<div class="tax-card primary"><div class="tax-lbl">Marktwaarde (laatste taxatie)</div><div class="tax-val primary">'+( tax.marktwaarde?'€ '+Math.round(tax.marktwaarde).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Marktwaarde invoeren..." value="'+(tax.marktwaarde||'')+'" oninput="updateTaxObj(\'marktwaarde\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+      '<div class="tax-card"><div class="tax-lbl">WOZ-waarde</div><div class="tax-val">'+( tax.woz?'€ '+Math.round(tax.woz).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="WOZ invoeren..." value="'+(tax.woz||'')+'" oninput="updateTaxObj(\'woz\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+      '<div class="tax-card"><div class="tax-lbl">Herbouwwaarde</div><div class="tax-val">'+( tax.herbouw?'€ '+Math.round(tax.herbouw).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Herbouwwaarde..." value="'+(tax.herbouw||'')+'" oninput="updateTaxObj(\'herbouw\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+      '<div class="tax-card"><div class="tax-lbl">Leegstandswaarde</div><div class="tax-val">'+( tax.leegstand?'€ '+Math.round(tax.leegstand).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Leegstandswaarde..." value="'+(tax.leegstand||'')+'" oninput="updateTaxObj(\'leegstand\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+    '</div>'+
+    '<div class="section-title" style="margin-top:10px;">BAR / NAR berekening (automatisch)</div>'+
+    '<div class="ratio-row"><span style="color:var(--text2);">Bruto jaarhuur</span><span style="font-weight:500;">€ '+Math.round(huurJ).toLocaleString('nl-NL')+'</span></div>'+
+    '<div class="ratio-row"><span style="color:var(--text2);">Exploitatiekosten (indicatief 20%)</span><span>€ '+Math.round(exploitatie).toLocaleString('nl-NL')+'</span></div>'+
+    '<div class="ratio-row"><span style="color:var(--text2);">Netto jaarhuur</span><span style="font-weight:500;">€ '+Math.round(nettoHuur).toLocaleString('nl-NL')+'</span></div>'+
+    '<div class="ratio-row"><span style="color:var(--text2);">BAR (bruto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?bar.toFixed(1)+'%':'— (vul marktwaarde in)')+'</span></div>'+
+    '<div class="ratio-row"><span style="color:var(--text2);">NAR (netto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?nar.toFixed(1)+'%':'—')+'</span></div>'+
+  '</div></div>';
+
+  container.innerHTML=html;
+}
+window.addHuurcontractObj=async()=>{
+  if(!currentObj)return;
+  if(!currentObj.huurcontracten)currentObj.huurcontracten=[];
+  currentObj.huurcontracten.push({huurder:'',huurprijs:0,ingangsdatum:'',einddatum:''});
+  await objDoc(currentObjId).set({huurcontracten:currentObj.huurcontracten},{merge:true});
+  renderChapter('huurtaxatie');
+};
+window.updateHuurcontractObj=async(idx,key,val)=>{
+  if(!currentObj||!currentObj.huurcontracten)return;
+  currentObj.huurcontracten[idx][key]=key==='huurprijs'?parseFloat(val)||0:val;
+  await objDoc(currentObjId).set({huurcontracten:currentObj.huurcontracten},{merge:true});
+};
+window.verwijderHuurcontractObj=async idx=>{
+  if(!currentObj||!currentObj.huurcontracten)return;
+  currentObj.huurcontracten.splice(idx,1);
+  await objDoc(currentObjId).set({huurcontracten:currentObj.huurcontracten},{merge:true});
+  renderChapter('huurtaxatie');
+};
+window.updateTaxObj=async(key,val)=>{
+  if(!currentObj)return;
+  if(!currentObj.tax)currentObj.tax={};
+  currentObj.tax[key]=parseFloat(val)||0;
+  await objDoc(currentObjId).set({tax:currentObj.tax},{merge:true});
+  renderSidebarNav();
+};
+
 // INSPECTIE
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
   if(chId==='objectgegevens'){renderObjectgegevens(container);return;}
   if(chId==='gebouwpaspoort'){renderGebouwpaspoort(container);return;}
+  if(chId==='huurtaxatie'){renderHuurTaxatie(container);return;}
   if(chId==='onderhoud'){renderOnderhoud(container);return;}
   if(chId==='mjop'){renderMJOP(container);return;}
   if(chId==='kosten'){renderKosten(container);return;}
