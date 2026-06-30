@@ -231,6 +231,31 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rapport-opt-icon{font-size:22px;margin-bottom:6px;}
 .rapport-opt-title{font-size:13px;font-weight:600;margin-bottom:3px;}
 .rapport-opt-sub{font-size:11px;color:var(--text3);line-height:1.5;}
+
+/* EIGENAREN */
+.eig-item{display:flex;align-items:center;gap:12px;padding:13px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:9px;cursor:pointer;}
+.eig-item:active{background:var(--bg2);}
+.eig-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-bg);color:var(--blue-text);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
+.eig-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.eig-stat{background:var(--bg1);border-radius:8px;padding:10px 12px;}
+.eig-stat-val{font-size:19px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.eig-stat-lbl{font-size:11px;color:var(--text3);}
+.eig-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);margin-bottom:14px;}
+.eig-tab{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-left:none;border-right:none;border-top:none;font-family:inherit;}
+.eig-tab.active{color:var(--text);border-bottom-color:var(--blue);font-weight:500;}
+.pand-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.pand-row:last-child{border:none;}
+.pand-row.pand-hdr-row{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding-bottom:6px;}
+.huur-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.huur-row:last-child{border:none;}
+.tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.tax-card{background:var(--bg1);border-radius:8px;padding:11px 13px;border:0.5px solid var(--border);}
+.tax-card.primary{background:var(--blue-bg);border-color:transparent;}
+.tax-lbl{font-size:11px;color:var(--text3);margin-bottom:3px;}
+.tax-val{font-size:17px;font-weight:600;}
+.tax-val.primary{font-size:22px;color:var(--blue-text);}
+.ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.ratio-row:last-child{border:none;}
 @media(max-width:700px){
   #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);width:260px;}
   #sidebar.open{transform:translateX(0);}
@@ -267,6 +292,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="topbar-chapter-sub" id="topbar-sub">Professionele bouwkundige inspectietool</div>
       </div>
       <div style="display:flex;gap:6px;">
+        <button class="icon-btn" onclick="navTo('import')" title="Bulk import">📥</button>
         <button class="icon-btn" onclick="navTo('settings')" title="Instellingen">⚙</button>
       </div>
     </div>
@@ -298,12 +324,33 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
       </div>
       <div id="page-objects" class="page">
+        <div class="section-title">Eigenaren</div>
+        <div id="eigenaren-list"></div>
+        <button class="btn btn-light btn-full btn-sm" style="margin-bottom:18px;" onclick="newEigenaar()">+ Nieuwe eigenaar aanmaken</button>
         <div class="section-title">Mijn objecten</div>
         <div id="objects-list"></div>
         <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
+      <div id="page-eigenaar-form" class="page">
+        <div class="section-title">Eigenaar</div>
+        <div class="field"><label>Naam eigenaar / organisatie</label><input type="text" id="eig-naam" placeholder="Bijv. Gemeente Bernheze"/></div>
+        <div class="grid2">
+          <div class="field"><label>KvK-nummer</label><input type="text" id="eig-kvk" placeholder="12345678"/></div>
+          <div class="field"><label>Contactpersoon</label><input type="text" id="eig-contact" placeholder="Naam contactpersoon"/></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>E-mailadres</label><input type="email" id="eig-email" placeholder="contact@..."/></div>
+          <div class="field"><label>Telefoonnummer</label><input type="text" id="eig-tel" placeholder="06-..."/></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-dark" onclick="saveEigenaar()">Opslaan</button>
+          <button class="btn btn-light" onclick="navTo('objects')">Annuleren</button>
+        </div>
+      </div>
+      <div id="page-eigenaar-dash" class="page"></div>
       <div id="page-object-form" class="page">
         <div class="section-title">Objectgegevens</div>
+        <div class="field"><label>Eigenaar</label><select id="f-eigenaar"><option value="">— Geen eigenaar gekoppeld —</option></select></div>
         <div class="field"><label>Adres zoeken (BAG)</label>
           <div class="bag-wrap"><input type="text" id="f-bag" placeholder="Kerkstraat 12 Nijmegen..." autocomplete="off" oninput="bagSuggest(this.value)"/><div id="bag-dd" class="bag-dd" style="display:none;"></div></div>
           <div id="bag-status"></div>
@@ -323,6 +370,21 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <button class="btn btn-dark" onclick="saveObject()">Opslaan</button>
           <button class="btn btn-light" onclick="navTo('objects')">Annuleren</button>
         </div>
+      </div>
+      <div id="page-import" class="page">
+        <div class="section-title">📥 Bulk data import</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px;">Importeer meerdere panden in één keer via een Excel-bestand. Download eerst het template, vul het in en upload het terug.</p>
+        <div class="btn-row" style="margin-bottom:16px;">
+          <button class="btn btn-light" onclick="downloadImportTemplate()">⬇ Download template</button>
+        </div>
+        <div class="foto-zone" id="import-zone" onclick="document.getElementById('import-file').click()">
+          <div class="foto-zone-icon">📊</div>
+          <div class="foto-zone-title">Excel-bestand uploaden</div>
+          <div class="foto-zone-sub">Tik om een .xlsx bestand te kiezen</div>
+          <input type="file" id="import-file" accept=".xlsx" style="display:none;" onchange="handleImportFile(event)"/>
+        </div>
+        <div id="import-status"></div>
+        <div id="import-preview"></div>
       </div>
       <div id="page-chapter" class="page"></div>
       <div id="page-settings" class="page">
@@ -375,11 +437,12 @@ const CONDITIE=['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
 const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 
 // STATE
-let currentUser=null,objects=[],currentObjId=null,currentOpnameId=null;
+let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
 // FIREBASE HELPERS
 const objDoc=id=>db.collection('objects').doc(id);
+const eigDoc=id=>db.collection('eigenaren').doc(id);
 const dataDoc=(oid,opnId,type)=>db.collection('objects').doc(oid).collection('opnames').doc(opnId).collection('data').doc(type);
 
 // AUTH
@@ -388,7 +451,7 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     document.getElementById('sb-user').textContent=user.displayName||user.email;
     document.getElementById('settings-user').textContent=user.email;
-    initSettings();loadObjects();
+    initSettings();loadObjects();loadEigenaren();
     document.getElementById('page-login').classList.remove('active');
     document.getElementById('sidebar').style.display='flex';
     document.getElementById('topbar').style.display='flex';
@@ -473,6 +536,7 @@ window.editObject=id=>{
   ['naam','jaar','opp','eenheden','postcode','context'].forEach(k=>{const el=document.getElementById('f-'+k);if(el)el.value=o[k]||'';});
   document.getElementById('f-type').value=o.type||'';
   document.getElementById('f-bag').value=o.naam||'';
+  vulEigenaarDropdown(o.eigenaarId||'');
   document.getElementById('page-object-form').dataset.editId=id;
   navTo('object-form');
 };
@@ -495,6 +559,7 @@ window.saveObject=async()=>{
     eenheden:document.getElementById('f-eenheden').value,
     postcode:document.getElementById('f-postcode').value,
     context:document.getElementById('f-context').value,
+    eigenaarId:document.getElementById('f-eigenaar').value||'',
     aangemaaktOp:bestaand?.aangemaaktOp||serverTimestamp(),
     aangemaaktDoor:bestaand?.aangemaaktDoor||(currentUser?.displayName||currentUser?.email||''),
   });
@@ -506,8 +571,303 @@ function clearObjectForm(){
   document.getElementById('bag-status').innerHTML='';
   document.getElementById('f-jaar-badge').textContent='';
   document.getElementById('f-opp-badge').textContent='';
+  vulEigenaarDropdown();
   hideBagDd();
 }
+function vulEigenaarDropdown(selectedId){
+  const sel=document.getElementById('f-eigenaar');if(!sel)return;
+  sel.innerHTML='<option value="">— Geen eigenaar gekoppeld —</option>'+eigenaren.map(e=>'<option value="'+e.id+'" '+(e.id===selectedId?'selected':'')+'>'+escHtml(e.naam)+'</option>').join('');
+}
+
+// EIGENAREN
+function loadEigenaren(){
+  db.collection('eigenaren').orderBy('aangemaaktOp','desc').onSnapshot(snap=>{
+    eigenaren=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderEigenaren();vulEigenaarDropdown();
+  });
+}
+function renderEigenaren(){
+  const list=document.getElementById('eigenaren-list');if(!list)return;
+  if(!eigenaren.length){list.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0 14px;">Nog geen eigenaren aangemaakt. Groepeer panden per eigenaar voor een overzichtelijk dashboard.</div>';return;}
+  list.innerHTML=eigenaren.map(e=>{
+    const aantalPanden=objects.filter(o=>o.eigenaarId===e.id).length;
+    const initials=(e.naam||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    return '<div class="eig-item" onclick="openEigenaarDash(\''+e.id+'\')">'+
+      '<div class="eig-avatar">'+initials+'</div>'+
+      '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14px;">'+escHtml(e.naam||'Naamloos')+'</div>'+
+      '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+aantalPanden+' pand'+(aantalPanden===1?'':'en')+(e.contact?' · '+escHtml(e.contact):'')+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:5px;">'+
+        '<button onclick="event.stopPropagation();editEigenaar(\''+e.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">✎</button>'+
+        '<button onclick="event.stopPropagation();deleteEigenaar(\''+e.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;">🗑</button>'+
+        '<span style="color:var(--text3);font-size:18px;">›</span>'+
+      '</div></div>';
+  }).join('');
+}
+window.newEigenaar=()=>{
+  ['eig-naam','eig-kvk','eig-contact','eig-email','eig-tel'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('page-eigenaar-form').dataset.editId='';
+  navTo('eigenaar-form');
+};
+window.editEigenaar=id=>{
+  const e=eigenaren.find(x=>x.id===id);if(!e)return;
+  document.getElementById('eig-naam').value=e.naam||'';
+  document.getElementById('eig-kvk').value=e.kvk||'';
+  document.getElementById('eig-contact').value=e.contact||'';
+  document.getElementById('eig-email').value=e.email||'';
+  document.getElementById('eig-tel').value=e.tel||'';
+  document.getElementById('page-eigenaar-form').dataset.editId=id;
+  navTo('eigenaar-form');
+};
+window.deleteEigenaar=async id=>{
+  if(!confirm('Eigenaar verwijderen? Gekoppelde panden blijven bestaan maar verliezen de koppeling.'))return;
+  await eigDoc(id).delete();
+  for(const o of objects.filter(o=>o.eigenaarId===id)){await objDoc(o.id).set({eigenaarId:''},{merge:true});}
+  showToast('Eigenaar verwijderd');
+};
+window.saveEigenaar=async()=>{
+  const naam=document.getElementById('eig-naam').value.trim();
+  if(!naam){showToast('Vul een naam in');return;}
+  const editId=document.getElementById('page-eigenaar-form').dataset.editId;
+  const id=editId||'eig_'+Date.now();
+  const bestaand=eigenaren.find(e=>e.id===editId);
+  await eigDoc(id).set({
+    naam,kvk:document.getElementById('eig-kvk').value,
+    contact:document.getElementById('eig-contact').value,
+    email:document.getElementById('eig-email').value,
+    tel:document.getElementById('eig-tel').value,
+    aangemaaktOp:bestaand?.aangemaaktOp||serverTimestamp(),
+  });
+  showToast('Eigenaar opgeslagen');navTo('objects');
+};
+
+// EIGENAAR DASHBOARD
+let eigDashTab='panden';
+window.openEigenaarDash=id=>{
+  currentEigenaarId=id;eigDashTab='panden';
+  navTo('eigenaar-dash');
+  renderEigenaarDash();
+};
+function renderEigenaarDash(){
+  const eig=eigenaren.find(e=>e.id===currentEigenaarId);
+  const container=document.getElementById('page-eigenaar-dash');
+  if(!eig){container.innerHTML='<div class="empty"><p>Eigenaar niet gevonden.</p></div>';return;}
+  const panden=objects.filter(o=>o.eigenaarId===eig.id);
+  const initials=(eig.naam||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const totHuur=panden.reduce((s,p)=>s+(parseFloat(p.huurJaar)||sumHuurcontracten(p)),0);
+  const totMarkt=panden.reduce((s,p)=>s+(parseFloat(p.tax?.marktwaarde)||0),0);
+  const totWoz=panden.reduce((s,p)=>s+(parseFloat(p.tax?.woz)||0),0);
+  let html='<div class="section-title">👤 '+escHtml(eig.naam)+'</div>'+
+    '<div class="card" style="margin-bottom:14px;"><div class="card-body">'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
+      '<div class="eig-avatar" style="width:44px;height:44px;font-size:16px;">'+initials+'</div>'+
+      '<div style="flex:1;"><div style="font-size:15px;font-weight:600;">'+escHtml(eig.naam)+'</div>'+
+      '<div style="font-size:12px;color:var(--text3);">'+(eig.kvk?'KvK '+escHtml(eig.kvk)+' · ':'')+(eig.contact?'Contactpersoon: '+escHtml(eig.contact):'')+'</div></div>'+
+      '<button class="btn btn-light btn-sm" onclick="editEigenaar(\''+eig.id+'\')">✎ Bewerken</button>'+
+    '</div>'+
+    '<div class="eig-stat-grid">'+
+      '<div class="eig-stat"><div class="eig-stat-val">'+panden.length+'</div><div class="eig-stat-lbl">Panden</div></div>'+
+      '<div class="eig-stat"><div class="eig-stat-val" style="color:var(--green-text);">€ '+Math.round(totHuur).toLocaleString('nl-NL')+'</div><div class="eig-stat-lbl">Jaarhuur</div></div>'+
+      '<div class="eig-stat"><div class="eig-stat-val" style="color:var(--blue-text);">€ '+formatM(totMarkt)+'</div><div class="eig-stat-lbl">Marktwaarde totaal</div></div>'+
+      '<div class="eig-stat"><div class="eig-stat-val">€ '+formatM(totWoz)+'</div><div class="eig-stat-lbl">WOZ totaal</div></div>'+
+    '</div></div></div>'+
+    '<div class="eig-tabs">'+
+      '<button class="eig-tab '+(eigDashTab==='panden'?'active':'')+'" onclick="switchEigDashTab(\'panden\')">Panden overzicht</button>'+
+      '<button class="eig-tab '+(eigDashTab==='huur'?'active':'')+'" onclick="switchEigDashTab(\'huur\')">Huurcontracten</button>'+
+      '<button class="eig-tab '+(eigDashTab==='taxatie'?'active':'')+'" onclick="switchEigDashTab(\'taxatie\')">Taxatiewaarden</button>'+
+    '</div>'+
+    '<div id="eig-dash-content"></div>';
+  container.innerHTML=html;
+  renderEigDashContent(panden);
+}
+function formatM(v){return v>=1000000?(v/1000000).toFixed(1).replace('.0','')+'M':Math.round(v).toLocaleString('nl-NL');}
+function sumHuurcontracten(pand){return(pand.huurcontracten||[]).reduce((s,h)=>s+((parseFloat(h.huurprijs)||0)*12),0);}
+window.switchEigDashTab=tab=>{eigDashTab=tab;document.querySelectorAll('.eig-tab').forEach((t,i)=>t.classList.toggle('active',['panden','huur','taxatie'][i]===tab));renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));};
+
+function renderEigDashContent(panden){
+  const el=document.getElementById('eig-dash-content');if(!el)return;
+  if(eigDashTab==='panden'){
+    if(!panden.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen panden gekoppeld aan deze eigenaar.<br>Koppel een pand via Objectgegevens.</p></div>';return;}
+    let html='<div class="card"><div class="card-body">'+
+      '<div class="pand-row pand-hdr-row"><span>Adres</span><span>Type</span><span>Conditie</span><span>Huur p/j</span><span>Marktwaarde</span></div>';
+    panden.forEach(p=>{
+      const cond=schatPandConditie(p);
+      html+='<div class="pand-row" style="cursor:pointer;" onclick="selectObject(\''+p.id+'\')">'+
+        '<div><div style="font-weight:500;">'+escHtml(p.naam||'')+'</div><div style="font-size:11px;color:var(--text3);">'+(p.jaar?p.jaar+' · ':'')+(p.opp?p.opp+' m²':'')+'</div></div>'+
+        '<div>'+escHtml(p.type||'—')+'</div>'+
+        '<div>'+(cond?'<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>':'<span class="badge badge-gray">Niet geïnspecteerd</span>')+'</div>'+
+        '<div>'+(sumHuurcontracten(p)?'€ '+Math.round(sumHuurcontracten(p)).toLocaleString('nl-NL'):'—')+'</div>'+
+        '<div>'+(p.tax?.marktwaarde?'€ '+Math.round(p.tax.marktwaarde).toLocaleString('nl-NL'):'—')+'</div>'+
+      '</div>';
+    });
+    html+='</div></div>';
+    el.innerHTML=html;
+  }else if(eigDashTab==='huur'){
+    if(!panden.length){el.innerHTML='<div class="empty"><p>Geen panden om huurcontracten voor te beheren.</p></div>';return;}
+    let html='';
+    panden.forEach(p=>{
+      const contracten=p.huurcontracten||[];
+      html+='<div class="card"><div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">🏢</div><div style="flex:1;font-weight:600;font-size:13px;">'+escHtml(p.naam||'')+'</div>'+
+        '<button class="btn btn-light btn-sm" onclick="addHuurcontract(\''+p.id+'\')">+ Contract</button></div><div class="card-body">';
+      if(!contracten.length){html+='<div style="font-size:12px;color:var(--text3);">Geen huurcontracten geregistreerd.</div>';}
+      else{
+        html+='<div class="huur-row pand-hdr-row"><span>Huurder</span><span>Huur p/m</span><span>Ingangsdatum</span><span>Einddatum</span><span>Status</span></div>';
+        contracten.forEach((h,i)=>{
+          const vandaag=new Date();const eind=h.einddatum?new Date(h.einddatum):null;
+          const status=!h.huurder?'leeg':( eind&&eind<vandaag?'verlopen':'lopend');
+          const statusBadge=status==='leeg'?'<span class="badge badge-gray">Leeg</span>':status==='verlopen'?'<span class="badge badge-3">Verlopen</span>':'<span class="badge badge-1">Lopend</span>';
+          html+='<div class="huur-row">'+
+            '<input type="text" value="'+escHtml(h.huurder||'')+'" placeholder="Huurder..." oninput="updateHuurcontract(\''+p.id+'\','+i+',\'huurder\',this.value)" style="border:none;background:none;font-size:12px;padding:0;"/>'+
+            '<input type="number" value="'+(h.huurprijs||'')+'" placeholder="0" oninput="updateHuurcontract(\''+p.id+'\','+i+',\'huurprijs\',this.value)" style="border:none;background:none;font-size:12px;padding:0;"/>'+
+            '<input type="date" value="'+(h.ingangsdatum||'')+'" oninput="updateHuurcontract(\''+p.id+'\','+i+',\'ingangsdatum\',this.value)" style="border:none;background:none;font-size:11px;padding:0;"/>'+
+            '<input type="date" value="'+(h.einddatum||'')+'" oninput="updateHuurcontract(\''+p.id+'\','+i+',\'einddatum\',this.value)" style="border:none;background:none;font-size:11px;padding:0;"/>'+
+            '<div style="display:flex;align-items:center;gap:6px;">'+statusBadge+'<button onclick="verwijderHuurcontract(\''+p.id+'\','+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;">×</button></div>'+
+          '</div>';
+        });
+      }
+      html+='</div></div>';
+    });
+    el.innerHTML=html;
+  }else if(eigDashTab==='taxatie'){
+    if(!panden.length){el.innerHTML='<div class="empty"><p>Geen panden om taxatiewaarden voor te beheren.</p></div>';return;}
+    let html='';
+    panden.forEach(p=>{
+      const tax=p.tax||{};
+      const huurJ=sumHuurcontracten(p);
+      const exploitatie=huurJ*0.2;
+      const nettoHuur=huurJ-exploitatie;
+      const bar=tax.marktwaarde?((huurJ/tax.marktwaarde)*100):0;
+      const nar=tax.marktwaarde?((nettoHuur/tax.marktwaarde)*100):0;
+      html+='<div class="card"><div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">💰</div><div style="flex:1;font-weight:600;font-size:13px;">'+escHtml(p.naam||'')+'</div></div><div class="card-body">'+
+        '<div class="tax-grid">'+
+          '<div class="tax-card primary"><div class="tax-lbl">Marktwaarde (laatste taxatie)</div><div class="tax-val primary">'+( tax.marktwaarde?'€ '+Math.round(tax.marktwaarde).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Marktwaarde invoeren..." value="'+(tax.marktwaarde||'')+'" oninput="updateTax(\''+p.id+'\',\'marktwaarde\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+          '<div class="tax-card"><div class="tax-lbl">WOZ-waarde</div><div class="tax-val">'+( tax.woz?'€ '+Math.round(tax.woz).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="WOZ invoeren..." value="'+(tax.woz||'')+'" oninput="updateTax(\''+p.id+'\',\'woz\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+          '<div class="tax-card"><div class="tax-lbl">Herbouwwaarde</div><div class="tax-val">'+( tax.herbouw?'€ '+Math.round(tax.herbouw).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Herbouwwaarde..." value="'+(tax.herbouw||'')+'" oninput="updateTax(\''+p.id+'\',\'herbouw\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+          '<div class="tax-card"><div class="tax-lbl">Leegstandswaarde</div><div class="tax-val">'+( tax.leegstand?'€ '+Math.round(tax.leegstand).toLocaleString('nl-NL'):'—')+'</div><input type="number" placeholder="Leegstandswaarde..." value="'+(tax.leegstand||'')+'" oninput="updateTax(\''+p.id+'\',\'leegstand\',this.value)" style="margin-top:6px;font-size:12px;padding:5px 7px;"/></div>'+
+        '</div>'+
+        '<div class="section-title" style="margin-top:10px;">BAR / NAR berekening (automatisch)</div>'+
+        '<div class="ratio-row"><span style="color:var(--text2);">Bruto jaarhuur</span><span style="font-weight:500;">€ '+Math.round(huurJ).toLocaleString('nl-NL')+'</span></div>'+
+        '<div class="ratio-row"><span style="color:var(--text2);">Exploitatiekosten (indicatief 20%)</span><span>€ '+Math.round(exploitatie).toLocaleString('nl-NL')+'</span></div>'+
+        '<div class="ratio-row"><span style="color:var(--text2);">Netto jaarhuur</span><span style="font-weight:500;">€ '+Math.round(nettoHuur).toLocaleString('nl-NL')+'</span></div>'+
+        '<div class="ratio-row"><span style="color:var(--text2);">BAR (bruto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?bar.toFixed(1)+'%':'— (vul marktwaarde in)')+'</span></div>'+
+        '<div class="ratio-row"><span style="color:var(--text2);">NAR (netto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?nar.toFixed(1)+'%':'—')+'</span></div>'+
+      '</div></div>';
+    });
+    el.innerHTML=html;
+  }
+}
+function schatPandConditie(pand){
+  // Placeholder: conditie wordt pas bekend nadat opname-data is geladen; hier geven we null terug tenzij elders bijgehouden
+  return pand.laatsteConditie||null;
+}
+window.updateTax=async(pandId,key,val)=>{
+  const pand=objects.find(o=>o.id===pandId);if(!pand)return;
+  if(!pand.tax)pand.tax={};pand.tax[key]=parseFloat(val)||0;
+  await objDoc(pandId).set({tax:pand.tax},{merge:true});
+  renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));
+};
+window.addHuurcontract=async pandId=>{
+  const pand=objects.find(o=>o.id===pandId);if(!pand)return;
+  if(!pand.huurcontracten)pand.huurcontracten=[];
+  pand.huurcontracten.push({huurder:'',huurprijs:0,ingangsdatum:'',einddatum:''});
+  await objDoc(pandId).set({huurcontracten:pand.huurcontracten},{merge:true});
+  renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));
+};
+window.updateHuurcontract=async(pandId,idx,key,val)=>{
+  const pand=objects.find(o=>o.id===pandId);if(!pand||!pand.huurcontracten)return;
+  pand.huurcontracten[idx][key]=key==='huurprijs'?parseFloat(val)||0:val;
+  await objDoc(pandId).set({huurcontracten:pand.huurcontracten},{merge:true});
+};
+window.verwijderHuurcontract=async(pandId,idx)=>{
+  const pand=objects.find(o=>o.id===pandId);if(!pand||!pand.huurcontracten)return;
+  pand.huurcontracten.splice(idx,1);
+  await objDoc(pandId).set({huurcontracten:pand.huurcontracten},{merge:true});
+  renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));
+};
+
+// BULK IMPORT
+window.downloadImportTemplate=async()=>{
+  await loadXLSX();
+  const wb=XLSX.utils.book_new();
+  const rows=[
+    ['Eigenaar','Adres','Type object','Bouwjaar','Oppervlakte m²','Postcode','Plaats','Huurder','Huurprijs p/m','WOZ-waarde','Marktwaarde'],
+    ['Gemeente Bernheze','Kerkstraat 12','Eengezinswoning',1965,140,'5384AB','Heesch','J. Jansen',850,285000,310000],
+    ['Gemeente Bernheze','Marktstraat 8','Winkelruimte',1978,320,'5384CD','Heesch','','',0,420000,460000],
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:22},{wch:24},{wch:18},{wch:10},{wch:14},{wch:10},{wch:14},{wch:18},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws,'Import');
+  XLSX.writeFile(wb,'VastgoedInspectie_import_template.xlsx');
+  showToast('Template gedownload');
+};
+window.handleImportFile=async event=>{
+  const file=event.target.files[0];if(!file)return;
+  await loadXLSX();
+  const statusEl=document.getElementById('import-status');
+  statusEl.innerHTML='<div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span>Bestand inlezen...</span></div>';
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!rows.length){statusEl.innerHTML='<div style="color:var(--red-text);font-size:13px;">Geen rijen gevonden in het bestand.</div>';return;}
+      window._importRows=rows;
+      let preview='<div class="card"><div class="card-body"><div style="font-size:13px;font-weight:600;margin-bottom:8px;">'+rows.length+' rijen gevonden</div>';
+      preview+='<div style="max-height:300px;overflow-y:auto;font-size:12px;">';
+      rows.slice(0,10).forEach(r=>{preview+='<div style="padding:5px 0;border-bottom:0.5px solid var(--border);">'+escHtml(r['Eigenaar']||'—')+' — '+escHtml(r['Adres']||'—')+' ('+escHtml(r['Type object']||'—')+')</div>';});
+      if(rows.length>10)preview+='<div style="padding:5px 0;color:var(--text3);">+ '+(rows.length-10)+' meer...</div>';
+      preview+='</div></div></div>';
+      preview+='<button class="btn btn-dark btn-full" onclick="uitvoerenImport()">Importeren ('+rows.length+' panden)</button>';
+      document.getElementById('import-preview').innerHTML=preview;
+      statusEl.innerHTML='<div style="color:var(--green-text);font-size:13px;">✓ Bestand succesvol ingelezen</div>';
+    }catch(err){statusEl.innerHTML='<div style="color:var(--red-text);font-size:13px;">Fout bij inlezen: '+err.message+'</div>';}
+  };
+  reader.readAsArrayBuffer(file);
+};
+window.uitvoerenImport=async()=>{
+  const rows=window._importRows||[];if(!rows.length)return;
+  const statusEl=document.getElementById('import-status');
+  statusEl.innerHTML='<div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span>Importeren... 0/'+rows.length+'</span></div>';
+  // Eerst unieke eigenaren aanmaken
+  const eigenaarNamen=[...new Set(rows.map(r=>(r['Eigenaar']||'').trim()).filter(Boolean))];
+  const eigenaarMap={};
+  for(const naam of eigenaarNamen){
+    let bestaand=eigenaren.find(e=>e.naam.toLowerCase()===naam.toLowerCase());
+    if(!bestaand){
+      const id='eig_import_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+      await eigDoc(id).set({naam,aangemaaktOp:serverTimestamp()});
+      bestaand={id,naam};eigenaren.push(bestaand);
+    }
+    eigenaarMap[naam.toLowerCase()]=bestaand.id;
+  }
+  let count=0;
+  for(const r of rows){
+    const adres=(r['Adres']||'').trim();if(!adres)continue;
+    const eigNaam=(r['Eigenaar']||'').trim();
+    const id='imp_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    const huurcontracten=[];
+    if(r['Huurder']){huurcontracten.push({huurder:String(r['Huurder']),huurprijs:parseFloat(r['Huurprijs p/m'])||0,ingangsdatum:'',einddatum:''});}
+    await objDoc(id).set({
+      naam:adres,
+      type:r['Type object']||'Eengezinswoning',
+      jaar:String(r['Bouwjaar']||''),
+      opp:String(r['Oppervlakte m²']||''),
+      postcode:(r['Postcode']||'')+(r['Plaats']?' '+r['Plaats']:''),
+      context:'',
+      eigenaarId:eigNaam?eigenaarMap[eigNaam.toLowerCase()]||'':'',
+      huurcontracten,
+      tax:{woz:parseFloat(r['WOZ-waarde'])||0,marktwaarde:parseFloat(r['Marktwaarde'])||0,herbouw:0,leegstand:0},
+      aangemaaktOp:serverTimestamp(),
+      aangemaaktDoor:currentUser?.displayName||currentUser?.email||'',
+    });
+    count++;
+    statusEl.innerHTML='<div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span>Importeren... '+count+'/'+rows.length+'</span></div>';
+  }
+  statusEl.innerHTML='<div style="color:var(--green-text);font-size:13px;">✓ '+count+' panden geïmporteerd</div>';
+  document.getElementById('import-preview').innerHTML='';
+  window._importRows=null;
+  showToast(count+' panden geïmporteerd');
+};
 
 // OPNAMES
 window.selectObject=async id=>{
@@ -637,6 +997,16 @@ function updateTopbar(page){
     document.getElementById('topbar-sub').textContent='Objecten overzicht';
   }else if(page==='settings'){
     document.getElementById('topbar-title').textContent='Instellingen';
+    document.getElementById('topbar-sub').textContent='';
+  }else if(page==='eigenaar-form'){
+    document.getElementById('topbar-title').textContent='Eigenaar';
+    document.getElementById('topbar-sub').textContent='';
+  }else if(page==='eigenaar-dash'){
+    const eig=eigenaren.find(e=>e.id===currentEigenaarId);
+    document.getElementById('topbar-title').textContent='👤 '+(eig?.naam||'Eigenaar');
+    document.getElementById('topbar-sub').textContent='Eigenaarsdashboard';
+  }else if(page==='import'){
+    document.getElementById('topbar-title').textContent='📥 Bulk data import';
     document.getElementById('topbar-sub').textContent='';
   }
 }
