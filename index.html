@@ -332,6 +332,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
       <div id="page-eigenaar-form" class="page">
+        <div style="margin-bottom:12px;"><button class="btn btn-light btn-sm" onclick="navTo('objects')">← Terug naar overzicht</button></div>
         <div class="section-title">Eigenaar</div>
         <div class="field"><label>Naam eigenaar / organisatie</label><input type="text" id="eig-naam" placeholder="Bijv. Gemeente Bernheze"/></div>
         <div class="grid2">
@@ -656,7 +657,8 @@ function renderEigenaarDash(){
   const totHuur=panden.reduce((s,p)=>s+(parseFloat(p.huurJaar)||sumHuurcontracten(p)),0);
   const totMarkt=panden.reduce((s,p)=>s+(parseFloat(p.tax?.marktwaarde)||0),0);
   const totWoz=panden.reduce((s,p)=>s+(parseFloat(p.tax?.woz)||0),0);
-  let html='<div class="section-title">👤 '+escHtml(eig.naam)+'</div>'+
+  let html='<div style="margin-bottom:10px;"><button class="btn btn-light btn-sm" onclick="navTo(\'objects\')">← Terug naar overzicht</button></div>'+
+    '<div class="section-title">👤 '+escHtml(eig.naam)+'</div>'+
     '<div class="card" style="margin-bottom:14px;"><div class="card-body">'+
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
       '<div class="eig-avatar" style="width:44px;height:44px;font-size:16px;">'+initials+'</div>'+
