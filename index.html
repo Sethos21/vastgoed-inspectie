@@ -332,7 +332,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
       <div id="page-eigenaar-form" class="page">
-        <div style="margin-bottom:12px;"><button class="btn btn-light btn-sm" onclick="navTo('objects')">← Terug naar overzicht</button></div>
+        <div style="margin-bottom:12px;"><button class="btn btn-light btn-sm" onclick="resetSidebar();navTo('objects')">← Terug naar overzicht</button></div>
         <div class="section-title">Eigenaar</div>
         <div class="field"><label>Naam eigenaar / organisatie</label><input type="text" id="eig-naam" placeholder="Bijv. Gemeente Bernheze"/></div>
         <div class="grid2">
@@ -345,7 +345,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
         <div class="btn-row">
           <button class="btn btn-dark" onclick="saveEigenaar()">Opslaan</button>
-          <button class="btn btn-light" onclick="navTo('objects')">Annuleren</button>
+          <button class="btn btn-light" onclick="resetSidebar();navTo('objects')">Annuleren</button>
         </div>
       </div>
       <div id="page-eigenaar-dash" class="page"></div>
@@ -607,6 +607,7 @@ function renderEigenaren(){
 window.newEigenaar=()=>{
   ['eig-naam','eig-kvk','eig-contact','eig-email','eig-tel'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('page-eigenaar-form').dataset.editId='';
+  setEigenarenSidebar();
   navTo('eigenaar-form');
 };
 window.editEigenaar=id=>{
@@ -617,6 +618,7 @@ window.editEigenaar=id=>{
   document.getElementById('eig-email').value=e.email||'';
   document.getElementById('eig-tel').value=e.tel||'';
   document.getElementById('page-eigenaar-form').dataset.editId=id;
+  setEigenarenSidebar();
   navTo('eigenaar-form');
 };
 window.deleteEigenaar=async id=>{
@@ -638,13 +640,24 @@ window.saveEigenaar=async()=>{
     tel:document.getElementById('eig-tel').value,
     aangemaaktOp:bestaand?.aangemaaktOp||serverTimestamp(),
   });
-  showToast('Eigenaar opgeslagen');navTo('objects');
+  showToast('Eigenaar opgeslagen');
+  resetSidebar();
+  navTo('objects');
 };
+
+function setEigenarenSidebar(){
+  document.getElementById('sb-object-name').textContent='Eigenaren';
+  document.getElementById('sb-object-sub').textContent='Beheer & overzicht';
+  document.getElementById('sb-opname-select').style.display='none';
+  document.getElementById('sb-nav').innerHTML='<div class="sb-section-label">Navigatie</div>'+
+    '<div class="sb-item" onclick="resetSidebar();navTo(\'objects\')" data-page="objects"><div class="sb-num">←</div>Alle objecten &amp; eigenaren</div>';
+}
 
 // EIGENAAR DASHBOARD
 let eigDashTab='panden';
 window.openEigenaarDash=id=>{
   currentEigenaarId=id;eigDashTab='panden';
+  setEigenarenSidebar();
   navTo('eigenaar-dash');
   renderEigenaarDash();
 };
@@ -657,7 +670,7 @@ function renderEigenaarDash(){
   const totHuur=panden.reduce((s,p)=>s+(parseFloat(p.huurJaar)||sumHuurcontracten(p)),0);
   const totMarkt=panden.reduce((s,p)=>s+(parseFloat(p.tax?.marktwaarde)||0),0);
   const totWoz=panden.reduce((s,p)=>s+(parseFloat(p.tax?.woz)||0),0);
-  let html='<div style="margin-bottom:10px;"><button class="btn btn-light btn-sm" onclick="navTo(\'objects\')">← Terug naar overzicht</button></div>'+
+  let html='<div style="margin-bottom:10px;"><button class="btn btn-light btn-sm" onclick="resetSidebar();navTo(\'objects\')">← Terug naar overzicht</button></div>'+
     '<div class="section-title">👤 '+escHtml(eig.naam)+'</div>'+
     '<div class="card" style="margin-bottom:14px;"><div class="card-body">'+
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
@@ -688,17 +701,27 @@ window.switchEigDashTab=tab=>{eigDashTab=tab;document.querySelectorAll('.eig-tab
 function renderEigDashContent(panden){
   const el=document.getElementById('eig-dash-content');if(!el)return;
   if(eigDashTab==='panden'){
-    if(!panden.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen panden gekoppeld aan deze eigenaar.<br>Koppel een pand via Objectgegevens.</p></div>';return;}
-    let html='<div class="card"><div class="card-body">'+
-      '<div class="pand-row pand-hdr-row"><span>Adres</span><span>Type</span><span>Conditie</span><span>Huur p/j</span><span>Marktwaarde</span></div>';
+    const ongekoppeld=objects.filter(o=>!o.eigenaarId||o.eigenaarId!==currentEigenaarId);
+    let koppelHtml='<div class="card" style="margin-bottom:10px;"><div class="card-body">'+
+      '<div style="display:flex;gap:8px;align-items:flex-end;">'+
+        '<div style="flex:1;"><label style="display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500;">Pand koppelen aan deze eigenaar</label>'+
+        '<select id="eig-pand-select"><option value="">— Kies een pand —</option>'+
+        ongekoppeld.map(o=>'<option value="'+o.id+'">'+escHtml(o.naam||'Naamloos')+(o.eigenaarId?' (nu bij '+escHtml(eigenaren.find(e=>e.id===o.eigenaarId)?.naam||'andere eigenaar')+')':'')+'</option>').join('')+
+        '</select></div>'+
+        '<button class="btn btn-dark btn-sm" onclick="koppelPandAanEigenaar()">+ Koppelen</button>'+
+      '</div></div></div>';
+    if(!panden.length){el.innerHTML=koppelHtml+'<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen panden gekoppeld aan deze eigenaar.</p></div>';return;}
+    let html=koppelHtml+'<div class="card"><div class="card-body">'+
+      '<div class="pand-row pand-hdr-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;"><span>Adres</span><span>Type</span><span>Conditie</span><span>Huur p/j</span><span>Marktwaarde</span><span></span></div>';
     panden.forEach(p=>{
       const cond=schatPandConditie(p);
-      html+='<div class="pand-row" style="cursor:pointer;" onclick="selectObject(\''+p.id+'\')">'+
-        '<div><div style="font-weight:500;">'+escHtml(p.naam||'')+'</div><div style="font-size:11px;color:var(--text3);">'+(p.jaar?p.jaar+' · ':'')+(p.opp?p.opp+' m²':'')+'</div></div>'+
+      html+='<div class="pand-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 32px;">'+
+        '<div style="cursor:pointer;" onclick="selectObject(\''+p.id+'\')"><div style="font-weight:500;">'+escHtml(p.naam||'')+'</div><div style="font-size:11px;color:var(--text3);">'+(p.jaar?p.jaar+' · ':'')+(p.opp?p.opp+' m²':'')+'</div></div>'+
         '<div>'+escHtml(p.type||'—')+'</div>'+
         '<div>'+(cond?'<span class="badge badge-'+cond+'">'+CONDITIE[cond]+'</span>':'<span class="badge badge-gray">Niet geïnspecteerd</span>')+'</div>'+
         '<div>'+(sumHuurcontracten(p)?'€ '+Math.round(sumHuurcontracten(p)).toLocaleString('nl-NL'):'—')+'</div>'+
         '<div>'+(p.tax?.marktwaarde?'€ '+Math.round(p.tax.marktwaarde).toLocaleString('nl-NL'):'—')+'</div>'+
+        '<button onclick="event.stopPropagation();ontkoppelPandVanEigenaar(\''+p.id+'\')" title="Loskoppelen" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;">🗑</button>'+
       '</div>';
     });
     html+='</div></div>';
@@ -761,6 +784,23 @@ function schatPandConditie(pand){
   // Placeholder: conditie wordt pas bekend nadat opname-data is geladen; hier geven we null terug tenzij elders bijgehouden
   return pand.laatsteConditie||null;
 }
+window.koppelPandAanEigenaar=async()=>{
+  const sel=document.getElementById('eig-pand-select');
+  const pandId=sel.value;if(!pandId){showToast('Kies eerst een pand');return;}
+  await objDoc(pandId).set({eigenaarId:currentEigenaarId},{merge:true});
+  const obj=objects.find(o=>o.id===pandId);if(obj)obj.eigenaarId=currentEigenaarId;
+  if(currentObj&&currentObj.id===pandId)currentObj.eigenaarId=currentEigenaarId;
+  showToast('Pand gekoppeld');
+  renderEigenaarDash();
+};
+window.ontkoppelPandVanEigenaar=async pandId=>{
+  if(!confirm('Dit pand loskoppelen van deze eigenaar?'))return;
+  await objDoc(pandId).set({eigenaarId:''},{merge:true});
+  const obj=objects.find(o=>o.id===pandId);if(obj)obj.eigenaarId='';
+  if(currentObj&&currentObj.id===pandId)currentObj.eigenaarId='';
+  showToast('Pand losgekoppeld');
+  renderEigenaarDash();
+};
 window.updateTax=async(pandId,key,val)=>{
   const pand=objects.find(o=>o.id===pandId);if(!pand)return;
   if(!pand.tax)pand.tax={};pand.tax[key]=parseFloat(val)||0;
@@ -1025,8 +1065,26 @@ function renderObjectgegevens(container){
     {key:'objectgegevens_energielabel',icon:'⚡',naam:'Energielabel',sub:'EPA rapport, certificaat'},
     {key:'objectgegevens_overig',icon:'📎',naam:'Overige documenten',sub:'Rapporten, VvE documenten'},
   ];
+  const gekoppeldeEigenaar=eigenaren.find(e=>e.id===obj.eigenaarId);
   container.innerHTML=`
     <div class="section-title">🏢 Objectgegevens</div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">👤</div>
+        <div><div style="font-weight:600;font-size:14px;">Eigenaar</div><div style="font-size:12px;color:var(--text3);">Koppel dit pand aan een eigenaar voor het eigenaarsdashboard</div></div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500;">Gekoppelde eigenaar</label>
+            <select id="og-eigenaar-select" onchange="koppelEigenaarVanObject(this.value)">
+              <option value="">— Geen eigenaar gekoppeld —</option>
+              ${eigenaren.map(e=>`<option value="${e.id}" ${e.id===obj.eigenaarId?'selected':''}>${escHtml(e.naam)}</option>`).join('')}
+            </select>
+          </div>
+          ${gekoppeldeEigenaar?`<button class="btn btn-light btn-sm" onclick="openEigenaarDash('${gekoppeldeEigenaar.id}')">→ Naar dashboard</button>`:`<button class="btn btn-light btn-sm" onclick="newEigenaar()">+ Nieuwe eigenaar</button>`}
+        </div>
+      </div>
+    </div>
     <div class="card" style="margin-bottom:14px;">
       <div class="card-header"><div class="card-icon" style="background:var(--blue-bg);">🏢</div>
         <div><div style="font-weight:600;font-size:14px;">BAG Objectgegevens</div><div style="font-size:12px;color:var(--text3);">Basisregistratie Adressen en Gebouwen</div></div>
@@ -1097,6 +1155,16 @@ window.saveObjExtra=async(key,val)=>{
   if(!currentObjId)return;
   await objDoc(currentObjId).set({[key]:val},{merge:true});
   if(currentObj)currentObj[key]=val;
+};
+
+window.koppelEigenaarVanObject=async eigenaarId=>{
+  if(!currentObjId)return;
+  await objDoc(currentObjId).set({eigenaarId:eigenaarId||''},{merge:true});
+  if(currentObj)currentObj.eigenaarId=eigenaarId||'';
+  const obj=objects.find(o=>o.id===currentObjId);
+  if(obj)obj.eigenaarId=eigenaarId||'';
+  showToast(eigenaarId?'Gekoppeld aan eigenaar':'Koppeling verwijderd');
+  renderChapter('objectgegevens');
 };
 
 // GEBOUWPASPOORT
