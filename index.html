@@ -1122,9 +1122,9 @@ window.toggleSnelInsp=()=>{snelInspOpen=!snelInspOpen;renderSidebarNav();};
 window.toggleAiInsp=()=>{aiInspOpen=!aiInspOpen;renderSidebarNav();};
 window.toggleSnelMenu=id=>{openSnelMenu=openSnelMenu===id?null:id;renderSidebarNav();};
 window.switchSnelInspectie=id=>{
-  if(id===currentSnelInspectieId){renderSidebarNav();return;}
   currentSnelInspectieId=id;openSnelMenu=null;
-  renderSidebarNav();renderChapter('snelinspectie');
+  renderSidebarNav();
+  navToChapter('snelinspectie');
 };
 window.nieuweSnelInspectie=async()=>{
   const nr=snelInspectiesLijst.length+1;
@@ -1227,7 +1227,7 @@ function resetSidebar(){
 
 window.switchOpname=async val=>{
   if(val==='__nieuw'){
-    const naam=prompt('Naam voor de nieuwe opname:','Opname '+(opnamesLijst.length+1));if(!naam)return;
+    const naam=prompt('Naam voor de nieuwe inspectie:','Inspectie '+(opnamesLijst.length+1));if(!naam)return;
     const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
     const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
@@ -1236,10 +1236,13 @@ window.switchOpname=async val=>{
     opnamesLijst=lijst;currentOpnameId=nieuw.id;
     opnames[nieuw.id]={fotos:{},elementen:[],mjop:[]};
     renderSidebarNav();
-    renderChapter(currentChapter);showToast('Nieuwe opname aangemaakt');return;
+    navToChapter('inspectieoverzicht');showToast('Nieuwe inspectie aangemaakt');return;
   }
-  if(val===currentOpnameId){renderSidebarNav();return;}
-  currentOpnameId=val;await loadOpnameData(currentObjId,val);renderSidebarNav();renderChapter(currentChapter);
+  if(val!==currentOpnameId){
+    currentOpnameId=val;await loadOpnameData(currentObjId,val);
+  }
+  renderSidebarNav();
+  navToChapter('inspectieoverzicht');
 };
 
 async function loadOpnameData(objId,opnId){
@@ -1320,7 +1323,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Snelle inspectie',i:'📋'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Snelle inspectie',i:'📋'},inspectieoverzicht:{n:'Inspectie overzicht',i:'🗂'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
     const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
@@ -1549,6 +1552,52 @@ function renderGebouwpaspoort(container){
     '<div class="btn-row"><button class="btn btn-light" onclick="navToChapter(\'objectgegevens\')">← Vorige: Objectgegevens</button><button class="btn btn-dark" onclick="navToChapter(\'huurtaxatie\')">Volgende: Huur &amp; taxatie →</button></div>';
 }
 
+// INSPECTIE OVERZICHT
+function renderInspectieOverzicht(container){
+  const opn=getOpname();
+  const actief=opnamesLijst.find(o=>o.id===currentOpnameId);
+  const inGevuld=chId=>{
+    const para=INSP_PARAGRAFEN.find(p=>p.id===chId);if(!para)return false;
+    const tabs=para.subtabs||[null];
+    return tabs.some(t=>{const key=t?chId+'_'+t:chId;return(opn.fotos[key]||[]).length>0||opn.elementen.some(e=>e.chapterId===chId);});
+  };
+  const totBev=opn.elementen.filter(e=>INSP_PARAGRAFEN.some(p=>p.id===e.chapterId)).length;
+  const totH=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+
+  let html='<div class="section-title">🗂 '+(actief?escHtml(actief.naam)+' — '+escHtml(actief.datum):'Inspectie overzicht')+'</div>';
+
+  // Statistieken
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">'+
+    '<div class="eig-stat"><div class="eig-stat-val">'+INSP_PARAGRAFEN.filter(p=>inGevuld(p.id)).length+'<span style="font-size:13px;color:var(--text3);">/'+INSP_PARAGRAFEN.length+'</span></div><div class="eig-stat-lbl">Paragrafen ingevuld</div></div>'+
+    '<div class="eig-stat"><div class="eig-stat-val">'+totBev+'</div><div class="eig-stat-lbl">Bevindingen</div></div>'+
+    '<div class="eig-stat"><div class="eig-stat-val" style="font-size:16px;color:var(--green-text);">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div><div class="eig-stat-lbl">Totaal herstel</div></div>'+
+  '</div>';
+
+  // Paragrafen als klikbare kaarten
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">';
+  INSP_PARAGRAFEN.forEach(p=>{
+    const gevuld=inGevuld(p.id);
+    const bevs=opn.elementen.filter(e=>e.chapterId===p.id).length;
+    const fotos=Object.entries(opn.fotos||{}).filter(([k])=>k===p.id||k.startsWith(p.id+'_')).reduce((s,[,v])=>s+v.length,0);
+    html+='<div onclick="navToChapter(\''+p.id+'\')" style="border:0.5px solid var(--'+(gevuld?'blue':'border')+');border-radius:var(--radius);padding:12px 14px;cursor:pointer;background:var(--'+(gevuld?'blue-bg':'bg')+');display:flex;align-items:center;gap:10px;">'+
+      '<div style="font-size:22px;">'+p.icon+'</div>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:13px;font-weight:500;color:var(--'+(gevuld?'blue-text':'text')+');">'+p.naam+'</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+(gevuld?bevs+' bevinding'+(bevs===1?'':'en')+' · '+fotos+' foto\'s':'Nog niet geïnspecteerd')+'</div>'+
+      '</div>'+
+      '<div style="font-size:16px;">'+(gevuld?'✓':'›')+'</div>'+
+    '</div>';
+  });
+  html+='</div>';
+
+  html+='<div class="btn-row">'+
+    '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Starten met inspecteren →</button>'+
+    '<button class="btn btn-light" onclick="navToChapter(\'onderhoud\')">→ Bevindingen &amp; kosten</button>'+
+  '</div>';
+
+  container.innerHTML=html;
+}
+
 // HUUR & TAXATIE (objectniveau)
 function renderHuurTaxatie(container){
   const obj=currentObj||{};
@@ -1644,6 +1693,7 @@ function renderChapter(chId){
   if(chId==='kosten'){renderKosten(container);return;}
   if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
   if(chId==='snelinspectie'){renderSnelInspectie(container);return;}
+  if(chId==='inspectieoverzicht'){renderInspectieOverzicht(container);return;}
   if(chId==='rapportage'){renderRapportage(container);return;}
   const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
   if(!para)return;
