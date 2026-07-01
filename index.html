@@ -1968,14 +1968,6 @@ Alleen JSON, niets anders.`}]);
 const SI_ELEMENTEN=['Gevel','Kozijn','Dak','Boeibord','Hemelwaterafvoer','Terrein','Overige'];
 
 function renderSnelInspectie(container){
-  const opn=getOpname();
-  if(!opn.snelInspectie)opn.snelInspectie={fotos:[],rijen:[]};
-  const si=opn.snelInspectie;
-  const fotos=si.fotos||[];
-  const rijen=si.rijen||[];
-  const condClass={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
-  const prioClass={'hoog':'si-p-hoog','gemiddeld':'si-p-mid','laag':'si-p-laag'};
-
   const activeSI=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
   if(!currentSnelInspectieId||!activeSI){
     container.innerHTML='<div class="section-title">📋 Snelle inspectie</div>'+
@@ -1983,6 +1975,11 @@ function renderSnelInspectie(container){
       '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie aanmaken</button>';
     return;
   }
+  const si=getSI();
+  const fotos=si.fotos||[];
+  const rijen=si.rijen||[];
+  const condClass={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
+  const prioClass={'hoog':'si-p-hoog','gemiddeld':'si-p-mid','laag':'si-p-laag'};
   let html='<div class="section-title">📋 '+escHtml(activeSI.naam)+' — '+escHtml(activeSI.datum)+'</div>';
 
   // FOTO UPLOAD
