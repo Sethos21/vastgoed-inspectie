@@ -1138,7 +1138,7 @@ window.nieuweSnelInspectie=async()=>{
   if(!opn.snelInspectieData)opn.snelInspectieData={};
   opn.snelInspectieData[id]={fotos:[],rijen:[]};
   await saveSnelInspectie();
-  renderSidebarNav();renderChapter('snelinspectie');
+  renderSidebarNav();const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
   showToast('Nieuwe snelle inspectie aangemaakt');
 };
 window.verwijderSnelInspectie=async id=>{
@@ -1150,7 +1150,7 @@ window.verwijderSnelInspectie=async id=>{
   if(currentSnelInspectieId===id)currentSnelInspectieId=snelInspectiesLijst[0]?.id||null;
   openSnelMenu=null;
   await saveSnelInspectie();
-  renderSidebarNav();renderChapter('snelinspectie');
+  renderSidebarNav();const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
   showToast('Inspectie verwijderd');
 };
 window.toggleOpnameKlap=id=>{
@@ -2227,7 +2227,7 @@ function getSI(){
 }
 window.siVoegRijToe=()=>{
   getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
-  renderChapter('snelinspectie');saveSnelInspectie();
+  const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');saveSnelInspectie();
 };
 window.siUpdate=async(idx,key,val)=>{
   const rijen=getSI().rijen;if(idx<0||idx>=rijen.length)return;
@@ -2246,7 +2246,7 @@ window.siUpdateVoorClass=(el,val)=>{
 };
 window.siVerwijderRij=async idx=>{
   getSI().rijen.splice(idx,1);
-  renderChapter('snelinspectie');await saveSnelInspectie();
+  const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();
 };
 window.siUploadFotos=async event=>{
   const files=Array.from(event.target.files);if(!files.length)return;
@@ -2257,7 +2257,7 @@ window.siUploadFotos=async event=>{
     const compressed=await compressPhoto(url);
     si.fotos.push({dataUrl:compressed,label:'Foto '+(si.fotos.length+1)});
   }
-  renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
+  const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
   event.target.value='';
 };
 window.siHandleDrop=async event=>{
@@ -2267,7 +2267,7 @@ window.siHandleDrop=async event=>{
 };
 window.siVerwijderFoto=async idx=>{
   getSI().fotos.splice(idx,1);
-  renderChapter('snelinspectie');await saveSnelInspectie();
+  const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();
 };
 window.siUpdateFotoLabel=async(idx,val)=>{
   const fotos=getSI().fotos;if(fotos[idx])fotos[idx].label=val;
@@ -2728,7 +2728,7 @@ window.siGenereerBeschrijvingen=async()=>{
       }
     });
     await saveSnelInspectie();
-    renderChapter('snelinspectie');
+    const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
     showToast(items.length+' beschrijvingen gegenereerd');
   }catch(err){
     showToast('Fout: '+err.message);
@@ -2762,7 +2762,7 @@ window.siGenereerEenFoto=async idx=>{
       });
     }
     await saveSnelInspectie();
-    renderChapter('snelinspectie');
+    const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
     showToast('Foto '+(idx+1)+' beschreven');
   }catch(err){showToast('Fout: '+err.message);}
 };
