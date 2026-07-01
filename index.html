@@ -1089,10 +1089,12 @@ function renderSidebarNav(){
       '<div class="sb-item" onclick="openEigenaarDash(\''+eig.id+'\')"><div class="sb-num">👤</div>'+escHtml(eig.naam)+'</div>';
   }
 
+  const isChapter=ch=>currentChapter===ch&&activeSection!=='snel'?'active':'';
+
   html+='<div class="sb-section-label">Object</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'objectgegevens\')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot '+(currentObj?.naam?'done':'')+'" style="margin-left:auto;"></div></div>'+
-    '<div class="sb-item" onclick="navToChapter(\'gebouwpaspoort\')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot '+(currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>'+
-    '<div class="sb-item" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
+    '<div class="sb-item '+isChapter('objectgegevens')+'" onclick="navToChapter(\'objectgegevens\')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot '+(currentObj?.naam?'done':'')+'" style="margin-left:auto;"></div></div>'+
+    '<div class="sb-item '+isChapter('gebouwpaspoort')+'" onclick="navToChapter(\'gebouwpaspoort\')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot '+(currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>'+
+    '<div class="sb-item '+isChapter('huurtaxatie')+'" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
 
   html+='<div class="sb-section-label">Inspecties</div>';
 
@@ -1121,7 +1123,7 @@ function renderSidebarNav(){
 
   if(aiInspOpen){
     opnamesLijst.forEach(o=>{
-      const isActive=o.id===currentOpnameId&&activeSection==='ai';
+      const isActive=o.id===currentOpnameId&&activeSection==='ai'&&(currentChapter==='inspectieoverzicht'||INSP_PARAGRAFEN.some(p=>p.id===currentChapter)||['onderhoud','mjop','kosten','rapportage','snellinvoer'].includes(currentChapter));
       const menuOpen=openOpnameMenu===o.id;
       const ingeklapt=ingeklapteOpnames.has(o.id);
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
@@ -1139,7 +1141,7 @@ function renderSidebarNav(){
         INSP_PARAGRAFEN.forEach(p=>{
           if(verborgen.includes(p.id))return;
           const gevuld=inGevuld(o.id,p.id);
-          html+='<div class="sb-item sub" onclick="activeSection=\'ai\';navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
+          html+='<div class="sb-item sub '+(currentChapter===p.id&&activeSection==='ai'?'active':'')+'" onclick="activeSection=\'ai\';navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
           if(!gevuld){
             html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Niet-geinspecteerd onderdeel verbergen">×</span>';
           }
@@ -1160,13 +1162,13 @@ function renderSidebarNav(){
   }
 
   html+='<div class="sb-section-label">Onderhoud &amp; herstel</div>'+
-    '<div class="sb-item sub" onclick="navToChapter(\'onderhoud\')" data-chapter="onderhoud"><div class="sb-dot '+(opn.elementen.some(e=>e.kosten>0)?'done':'')+'"></div>Bevindingen &amp; kosten</div>'+
+    '<div class="sb-item sub '+isChapter('onderhoud')+'" onclick="navToChapter(\'onderhoud\')" data-chapter="onderhoud"><div class="sb-dot '+(opn.elementen.some(e=>e.kosten>0)?'done':'')+'"></div>Bevindingen &amp; kosten</div>'+
     '<div class="sb-section-label">MJOP</div>'+
-    '<div class="sb-item sub" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
+    '<div class="sb-item sub '+isChapter('mjop')+'" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
     '<div class="sb-section-label">Samenvatting</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
+    '<div class="sb-item '+isChapter('snellinvoer')+'" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
+    '<div class="sb-item '+isChapter('kosten')+'" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
+    '<div class="sb-item '+isChapter('rapportage')+'" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
 
   nav.innerHTML=html;
 }
