@@ -365,6 +365,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="topbar-chapter-sub" id="topbar-sub">Professionele bouwkundige inspectietool</div>
       </div>
       <div style="display:flex;gap:6px;">
+        <button class="icon-btn" onclick="printHuidigePagina()" title="Pagina afdrukken">🖨</button>
         <button class="icon-btn" onclick="navTo('import')" title="Bulk import">📥</button>
         <button class="icon-btn" onclick="navTo('settings')" title="Instellingen">⚙</button>
       </div>
@@ -1120,8 +1121,8 @@ function renderSidebarNav(){
       }
       html+='</div>';
     });
-    html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie</button>';
   }
+  html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie</button>';
 
   // A.I. INSPECTIES
   html+='<div class="insp-toggle'+(aiInspOpen?' open':'')+'" onclick="toggleAiInsp()"><div class="sb-num">🗂</div>A.I. inspecties<span class="sb-chev">›</span></div>'+
@@ -3081,6 +3082,40 @@ window.toggleSidebar=()=>{const sb=document.getElementById('sidebar');const ov=d
 window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('show');};
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
+window.printHuidigePagina=()=>{
+  const titel=document.getElementById('topbar-title')?.textContent||'VastgoedInspectie';
+  const sub=document.getElementById('topbar-sub')?.textContent||'';
+  const activePage=document.querySelector('.page.active');
+  if(!activePage){window.print();return;}
+  const inhoud=activePage.innerHTML;
+  const win=window.open('','_blank');
+  if(!win){showToast('Pop-up geblokkeerd door browser');return;}
+  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>${titel}</title><style>
+    body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5;color:#000;}
+    h1{font-size:16pt;margin-bottom:4pt;}
+    h2{font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:3pt;margin:12pt 0 6pt;}
+    h3{font-size:12pt;margin:8pt 0 4pt;}
+    .section-title{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#666;margin:12pt 0 4pt;}
+    .card,.bevinding-card,.kosten-accordion{border:1px solid #ccc;border-radius:6pt;margin-bottom:8pt;padding:8pt;break-inside:avoid;}
+    .card-header,.bev-header,.kosten-acc-header{font-weight:600;margin-bottom:4pt;}
+    .bev-body,.kosten-acc-body{display:block!important;}
+    .badge{border:1px solid #ccc;border-radius:3pt;padding:1pt 5pt;font-size:9pt;}
+    .btn,.icon-btn,button{display:none!important;}
+    .sb-item,.sb-nav,#topbar,#sidebar,.foto-zone,input,select,textarea,.toast,.sync-indicator,.bev-add-row,.bev-savebar,.para-x,.sb-new-opname,.confirm-box{display:none!important;}
+    .bev-chevron,.kosten-acc-arrow{display:none!important;}
+    img{max-width:100%;height:auto;border-radius:4pt;}
+    table{width:100%;border-collapse:collapse;font-size:10pt;}
+    td,th{border:1px solid #ccc;padding:4pt 6pt;}
+    .foto-grid-groot,.foto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4pt;}
+    @media print{body{margin:1.5cm;}@page{margin:1.5cm;}}
+  </style></head><body>
+    <h1>${titel}</h1>
+    ${sub?`<p style="color:#666;font-size:10pt;margin-bottom:12pt;">${sub}</p>`:''}
+    ${inhoud}
+  </body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),600);
+};
 window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);};
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 document.getElementById('sidebar').style.display='none';
