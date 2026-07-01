@@ -311,14 +311,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tax-val.primary{font-size:22px;color:var(--blue-text);}
 .ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
 .ratio-row:last-child{border:none;}
-.si-tabel{width:100%;border-collapse:collapse;font-size:12px;}
-.si-tabel th{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:5px 5px;border-bottom:0.5px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg1);}
+.si-tabel{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;}
+.si-tabel th{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:4px 3px;border-bottom:0.5px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg1);overflow:hidden;}
 .si-row{border-bottom:0.5px solid var(--border);}
 .si-row:hover{background:var(--bg1);}
-.si-row td{padding:4px 4px;vertical-align:middle;}
-.si-sel,.si-ta,.si-inp{width:100%;border:0.5px solid var(--border);border-radius:5px;padding:4px 6px;font-size:11px;background:var(--bg);color:var(--text);font-family:inherit;}
-.si-ta{resize:none;min-height:34px;line-height:1.4;}
+.si-row td{padding:3px 3px;vertical-align:middle;}
+.si-sel,.si-ta,.si-inp{width:100%;border:0.5px solid var(--border);border-radius:4px;padding:3px 5px;font-size:11px;background:var(--bg);color:var(--text);font-family:inherit;}
+.si-ta{resize:none;min-height:32px;line-height:1.4;}
 .si-sel{-webkit-appearance:none;}
+.si-row td{padding:3px 3px;vertical-align:middle;overflow:hidden;max-width:0;}
 .si-c1{background:var(--green-bg);color:var(--green-text);font-weight:500;}
 .si-c2{background:var(--amber-bg);color:var(--amber-text);font-weight:500;}
 .si-c3{background:var(--orange-bg);color:var(--orange-text);font-weight:500;}
@@ -1043,7 +1044,8 @@ function renderSidebarNav(){
     '<div class="sb-item" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
 
   html+='<div class="sb-section-label">Inspecties</div>'+
-    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num">📋</div>Alle opnames<span class="sb-chev">›</span></div>'+
+    '<div class="sb-item" onclick="navToChapter(\'snelinspectie\')" data-chapter="snelinspectie"><div class="sb-num">📋</div>Snelle inspectie</div>'+
+    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num">🗂</div>Alle opnames<span class="sb-chev">›</span></div>'+
     '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe opname aanmaken</button>';
 
   if(inspectiesOpen){
@@ -1092,7 +1094,6 @@ function renderSidebarNav(){
     '<div class="sb-item sub" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
     '<div class="sb-section-label">Samenvatting</div>'+
     '<div class="sb-item" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'snelinspectie\')" data-chapter="snelinspectie"><div class="sb-num">📋</div>Snelle inspectie</div>'+
     '<div class="sb-item" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
     '<div class="sb-item" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
 
@@ -1903,17 +1904,17 @@ function renderSnelInspectie(container){
   }
 
   // TABEL
-  html+='<div style="overflow-x:auto;"><table class="si-tabel"><thead><tr>'+
-    '<th style="width:100px;">Element</th>'+
-    '<th>Omschrijving</th>'+
-    '<th style="width:70px;">Conditie</th>'+
-    '<th>Voorgestelde actie</th>'+
-    '<th style="width:78px;">Prioriteit</th>'+
-    '<th style="width:80px;">Voor rekening</th>'+
-    '<th style="width:58px;">Foto\'s</th>'+
-    '<th style="width:70px;">Herstel €</th>'+
-    '<th style="width:70px;">Vervang. €</th>'+
-    '<th style="width:22px;"></th>'+
+  html+='<table class="si-tabel"><thead><tr>'+
+    '<th style="width:11%;">Element</th>'+
+    '<th style="width:18%;">Omschrijving</th>'+
+    '<th style="width:9%;">Conditie</th>'+
+    '<th style="width:16%;">Voorgestelde actie</th>'+
+    '<th style="width:9%;">Prioriteit</th>'+
+    '<th style="width:10%;">Voor rekening</th>'+
+    '<th style="width:7%;">Foto\'s</th>'+
+    '<th style="width:9%;">Herstel €</th>'+
+    '<th style="width:9%;">Vervang. €</th>'+
+    '<th style="width:2%;"></th>'+
   '</tr></thead><tbody>';
 
   rijen.forEach((r,i)=>{
@@ -1945,7 +1946,7 @@ function renderSnelInspectie(container){
     '</tr>';
   });
 
-  html+='</tbody></table></div>';
+  html+='</tbody></table>';
   html+='<button class="bev-add-row" onclick="siVoegRijToe()" style="margin-top:6px;"><i>+</i> Bevinding toevoegen</button>';
 
   // Totalen
