@@ -347,7 +347,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <nav class="sb-nav" id="sb-nav">
       <div class="sb-section-label">Navigatie</div>
-      <div class="sb-item active" onclick="navTo('eigenaren')" data-page="eigenaren"><div class="sb-num">👤</div>Eigenaren</div>
+      <div class="sb-item active" onclick="navTo('home')" data-page="home"><div class="sb-num">🏠</div>Home</div>
+      <div class="sb-item" onclick="navTo('eigenaren')" data-page="eigenaren"><div class="sb-num">👤</div>Eigenaren</div>
       <div class="sb-item" onclick="navTo('objects')" data-page="objects"><div class="sb-num">🏢</div>Objecten</div>
     </nav>
     <div class="sb-footer">
@@ -395,15 +396,47 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           </div>
         </div>
       </div>
+      <div id="page-home" class="page">
+        <div style="max-width:500px;margin:40px auto;text-align:center;">
+          <div style="font-size:48px;margin-bottom:12px;">🏢</div>
+          <h1 style="font-size:22px;font-weight:700;margin-bottom:6px;">VastgoedInspectie</h1>
+          <p style="font-size:14px;color:var(--text3);margin-bottom:32px;">Professionele bouwkundige inspectietool</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+            <div onclick="navTo('eigenaren')" style="border:0.5px solid var(--border);border-radius:var(--radius);padding:24px 16px;cursor:pointer;background:var(--bg1);" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg1)'">
+              <div style="font-size:32px;margin-bottom:8px;">👤</div>
+              <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Eigenaren</div>
+              <div style="font-size:12px;color:var(--text3);">Beheer eigenaren en hun panden</div>
+            </div>
+            <div onclick="navTo('objects')" style="border:0.5px solid var(--border);border-radius:var(--radius);padding:24px 16px;cursor:pointer;background:var(--bg1);" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg1)'">
+              <div style="font-size:32px;margin-bottom:8px;">🏢</div>
+              <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Objecten</div>
+              <div style="font-size:12px;color:var(--text3);">Zoek en selecteer een object</div>
+            </div>
+          </div>
+          <div id="home-recents"></div>
+        </div>
+      </div>
       <div id="page-eigenaren" class="page">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="position:relative;flex:1;">
+            <input type="text" id="eig-zoek" placeholder="Zoek eigenaar..." oninput="filterEigenaren(this.value)" style="padding-left:32px;"/>
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;">🔍</span>
+          </div>
+          <button class="btn btn-light btn-sm" onclick="newEigenaar()">+ Nieuwe eigenaar</button>
+        </div>
         <div class="section-title">Eigenaren</div>
         <div id="eigenaren-list"></div>
-        <button class="btn btn-light btn-full btn-sm" onclick="newEigenaar()">+ Nieuwe eigenaar aanmaken</button>
       </div>
       <div id="page-objects" class="page">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="position:relative;flex:1;">
+            <input type="text" id="obj-zoek" placeholder="Zoek op adres..." oninput="filterObjecten(this.value)" style="padding-left:32px;"/>
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;">🔍</span>
+          </div>
+          <button class="btn btn-dark btn-sm" onclick="newObject()">+ Nieuw object</button>
+        </div>
         <div class="section-title">Mijn objecten</div>
         <div id="objects-list"></div>
-        <button class="btn btn-dark btn-full" onclick="newObject()">+ Nieuw object aanmaken</button>
       </div>
       <div id="page-eigenaar-form" class="page">
         <div style="margin-bottom:12px;"><button class="btn btn-light btn-sm" onclick="resetSidebar();navTo('eigenaren')">← Terug naar overzicht</button></div>
@@ -533,7 +566,7 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('page-login').classList.remove('active');
     document.getElementById('sidebar').style.display='flex';
     document.getElementById('topbar').style.display='flex';
-    navTo('objects');
+    navTo('home');
   }else{
     currentUser=null;
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -588,13 +621,28 @@ function loadObjects(){
   setSyncStatus('syncing','Laden...');
   db.collection('objects').orderBy('aangemaaktOp','desc').onSnapshot(snap=>{
     objects=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderObjects();setSyncStatus('ok','Gesynchroniseerd');
+    renderObjects();renderHome();setSyncStatus('ok','Gesynchroniseerd');
   });
 }
-function renderObjects(){
-  const list=document.getElementById('objects-list');
-  if(!objects.length){list.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>Nog geen objecten.<br>Maak er een aan.</p></div>';return;}
-  list.innerHTML=objects.map(o=>`<div class="obj-item" onclick="selectObject('${o.id}')">
+function renderHome(){
+  const el=document.getElementById('home-recents');if(!el)return;
+  if(!objects.length&&!eigenaren.length){el.innerHTML='';return;}
+  let html='<div class="section-title" style="margin-top:0;">Recente objecten</div>';
+  objects.slice(0,4).forEach(o=>{
+    html+='<div class="obj-item" onclick="selectObject(\''+o.id+'\')" style="text-align:left;">'+
+      '<div class="obj-avatar">'+(o.type==='Eengezinswoning'?'🏠':o.type==='Kantoorpand'?'🏗':'🏢')+'</div>'+
+      '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;">'+escHtml(o.naam||'Naamloos')+'</div>'+
+      '<div style="font-size:11px;color:var(--text3);">'+(o.type||'')+(o.jaar?' · '+o.jaar:'')+'</div></div>'+
+      '<span style="color:var(--text3);font-size:16px;">›</span>'+
+    '</div>';
+  });
+  el.innerHTML=html;
+}
+function renderObjects(filter=''){
+  const list=document.getElementById('objects-list');if(!list)return;
+  const gefilterd=filter?objects.filter(o=>(o.naam||'').toLowerCase().includes(filter.toLowerCase())):objects;
+  if(!gefilterd.length){list.innerHTML='<div class="empty"><div class="empty-icon">🏢</div><p>'+(filter?'Geen objecten gevonden voor "'+escHtml(filter)+'"':'Nog geen objecten.<br>Maak er een aan.')+'</p></div>';return;}
+  list.innerHTML=gefilterd.map(o=>`<div class="obj-item" onclick="selectObject('${o.id}')">
     <div class="obj-avatar">${o.type==='Eengezinswoning'?'🏠':o.type==='Kantoorpand'?'🏗':'🏢'}</div>
     <div style="flex:1;min-width:0;">
       <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.naam||'Naamloos'}</div>
@@ -607,6 +655,7 @@ function renderObjects(){
     </div>
   </div>`).join('');
 }
+window.filterObjecten=q=>renderObjects(q);
 window.newObject=()=>{clearObjectForm();document.getElementById('page-object-form').dataset.editId='';navTo('object-form');};
 window.editObject=id=>{
   const o=objects.find(x=>x.id===id);if(!o)return;
@@ -664,10 +713,11 @@ function loadEigenaren(){
     renderEigenaren();vulEigenaarDropdown();
   });
 }
-function renderEigenaren(){
+function renderEigenaren(filter=''){
   const list=document.getElementById('eigenaren-list');if(!list)return;
-  if(!eigenaren.length){list.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0 14px;">Nog geen eigenaren aangemaakt. Groepeer panden per eigenaar voor een overzichtelijk dashboard.</div>';return;}
-  list.innerHTML=eigenaren.map(e=>{
+  const gefilterd=filter?eigenaren.filter(e=>(e.naam||'').toLowerCase().includes(filter.toLowerCase())):eigenaren;
+  if(!gefilterd.length){list.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0 14px;">'+(filter?'Geen eigenaren gevonden voor "'+escHtml(filter)+'"':'Nog geen eigenaren aangemaakt.')+'</div>';return;}
+  list.innerHTML=gefilterd.map(e=>{
     const aantalPanden=objects.filter(o=>o.eigenaarId===e.id).length;
     const initials=(e.naam||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     return '<div class="eig-item" onclick="openEigenaarDash(\''+e.id+'\')">'+
@@ -681,6 +731,7 @@ function renderEigenaren(){
       '</div></div>';
   }).join('');
 }
+window.filterEigenaren=q=>renderEigenaren(q);
 window.newEigenaar=()=>{
   ['eig-naam','eig-kvk','eig-contact','eig-email','eig-tel'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('page-eigenaar-form').dataset.editId='';
@@ -1000,6 +1051,7 @@ window.uitvoerenImport=async()=>{
 // OPNAMES
 window.selectObject=async id=>{
   currentObjId=id;currentObj=objects.find(o=>o.id===id);
+  activeSection='ai'; // Reset zodat geen snelle inspectie blauw blijft
   const snap=await db.collection('objects').doc(id).collection('meta').doc('opnames').get();
   let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'A.I. inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
   if(!snap.exists)await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst});
@@ -1030,7 +1082,7 @@ function renderSidebarNav(){
   const eig=eigenaren.find(e=>e.id===currentObj?.eigenaarId);
   const nav=document.getElementById('sb-nav');
   let html='<div class="sb-section-label">Navigatie</div>'+
-    '<div class="sb-item" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num">←</div>Terug naar overzicht</div>';
+    '<div class="sb-item" onclick="navTo(\'home\')" data-page="home"><div class="sb-num">🏠</div>Terug naar overzicht</div>';
 
   if(eig){
     html+='<div class="sb-section-label">Eigenaar</div>'+
@@ -1222,8 +1274,9 @@ function resetSidebar(){
   document.getElementById('sb-object-sub').textContent='Selecteer een object';
   document.getElementById('sb-opname-select').style.display='none';
   document.getElementById('sb-nav').innerHTML='<div class="sb-section-label">Navigatie</div>'+
+    '<div class="sb-item" onclick="navTo(\'home\')" data-page="home"><div class="sb-num">🏠</div>Home</div>'+
     '<div class="sb-item" onclick="navTo(\'eigenaren\')" data-page="eigenaren"><div class="sb-num">👤</div>Eigenaren</div>'+
-    '<div class="sb-item active" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num">🏢</div>Objecten</div>';
+    '<div class="sb-item" onclick="navTo(\'objects\')" data-page="objects"><div class="sb-num">🏢</div>Objecten</div>';
 }
 
 window.switchOpname=async val=>{
@@ -1332,6 +1385,9 @@ function updateTopbar(page){
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
     document.getElementById('topbar-sub').textContent=currentObj?.naam||'';
+  }else if(page==='home'){
+    document.getElementById('topbar-title').textContent='VastgoedInspectie';
+    document.getElementById('topbar-sub').textContent='Welkom terug';
   }else if(page==='objects'){
     document.getElementById('topbar-title').textContent='🏢 Objecten';
     document.getElementById('topbar-sub').textContent='Objecten overzicht';
