@@ -514,6 +514,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 // STATE
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
 let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null,ingeklapteOpnames=new Set();
+let snelInspectiesLijst=[],currentSnelInspectieId=null,snelInspOpen=true,openSnelMenu=null,aiInspOpen=true;
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
 // FIREBASE HELPERS
@@ -1040,12 +1041,32 @@ function renderSidebarNav(){
     '<div class="sb-item" onclick="navToChapter(\'gebouwpaspoort\')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot '+(currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>'+
     '<div class="sb-item" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
 
-  html+='<div class="sb-section-label">Inspecties</div>'+
-    '<div class="sb-item" onclick="navToChapter(\'snelinspectie\')" data-chapter="snelinspectie"><div class="sb-num">📋</div>Snelle inspectie</div>'+
-    '<div class="insp-toggle'+(inspectiesOpen?' open':'')+'" onclick="toggleInspecties()"><div class="sb-num">🗂</div>Alle opnames<span class="sb-chev">›</span></div>'+
-    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe opname aanmaken</button>';
+  html+='<div class="sb-section-label">Inspecties</div>';
 
-  if(inspectiesOpen){
+  // SNELLE INSPECTIES
+  html+='<div class="insp-toggle'+(snelInspOpen?' open':'')+'" onclick="toggleSnelInsp()"><div class="sb-num">📋</div>Snelle inspecties<span class="sb-chev">›</span></div>';
+  if(snelInspOpen){
+    snelInspectiesLijst.forEach(si=>{
+      const isActive=si.id===currentSnelInspectieId;
+      const menuOpen=openSnelMenu===si.id;
+      html+='<div class="opname-block'+(isActive?' active':'')+'">'+
+        '<div class="opname-head" onclick="switchSnelInspectie(\''+si.id+'\')">'+
+          '📋 '+escHtml(si.naam)+' — '+escHtml(si.datum)+
+          '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleSnelMenu(\''+si.id+'\')">⋯</span>'+
+        '</div>';
+      if(menuOpen){
+        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderSnelInspectie(\''+si.id+'\')">🗑 Inspectie verwijderen</div></div>';
+      }
+      html+='</div>';
+    });
+    html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie</button>';
+  }
+
+  // A.I. INSPECTIES
+  html+='<div class="insp-toggle'+(aiInspOpen?' open':'')+'" onclick="toggleAiInsp()"><div class="sb-num">🗂</div>A.I. inspecties<span class="sb-chev">›</span></div>'+
+    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe A.I. inspectie</button>';
+
+  if(aiInspOpen){
     opnamesLijst.forEach(o=>{
       const isActive=o.id===currentOpnameId;
       const menuOpen=openOpnameMenu===o.id;
@@ -1097,6 +1118,40 @@ function renderSidebarNav(){
   nav.innerHTML=html;
 }
 
+window.toggleSnelInsp=()=>{snelInspOpen=!snelInspOpen;renderSidebarNav();};
+window.toggleAiInsp=()=>{aiInspOpen=!aiInspOpen;renderSidebarNav();};
+window.toggleSnelMenu=id=>{openSnelMenu=openSnelMenu===id?null:id;renderSidebarNav();};
+window.switchSnelInspectie=id=>{
+  if(id===currentSnelInspectieId){renderSidebarNav();return;}
+  currentSnelInspectieId=id;openSnelMenu=null;
+  renderSidebarNav();renderChapter('snelinspectie');
+};
+window.nieuweSnelInspectie=async()=>{
+  const nr=snelInspectiesLijst.length+1;
+  const naam=prompt('Naam voor de nieuwe snelle inspectie:','Snelle inspectie '+nr);
+  if(!naam)return;
+  const id='si_'+Date.now();
+  snelInspectiesLijst.push({id,naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()});
+  currentSnelInspectieId=id;
+  const opn=getOpname();
+  if(!opn.snelInspectieData)opn.snelInspectieData={};
+  opn.snelInspectieData[id]={fotos:[],rijen:[]};
+  await saveSnelInspectie();
+  renderSidebarNav();renderChapter('snelinspectie');
+  showToast('Nieuwe snelle inspectie aangemaakt');
+};
+window.verwijderSnelInspectie=async id=>{
+  const si=snelInspectiesLijst.find(x=>x.id===id);
+  if(!confirm('Weet je zeker dat je "'+(si?.naam||'deze inspectie')+'" wilt verwijderen? Dit kan niet ongedaan gemaakt worden.'))return;
+  snelInspectiesLijst=snelInspectiesLijst.filter(x=>x.id!==id);
+  const opn=getOpname();
+  if(opn.snelInspectieData)delete opn.snelInspectieData[id];
+  if(currentSnelInspectieId===id)currentSnelInspectieId=snelInspectiesLijst[0]?.id||null;
+  openSnelMenu=null;
+  await saveSnelInspectie();
+  renderSidebarNav();renderChapter('snelinspectie');
+  showToast('Inspectie verwijderd');
+};
 window.toggleOpnameKlap=id=>{
   if(ingeklapteOpnames.has(id))ingeklapteOpnames.delete(id);
   else ingeklapteOpnames.add(id);
@@ -1133,8 +1188,9 @@ window.toonVerborgenParagrafen=async opnId=>{
   renderSidebarNav();
 };
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.opname-head')&&!e.target.closest('.opname-menu')&&openOpnameMenu){
-    openOpnameMenu=null;renderSidebarNav();
+  if(!e.target.closest('.opname-head')&&!e.target.closest('.opname-menu')){
+    if(openOpnameMenu){openOpnameMenu=null;renderSidebarNav();}
+    else if(openSnelMenu){openSnelMenu=null;renderSidebarNav();}
   }
 });
 window.verwijderOpname=async id=>{
@@ -1198,8 +1254,28 @@ async function loadOpnameData(objId,opnId){
     const rs=await dataDoc(objId,opnId,'rapport').get();
     if(rs.exists)rapportTekst=rs.data().tekst||'';else rapportTekst='';
     const sis=await dataDoc(objId,opnId,'snelinspectie').get();
-    if(sis.exists)opnames[opnId].snelInspectie=sis.data().data||{fotos:[],rijen:[]};
-    else opnames[opnId].snelInspectie={fotos:[],rijen:[]};
+    if(sis.exists){
+      const sisData=sis.data();
+      if(sisData.lijst){
+        snelInspectiesLijst=sisData.lijst;
+        currentSnelInspectieId=snelInspectiesLijst[0]?.id||null;
+        opnames[opnId].snelInspectieData=sisData.data||{};
+      } else {
+        const legacyData=sisData.data||{fotos:[],rijen:[]};
+        if(legacyData.rijen?.length||legacyData.fotos?.length){
+          const id='si_'+Date.now();
+          snelInspectiesLijst=[{id,naam:'Snelle inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+          currentSnelInspectieId=id;
+          opnames[opnId].snelInspectieData={[id]:legacyData};
+        } else {
+          snelInspectiesLijst=[];currentSnelInspectieId=null;
+          opnames[opnId].snelInspectieData={};
+        }
+      }
+    } else {
+      snelInspectiesLijst=[];currentSnelInspectieId=null;
+      opnames[opnId].snelInspectieData={};
+    }
     // Migreer bestaande elementen: zet snellinvoer chapterId's om naar inspectie
     opnames[opnId].elementen=opnames[opnId].elementen.map(el=>{
       if(el.chapterId==='snellinvoer')return{...el,chapterId:'gevels',subTab:el.subTab||'Voorgevel'};
@@ -1470,7 +1546,7 @@ function renderGebouwpaspoort(container){
       gpRow('Tekeningen beschikbaar',gpSel('jannee','tekeningen',gp.tekeningen||''))+gpRow('Constructieberekeningen',gpSel('jannee','berekeningen',gp.berekeningen||''))+
       gpRow('Vergunningen',gpSel('jannee','vergunningen',gp.vergunningen||''))+gpRow('Handleidingen installaties',gpSel('jannee','handleidingen',gp.handleidingen||''))+
       '<div class="field" style="grid-column:1/-1"><label>Overige certificaten</label>'+gpInp('overigeCert',gp.overigeCert||'','text','Bijv. NEN-keuring, BREEAM...')+'</div>')+
-    '<div class="btn-row"><button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Volgende: Inspectie → Gevels &amp; exterieur</button></div>';
+    '<div class="btn-row"><button class="btn btn-light" onclick="navToChapter(\'objectgegevens\')">← Vorige: Objectgegevens</button><button class="btn btn-dark" onclick="navToChapter(\'huurtaxatie\')">Volgende: Huur &amp; taxatie →</button></div>';
 }
 
 // HUUR & TAXATIE (objectniveau)
@@ -1523,7 +1599,11 @@ function renderHuurTaxatie(container){
     '<div class="ratio-row"><span style="color:var(--text2);">Netto jaarhuur</span><span style="font-weight:500;">€ '+Math.round(nettoHuur).toLocaleString('nl-NL')+'</span></div>'+
     '<div class="ratio-row"><span style="color:var(--text2);">BAR (bruto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?bar.toFixed(1)+'%':'— (vul marktwaarde in)')+'</span></div>'+
     '<div class="ratio-row"><span style="color:var(--text2);">NAR (netto aanvangsrendement)</span><span style="font-weight:600;color:var(--blue-text);">'+(tax.marktwaarde?nar.toFixed(1)+'%':'—')+'</span></div>'+
-  '</div></div>';
+  '</div></div>'+
+  '<div class="btn-row" style="margin-top:14px;">'+
+    '<button class="btn btn-light" onclick="navToChapter(\'gebouwpaspoort\')">← Vorige: Gebouwpaspoort</button>'+
+    '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Volgende: Gevels &amp; exterieur →</button>'+
+  '</div>';
 
   container.innerHTML=html;
 }
@@ -1590,11 +1670,23 @@ function renderInspectie(container,para){
     html+=renderInspectieTab(para.id,null,opn);
   }
   const idx=INSP_PARAGRAFEN.findIndex(p=>p.id===para.id);
+  const actieveInspectie=opnamesLijst.find(o=>o.id===currentOpnameId);
+  const inspNaam=actieveInspectie?actieveInspectie.naam+' — '+actieveInspectie.datum:'';
   html+='<div class="btn-row" style="margin-top:18px;">';
-  if(idx>0)html+='<button class="btn btn-light" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx-1].id+'\')">← '+INSP_PARAGRAFEN[idx-1].naam+'</button>';
-  if(idx<INSP_PARAGRAFEN.length-1)html+='<button class="btn btn-dark" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx+1].id+'\')">Volgende: '+INSP_PARAGRAFEN[idx+1].naam+' →</button>';
-  else html+='<button class="btn btn-dark" onclick="navToChapter(\'onderhoud\')">→ Onderhoud & herstel</button>';
+  if(idx===0){
+    html+='<button class="btn btn-light" onclick="navToChapter(\'huurtaxatie\')">← Vorige: Huur &amp; taxatie</button>';
+  } else {
+    html+='<button class="btn btn-light" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx-1].id+'\')">← '+INSP_PARAGRAFEN[idx-1].naam+'</button>';
+  }
+  if(idx<INSP_PARAGRAFEN.length-1){
+    html+='<button class="btn btn-dark" onclick="navToChapter(\''+INSP_PARAGRAFEN[idx+1].id+'\')">Volgende: '+INSP_PARAGRAFEN[idx+1].naam+' →</button>';
+  } else {
+    html+='<button class="btn btn-dark" onclick="navToChapter(\'onderhoud\')">→ Onderhoud &amp; herstel</button>';
+  }
   html+='</div>';
+  if(inspNaam){
+    html+='<div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center;">Inspectie: '+escHtml(inspNaam)+'</div>';
+  }
   container.innerHTML=html;
 }
 
@@ -1765,10 +1857,20 @@ function renderOnderhoud(container){
       dubbeleGroepen.map(g=>escHtml(g[0].element)+' ('+g.map(e=>INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId).join(', ')+')').join('; ')+
     '</div>';
   }
+  if(!window._onderhoudIngeklapt)window._onderhoudIngeklapt=new Set();
   INSP_PARAGRAFEN.forEach(para=>{
     const paraEls=els.filter(e=>e.chapterId===para.id);if(!paraEls.length)return;
-    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--text2);">'+para.icon+' '+para.naam+'</div>';
-    paraEls.forEach(el=>{html+=renderBevindingCard(el);});
+    const ingeklapt=window._onderhoudIngeklapt.has(para.id);
+    const totH=paraEls.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const totV=paraEls.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleOnderhoudPara(\''+para.id+'\')">'+
+      '<span style="font-size:13px;">'+(ingeklapt?'›':'∨')+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--text2);flex:1;">'+para.icon+' '+para.naam+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);">'+paraEls.length+' bevinding'+(paraEls.length===1?'':'en')+'</span>'+
+      (totH?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(totH).toLocaleString('nl-NL')+'</span>':'')+
+      (totV?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(totV).toLocaleString('nl-NL')+'</span>':'')+
+    '</div>';
+    if(!ingeklapt){paraEls.forEach(el=>{html+=renderBevindingCard(el);});}
   });
   const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
   const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
@@ -1874,7 +1976,14 @@ function renderSnelInspectie(container){
   const condClass={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
   const prioClass={'hoog':'si-p-hoog','gemiddeld':'si-p-mid','laag':'si-p-laag'};
 
-  let html='<div class="section-title">📋 Snelle inspectie</div>';
+  const activeSI=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
+  if(!currentSnelInspectieId||!activeSI){
+    container.innerHTML='<div class="section-title">📋 Snelle inspectie</div>'+
+      '<div class="empty"><div class="empty-icon">📋</div><p>Nog geen snelle inspectie aangemaakt.<br>Maak er een aan via de zijbalk.</p></div>'+
+      '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie aanmaken</button>';
+    return;
+  }
+  let html='<div class="section-title">📋 '+escHtml(activeSI.naam)+' — '+escHtml(activeSI.datum)+'</div>';
 
   // FOTO UPLOAD
   html+='<div class="foto-zone" id="si-fotozone" onclick="document.getElementById(\'si-foto-inp\').click()" ondragover="event.preventDefault();document.getElementById(\'si-fotozone\').classList.add(\'drag-over\')" ondragleave="document.getElementById(\'si-fotozone\').classList.remove(\'drag-over\')" ondrop="siHandleDrop(event)">'+
@@ -1944,18 +2053,111 @@ function renderSnelInspectie(container){
     '<span style="font-size:15px;font-weight:600;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</span>'+
     '<span style="font-size:12px;color:var(--text2);margin-left:14px;">Totaal vervanging</span>'+
     '<span style="font-size:15px;font-weight:600;color:var(--orange-text);">€ '+Math.round(totV).toLocaleString('nl-NL')+'</span>'+
+  '</div>'+
+  '<div class="btn-row" style="margin-top:12px;">'+
+    '<button class="btn btn-light btn-sm" onclick="exportSnelInspectieExcel()">⬇ Excel</button>'+
+    '<button class="btn btn-light btn-sm" onclick="exportSnelInspectiePDF()">⬇ PDF</button>'+
+    '<button class="btn btn-light btn-sm" onclick="exportSnelInspectieWord()">⬇ Word</button>'+
   '</div>';
 
   container.innerHTML=html;
 }
 
+// SNELLE INSPECTIE EXPORT
+window.exportSnelInspectieExcel=async()=>{
+  await loadXLSX();
+  const si=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
+  const rijen=getSI().rijen||[];
+  const wb=XLSX.utils.book_new();
+  const rows=[
+    ['Snelle inspectie — '+(currentObj?.naam||'')],
+    [si?.naam||'',' — ',si?.datum||''],
+    ['Datum export: '+new Date().toLocaleDateString('nl-NL')],
+    [],
+    ['Element','Omschrijving','Conditie','Voorgestelde actie','Prioriteit','Voor rekening','Foto\'s','Herstel €','Vervanging €'],
+    ...rijen.map(r=>[r.element||'',r.omschrijving||'',r.conditie||'',r.actie||'',r.prioriteit||'',r.voorrekening||'',r.fotos||'',r.herstel||0,r.vervanging||0]),
+    [],
+    ['','','','','','','Totaal herstel',rijen.reduce((s,r)=>s+(r.herstel||0),0),rijen.reduce((s,r)=>s+(r.vervanging||0),0)],
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:14},{wch:28},{wch:10},{wch:24},{wch:12},{wch:14},{wch:8},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws,'Snelle inspectie');
+  XLSX.writeFile(wb,'SnelleInspectie_'+(si?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.xlsx');
+  showToast('Excel gedownload');
+};
+window.exportSnelInspectiePDF=()=>{
+  const si=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
+  const rijen=getSI().rijen||[];
+  const win=window.open('','_blank');
+  const prioKleur={'hoog':'#fcebeb','gemiddeld':'#faeeda','laag':'#eaf3de'};
+  let tabel='<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="background:#f0f0f0;">'+
+    ['Element','Omschrijving','Conditie','Voorgestelde actie','Prioriteit','Voor rekening','Foto\'s','Herstel €','Vervanging €'].map(h=>'<th style="border:1px solid #ccc;padding:5pt;text-align:left;">'+h+'</th>').join('')+'</tr>';
+  rijen.forEach(r=>{
+    tabel+='<tr>'+
+      '<td style="border:1px solid #ccc;padding:4pt;">'+escHtml(r.element||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;">'+escHtml(r.omschrijving||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;text-align:center;">'+(r.conditie||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;">'+escHtml(r.actie||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;background:'+(prioKleur[r.prioriteit]||'#fff')+';text-align:center;">'+(r.prioriteit||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;">'+escHtml(r.voorrekening||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;text-align:center;">'+escHtml(r.fotos||'')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;text-align:right;">'+(r.herstel?'€ '+Math.round(r.herstel).toLocaleString('nl-NL'):'—')+'</td>'+
+      '<td style="border:1px solid #ccc;padding:4pt;text-align:right;">'+(r.vervanging?'€ '+Math.round(r.vervanging).toLocaleString('nl-NL'):'—')+'</td>'+
+    '</tr>';
+  });
+  const totH=rijen.reduce((s,r)=>s+(r.herstel||0),0);
+  const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
+  tabel+='<tr style="font-weight:bold;background:#f0f0f0;"><td colspan="7" style="border:1px solid #ccc;padding:4pt;">Totaal</td><td style="border:1px solid #ccc;padding:4pt;text-align:right;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</td><td style="border:1px solid #ccc;padding:4pt;text-align:right;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</td></tr></table>';
+  win.document.write('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>'+escHtml(si?.naam||'')+'</title><style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5;}@media print{body{margin:1.5cm;}}</style></head><body>'+
+    '<h1 style="font-size:16pt;">Snelle inspectie</h1>'+
+    '<h2 style="font-size:13pt;font-weight:normal;">'+escHtml(currentObj?.naam||'')+'</h2>'+
+    '<p style="color:#666;">'+escHtml(si?.naam||'')+' — '+escHtml(si?.datum||'')+'</p>'+
+    tabel+'</body></html>');
+  win.document.close();setTimeout(()=>win.print(),600);
+};
+window.exportSnelInspectieWord=async()=>{
+  showToast('Word aanmaken...');
+  const si=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
+  const rijen=getSI().rijen||[];
+  try{
+    if(!window.docx){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+    const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,AlignmentType}=docx;
+    const children=[];
+    children.push(new Paragraph({children:[new TextRun({text:'Snelle inspectie — '+(si?.naam||''),bold:true,size:36,font:'Arial'})],spacing:{after:200}}));
+    children.push(new Paragraph({children:[new TextRun({text:(currentObj?.naam||'')+' — '+(si?.datum||''),size:24,font:'Arial'})],spacing:{after:400}}));
+    const hdrs=['Element','Omschrijving','Conditie','Voorgestelde actie','Prioriteit','Voor rekening','Foto\'s','Herstel €','Vervanging €'];
+    const tblRows=[new TableRow({children:hdrs.map(h=>new TableCell({children:[new Paragraph({children:[new TextRun({text:h,bold:true,font:'Arial',size:18})]})]}))})];
+    rijen.forEach(r=>{
+      const hVal=r.herstel?'EUR '+Math.round(r.herstel).toLocaleString('nl-NL'):'--';
+      const vVal=r.vervanging?'EUR '+Math.round(r.vervanging).toLocaleString('nl-NL'):'--';
+      tblRows.push(new TableRow({children:[r.element||'',r.omschrijving||'',String(r.conditie||''),r.actie||'',r.prioriteit||'',r.voorrekening||'',r.fotos||'',hVal,vVal].map(v=>new TableCell({children:[new Paragraph({children:[new TextRun({text:v,font:'Arial',size:18})]})]}))}));
+    });
+    children.push(new Table({rows:tblRows,width:{size:100,type:WidthType.PERCENTAGE}}));
+    const docFile=new Document({sections:[{properties:{page:{margin:{top:1440,right:1440,bottom:1440,left:1440}}},children}]});
+    const buf=await Packer.toBuffer(docFile);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
+    a.download='SnelleInspectie_'+(si?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.docx';a.click();
+    showToast('Word gedownload');
+  }catch(e){showToast('Fout: '+e.message);}
+};
+
 // SNELLE INSPECTIE HELPERS
 async function saveSnelInspectie(){
   if(!currentObjId||!currentOpnameId)return;
   const d=opnames[currentOpnameId]||{};
-  await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({data:d.snelInspectie||{},bijgewerktOp:serverTimestamp()});
+  await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({
+    lijst:snelInspectiesLijst,
+    data:d.snelInspectieData||{},
+    bijgewerktOp:serverTimestamp()
+  });
 }
-function getSI(){const opn=getOpname();if(!opn.snelInspectie)opn.snelInspectie={fotos:[],rijen:[]};return opn.snelInspectie;}
+function getSI(){
+  const opn=getOpname();
+  if(!opn.snelInspectieData)opn.snelInspectieData={};
+  if(!currentSnelInspectieId)return{fotos:[],rijen:[]};
+  if(!opn.snelInspectieData[currentSnelInspectieId])opn.snelInspectieData[currentSnelInspectieId]={fotos:[],rijen:[]};
+  return opn.snelInspectieData[currentSnelInspectieId];
+}
 window.siVoegRijToe=()=>{
   getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
   renderChapter('snelinspectie');saveSnelInspectie();
@@ -2142,6 +2344,12 @@ function renderKosten(container){
   html+='<div class="btn-row" style="margin-top:14px;"><button class="btn btn-light btn-sm" onclick="downloadKostenExcel()">⬇ Excel</button><button class="btn btn-dark btn-sm" onclick="navToChapter(\'rapportage\')">→ Rapportage</button></div>';
   container.innerHTML=html;
 }
+window.toggleOnderhoudPara=id=>{
+  if(!window._onderhoudIngeklapt)window._onderhoudIngeklapt=new Set();
+  if(window._onderhoudIngeklapt.has(id))window._onderhoudIngeklapt.delete(id);
+  else window._onderhoudIngeklapt.add(id);
+  renderChapter('onderhoud');
+};
 window.toggleAcc=id=>{
   const body=document.getElementById(id);const arrow=document.getElementById('arrow-'+id);
   const open=body.classList.toggle('open');arrow.classList.toggle('open',open);
@@ -2156,6 +2364,7 @@ function renderRapportage(container){
       '<div class="rapport-opt" onclick="generateRapport(\'conditie\')"><div class="rapport-opt-icon">🔍</div><div class="rapport-opt-title">Conditiemeting rapport</div><div class="rapport-opt-sub">Alle bevindingen incl. foto\'s en kostenraming herstel per element.</div></div>'+
       '<div class="rapport-opt" onclick="generateRapport(\'mjop\')"><div class="rapport-opt-icon">📅</div><div class="rapport-opt-title">MJOP export</div><div class="rapport-opt-sub">Meerjaren plan met jaarlijkse voorziening. Export naar Excel of PDF.</div></div>'+
       '<div class="rapport-opt" onclick="generateRapport(\'volledig\')"><div class="rapport-opt-icon">📄</div><div class="rapport-opt-title">Volledig rapport</div><div class="rapport-opt-sub">Alles in één: paspoort, inspectie, kosten en MJOP.</div></div>'+
+      '<div class="rapport-opt" onclick="generateRapport(\'snelinspectie\')"><div class="rapport-opt-icon">📋</div><div class="rapport-opt-title">Rapportage snelle inspectie</div><div class="rapport-opt-sub">Overzicht van alle snelle inspecties met bevindingen, prioriteiten en kosten.</div></div>'+
     '</div>'+
     '<div id="rapport-loading" style="display:none;"><div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-load-status">Rapport genereren...</span></div><div class="progress-wrap"><div class="progress-bar" id="rapport-pbar" style="width:0%"></div></div></div>';
   if(rapportTekst){
@@ -2182,6 +2391,33 @@ window.generateRapport=async type=>{
   const gp=obj?.gp||{};
   const gpStr='Constructie: '+(gp.constructie||'?')+' | Dak: '+(gp.dak1||'?')+' | Gevel: '+(gp.gevel1||'?')+' | Energielabel: '+(gp.energielabel||'?');
   let prompt='';
+  if(type==='snelinspectie'){
+    const opn=getOpname();
+    const siData=opn.snelInspectieData||{};
+    let siTekst='# Rapportage snelle inspectie\n\n';
+    siTekst+='**Object:** '+( obj?.naam||'—')+'\n**Datum:** '+datum+'\n\n';
+    if(!snelInspectiesLijst.length){siTekst+='Geen snelle inspecties beschikbaar.';}
+    else{
+      snelInspectiesLijst.forEach(si=>{
+        const rijen=siData[si.id]?.rijen||[];
+        siTekst+='## '+si.naam+' — '+si.datum+'\n\n';
+        if(!rijen.length){siTekst+='Geen bevindingen.\n\n';return;}
+        siTekst+='| Element | Omschrijving | Conditie | Voorgestelde actie | Prioriteit | Voor rekening | Herstel | Vervanging |\n';
+        siTekst+='|---|---|---|---|---|---|---|---|\n';
+        rijen.forEach(r=>{
+          siTekst+='| '+[r.element||'',r.omschrijving||'',r.conditie||'',r.actie||'',r.prioriteit||'',r.voorrekening||'',r.herstel?'EUR '+Math.round(r.herstel).toLocaleString('nl-NL'):'--',r.vervanging?'EUR '+Math.round(r.vervanging).toLocaleString('nl-NL'):'--'].join(' | ')+' |\n';
+        });
+        const totH=rijen.reduce((s,r)=>s+(r.herstel||0),0);
+        const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
+        siTekst+='\nTotaal herstel: EUR '+Math.round(totH).toLocaleString('nl-NL')+' | Totaal vervanging: EUR '+Math.round(totV).toLocaleString('nl-NL')+'\n\n';
+      });
+    }
+    rapportTekst=siTekst;
+    await dataDoc(currentObjId,currentOpnameId,'rapport').set({tekst:siTekst,aangemaaktOp:serverTimestamp()});
+    if(pbar)pbar.style.width='100%';
+    setTimeout(()=>{if(loadEl)loadEl.style.display='none';renderRapportage(document.getElementById('page-chapter'));},400);
+    return;
+  }
   if(type==='paspoort'){
     prompt=`Schrijf een professioneel Gebouwpaspoort rapport in het Nederlands.
 Object: ${obj?.naam} | Type: ${obj?.type} | Bouwjaar: ${obj?.jaar||'?'} | Opp: ${obj?.opp||'?'}m² | Datum: ${datum}
