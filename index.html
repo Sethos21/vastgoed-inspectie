@@ -80,6 +80,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .confirm-row{display:flex;gap:6px;margin-top:6px;}
 .confirm-btn{padding:4px 10px;border-radius:5px;border:0.5px solid var(--border2);background:var(--bg);font-size:11px;cursor:pointer;font-family:inherit;color:var(--text);}
 .confirm-btn.danger{background:var(--red-text);color:#fff;border-color:transparent;}
+.sb-show-hidden{margin:2px 14px 6px 30px;padding:5px 9px;border:none;background:none;color:var(--text3);font-size:11px;font-family:inherit;cursor:pointer;text-align:left;}
+.sb-show-hidden:hover{color:var(--blue-text);}
 .sb-footer{padding:10px 14px;border-top:0.5px solid var(--border);flex-shrink:0;}
 .sb-user{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #topbar{padding:calc(var(--safe-top)+10px) 16px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
@@ -309,6 +311,24 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tax-val.primary{font-size:22px;color:var(--blue-text);}
 .ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
 .ratio-row:last-child{border:none;}
+.si-tabel{width:100%;border-collapse:collapse;font-size:12px;}
+.si-tabel th{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:5px 5px;border-bottom:0.5px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg1);}
+.si-row{border-bottom:0.5px solid var(--border);}
+.si-row:hover{background:var(--bg1);}
+.si-row td{padding:4px 4px;vertical-align:middle;}
+.si-sel,.si-ta,.si-inp{width:100%;border:0.5px solid var(--border);border-radius:5px;padding:4px 6px;font-size:11px;background:var(--bg);color:var(--text);font-family:inherit;}
+.si-ta{resize:none;min-height:34px;line-height:1.4;}
+.si-sel{-webkit-appearance:none;}
+.si-c1{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+.si-c2{background:var(--amber-bg);color:var(--amber-text);font-weight:500;}
+.si-c3{background:var(--orange-bg);color:var(--orange-text);font-weight:500;}
+.si-c4{background:var(--red-bg);color:var(--red-text);font-weight:500;}
+.si-c5{background:var(--red-bg);color:var(--red2);font-weight:500;}
+.si-p-hoog{background:var(--red-bg);color:var(--red-text);font-weight:500;}
+.si-p-mid{background:var(--amber-bg);color:var(--amber-text);font-weight:500;}
+.si-p-laag{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+.si-voor-eig{background:var(--blue-bg);color:var(--blue-text);font-weight:500;}
+.si-voor-huur{background:var(--green-bg);color:var(--green-text);font-weight:500;}
 @media(max-width:700px){
   #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);width:260px;}
   #sidebar.open{transform:translateX(0);}
@@ -495,7 +515,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 
 // STATE
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
-let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null;
+let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null,ingeklapteOpnames=new Set();
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
 // FIREBASE HELPERS
@@ -1030,8 +1050,10 @@ function renderSidebarNav(){
     opnamesLijst.forEach(o=>{
       const isActive=o.id===currentOpnameId;
       const menuOpen=openOpnameMenu===o.id;
+      const ingeklapt=ingeklapteOpnames.has(o.id);
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
         '<div class="opname-head" onclick="switchOpname(\''+o.id+'\')">'+
+          '<span onclick="event.stopPropagation();toggleOpnameKlap(\''+o.id+'\')" style="cursor:pointer;font-size:11px;margin-right:3px;color:var(--text3);">'+(ingeklapt?'›':'∨')+'</span>'+
           '📅 '+escHtml(o.naam)+' — '+escHtml(o.datum)+
           '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')">⋯</span>'+
         '</div>';
@@ -1039,22 +1061,27 @@ function renderSidebarNav(){
         html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Hele inspectie verwijderen</div></div>';
       }
       html+='</div>';
-      if(isActive){
+      if(!ingeklapt&&isActive){
+        const verborgen=opn.verborgenParagrafen||[];
         INSP_PARAGRAFEN.forEach(p=>{
+          if(verborgen.includes(p.id))return;
           const gevuld=inGevuld(o.id,p.id);
           html+='<div class="sb-item sub" onclick="navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
-          if(gevuld){
-            html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Paragraaf verwijderen uit deze opname">×</span>';
+          if(!gevuld){
+            html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Niet-geinspecteerd onderdeel verbergen">×</span>';
           }
           html+='</div>';
           if(confirmVerwijderParagraaf&&confirmVerwijderParagraaf.opnId===o.id&&confirmVerwijderParagraaf.chId===p.id){
-            html+='<div class="confirm-box">"'+p.naam+'" verwijderen uit deze opname? Foto\'s en bevindingen gaan verloren.'+
+            html+='<div class="confirm-box">"'+p.naam+'" verbergen uit deze opname? Dit onderdeel is niet geïnspecteerd en verdwijnt uit de lijst. Je kunt het later weer terugzetten.'+
               '<div class="confirm-row">'+
-                '<button class="confirm-btn danger" onclick="verwijderParagraaf(\''+o.id+'\',\''+p.id+'\')">Verwijderen</button>'+
+                '<button class="confirm-btn danger" onclick="verbergParagraaf(\''+o.id+'\',\''+p.id+'\')">Verbergen</button>'+
                 '<button class="confirm-btn" onclick="toggleParagraafConfirm(null,null)">Annuleren</button>'+
               '</div></div>';
           }
         });
+        if(verborgen.length){
+          html+='<button class="sb-show-hidden" onclick="toonVerborgenParagrafen(\''+o.id+'\')">↺ Toon '+verborgen.length+' verborgen onderdeel'+(verborgen.length>1?'en':'')+'</button>';
+        }
       }
     });
   }
@@ -1065,12 +1092,18 @@ function renderSidebarNav(){
     '<div class="sb-item sub" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
     '<div class="sb-section-label">Samenvatting</div>'+
     '<div class="sb-item" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
+    '<div class="sb-item" onclick="navToChapter(\'snelinspectie\')" data-chapter="snelinspectie"><div class="sb-num">📋</div>Snelle inspectie</div>'+
     '<div class="sb-item" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
     '<div class="sb-item" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
 
   nav.innerHTML=html;
 }
 
+window.toggleOpnameKlap=id=>{
+  if(ingeklapteOpnames.has(id))ingeklapteOpnames.delete(id);
+  else ingeklapteOpnames.add(id);
+  renderSidebarNav();
+};
 window.toggleInspecties=()=>{inspectiesOpen=!inspectiesOpen;renderSidebarNav();};
 window.toggleOpnameMenu=id=>{
   openOpnameMenu=(openOpnameMenu===id)?null:id;
@@ -1085,17 +1118,21 @@ window.toggleParagraafConfirm=(opnId,chId)=>{
   }
   renderSidebarNav();
 };
-window.verwijderParagraaf=async(opnId,chId)=>{
+window.verbergParagraaf=async(opnId,chId)=>{
   const data=opnames[opnId];if(!data)return;
   const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
-  const tabs=para?.subtabs||[null];
-  tabs.forEach(t=>{const key=t?chId+'_'+t:chId;delete data.fotos[key];});
-  data.elementen=data.elementen.filter(e=>e.chapterId!==chId);
+  if(!data.verborgenParagrafen)data.verborgenParagrafen=[];
+  if(!data.verborgenParagrafen.includes(chId))data.verborgenParagrafen.push(chId);
   confirmVerwijderParagraaf=null;
   try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
   renderSidebarNav();
-  if(currentChapter===chId)renderChapter(chId);
-  showToast(para?.naam+' verwijderd uit deze opname');
+  showToast(para?.naam+' verborgen — terug te zetten via "Toon verborgen onderdelen"');
+};
+window.toonVerborgenParagrafen=async opnId=>{
+  const data=opnames[opnId];if(!data)return;
+  data.verborgenParagrafen=[];
+  try{await saveOpnameData();}catch(err){showToast('Opslaan mislukt: '+err.message);}
+  renderSidebarNav();
 };
 document.addEventListener('click',e=>{
   if(!e.target.closest('.opname-head')&&!e.target.closest('.opname-menu')&&openOpnameMenu){
@@ -1162,6 +1199,9 @@ async function loadOpnameData(objId,opnId){
     if(ms.exists)opnames[opnId].mjop=ms.data().lijst||[];
     const rs=await dataDoc(objId,opnId,'rapport').get();
     if(rs.exists)rapportTekst=rs.data().tekst||'';else rapportTekst='';
+    const sis=await dataDoc(objId,opnId,'snelinspectie').get();
+    if(sis.exists)opnames[opnId].snelInspectie=sis.data().data||{fotos:[],rijen:[]};
+    else opnames[opnId].snelInspectie={fotos:[],rijen:[]};
     // Migreer bestaande elementen: zet snellinvoer chapterId's om naar inspectie
     opnames[opnId].elementen=opnames[opnId].elementen.map(el=>{
       if(el.chapterId==='snellinvoer')return{...el,chapterId:'gevels',subTab:el.subTab||'Voorgevel'};
@@ -1206,7 +1246,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Snelle inspectie',i:'📋'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
     const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
@@ -1525,6 +1565,7 @@ function renderChapter(chId){
   if(chId==='mjop'){renderMJOP(container);return;}
   if(chId==='kosten'){renderKosten(container);return;}
   if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
+  if(chId==='snelinspectie'){renderSnelInspectie(container);return;}
   if(chId==='rapportage'){renderRapportage(container);return;}
   const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
   if(!para)return;
@@ -1820,6 +1861,156 @@ Alleen JSON, niets anders.`}]);
       showToast('MJOP gegenereerd');
     }
   }catch(err){showToast('Fout: '+err.message);if(loadEl)loadEl.style.display='none';}
+};
+
+
+// SNELLE INSPECTIE
+const SI_ELEMENTEN=['Gevel','Kozijn','Dak','Boeibord','Hemelwaterafvoer','Terrein','Overige'];
+
+function renderSnelInspectie(container){
+  const opn=getOpname();
+  if(!opn.snelInspectie)opn.snelInspectie={fotos:[],rijen:[]};
+  const si=opn.snelInspectie;
+  const fotos=si.fotos||[];
+  const rijen=si.rijen||[];
+
+  const condClass={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
+  const prioClass={'hoog':'si-p-hoog','gemiddeld':'si-p-mid','laag':'si-p-laag'};
+
+  let html='<div class="section-title">📋 Snelle inspectie</div>';
+
+  // FOTO UPLOAD
+  html+='<div class="foto-zone" id="si-fotozone" onclick="document.getElementById(\'si-foto-inp\').click()" ondragover="event.preventDefault();document.getElementById(\'si-fotozone\').classList.add(\'drag-over\')" ondragleave="document.getElementById(\'si-fotozone\').classList.remove(\'drag-over\')" ondrop="siHandleDrop(event)">'+
+    '<div class="foto-zone-icon">📷</div>'+
+    '<div class="foto-zone-title">'+(fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden')+'</div>'+
+    '<div class="foto-zone-sub">Tik of sleep meerdere foto\'s tegelijk hierheen</div>'+
+    '<input type="file" id="si-foto-inp" accept="image/*" multiple style="display:none;" onchange="siUploadFotos(event)"/>'+
+  '</div>';
+
+  if(fotos.length){
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;">';
+    fotos.forEach((f,i)=>{
+      html+='<div style="position:relative;border-radius:9px;overflow:hidden;border:0.5px solid var(--border);">'+
+        '<img src="'+f.dataUrl+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;" ondblclick="openFotoVolledig(this.src)" title="Dubbelklik voor volledig formaat"/>'+
+        '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">'+(i+1)+'</div>'+
+        '<button onclick="siVerwijderFoto('+i+')" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:12px;">×</button>'+
+        '<div style="padding:5px 7px;background:var(--bg1);border-top:0.5px solid var(--border);">'+
+          '<input value="'+escHtml(f.label||'')+'" placeholder="Bijschrift..." style="width:100%;border:none;background:transparent;font-size:11px;padding:0;font-family:inherit;color:var(--text2);" onchange="siUpdateFotoLabel('+i+',this.value)"/>'+
+        '</div>'+
+      '</div>';
+    });
+    html+='</div>';
+  }
+
+  // TABEL
+  html+='<div style="overflow-x:auto;"><table class="si-tabel"><thead><tr>'+
+    '<th style="width:100px;">Element</th>'+
+    '<th>Omschrijving</th>'+
+    '<th style="width:70px;">Conditie</th>'+
+    '<th>Voorgestelde actie</th>'+
+    '<th style="width:78px;">Prioriteit</th>'+
+    '<th style="width:80px;">Voor rekening</th>'+
+    '<th style="width:58px;">Foto\'s</th>'+
+    '<th style="width:70px;">Herstel €</th>'+
+    '<th style="width:70px;">Vervang. €</th>'+
+    '<th style="width:22px;"></th>'+
+  '</tr></thead><tbody>';
+
+  rijen.forEach((r,i)=>{
+    const cc=condClass[r.conditie||2]||'';
+    const pc=prioClass[r.prioriteit||'gemiddeld']||'';
+    const vc=r.voorrekening==='huurder'?'si-voor-huur':'si-voor-eig';
+    html+='<tr class="si-row">'+
+      '<td><select class="si-sel" onchange="siUpdate('+i+',\'element\',this.value)">'+
+        SI_ELEMENTEN.map(e=>'<option '+(r.element===e?'selected':'')+'>'+e+'</option>').join('')+
+      '</select></td>'+
+      '<td><textarea class="si-ta" rows="2" onchange="siUpdate('+i+',\'omschrijving\',this.value)">'+escHtml(r.omschrijving||'')+'</textarea></td>'+
+      '<td><select class="si-sel '+cc+'" onchange="siUpdate('+i+',\'conditie\',parseInt(this.value));this.className=\'si-sel '+"'+condClass[parseInt(this.value)]||''"+'\'">'+
+        [1,2,3,4,5].map(n=>'<option value="'+n+'" '+(r.conditie===n?'selected':'')+'>'+n+' '+['Goed','Redelijk','Matig','Slecht','Z.slecht'][n-1]+'</option>').join('')+
+      '</select></td>'+
+      '<td><textarea class="si-ta" rows="2" onchange="siUpdate('+i+',\'actie\',this.value)">'+escHtml(r.actie||'')+'</textarea></td>'+
+      '<td><select class="si-sel '+pc+'" onchange="siUpdate('+i+',\'prioriteit\',this.value);siUpdatePrioClass(this,this.value)">'+
+        '<option value="hoog" '+(r.prioriteit==='hoog'?'selected':'')+'>🔴 Hoog</option>'+
+        '<option value="gemiddeld" '+(r.prioriteit==='gemiddeld'||!r.prioriteit?'selected':'')+'>🟠 Gemiddeld</option>'+
+        '<option value="laag" '+(r.prioriteit==='laag'?'selected':'')+'>🟢 Laag</option>'+
+      '</select></td>'+
+      '<td><select class="si-sel '+vc+'" onchange="siUpdate('+i+',\'voorrekening\',this.value);siUpdateVoorClass(this,this.value)">'+
+        '<option value="eigenaar" '+(r.voorrekening!=='huurder'?'selected':'')+'>🏢 Eigenaar</option>'+
+        '<option value="huurder" '+(r.voorrekening==='huurder'?'selected':'')+'>🧑 Huurder</option>'+
+      '</select></td>'+
+      '<td><input type="text" class="si-inp" value="'+escHtml(r.fotos||'')+'" placeholder="1,2..." onchange="siUpdate('+i+',\'fotos\',this.value)"/></td>'+
+      '<td><input type="number" class="si-inp" value="'+(r.herstel||'')+'" placeholder="0" onchange="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0)"/></td>'+
+      '<td><input type="number" class="si-inp" value="'+(r.vervanging||'')+'" placeholder="0" onchange="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0)"/></td>'+
+      '<td><button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;">×</button></td>'+
+    '</tr>';
+  });
+
+  html+='</tbody></table></div>';
+  html+='<button class="bev-add-row" onclick="siVoegRijToe()" style="margin-top:6px;"><i>+</i> Bevinding toevoegen</button>';
+
+  // Totalen
+  const totH=rijen.reduce((s,r)=>s+(r.herstel||0),0);
+  const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
+  html+='<div class="si-totaal" style="margin-top:12px;">'+
+    '<span style="font-size:12px;color:var(--text2);">Totaal herstel</span>'+
+    '<span style="font-size:15px;font-weight:600;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</span>'+
+    '<span style="font-size:12px;color:var(--text2);margin-left:14px;">Totaal vervanging</span>'+
+    '<span style="font-size:15px;font-weight:600;color:var(--orange-text);">€ '+Math.round(totV).toLocaleString('nl-NL')+'</span>'+
+  '</div>';
+
+  container.innerHTML=html;
+}
+
+// SNELLE INSPECTIE HELPERS
+async function saveSnelInspectie(){
+  if(!currentObjId||!currentOpnameId)return;
+  const d=opnames[currentOpnameId]||{};
+  await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({data:d.snelInspectie||{},bijgewerktOp:serverTimestamp()});
+}
+function getSI(){const opn=getOpname();if(!opn.snelInspectie)opn.snelInspectie={fotos:[],rijen:[]};return opn.snelInspectie;}
+window.siVoegRijToe=()=>{
+  getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
+  renderChapter('snelinspectie');saveSnelInspectie();
+};
+window.siUpdate=async(idx,key,val)=>{
+  const rijen=getSI().rijen;if(idx<0||idx>=rijen.length)return;
+  rijen[idx][key]=val;
+  await saveSnelInspectie();
+};
+window.siUpdatePrioClass=(el,val)=>{
+  el.className='si-sel '+({hoog:'si-p-hoog',gemiddeld:'si-p-mid',laag:'si-p-laag'}[val]||'');
+};
+window.siUpdateVoorClass=(el,val)=>{
+  el.className='si-sel '+(val==='huurder'?'si-voor-huur':'si-voor-eig');
+};
+window.siVerwijderRij=async idx=>{
+  getSI().rijen.splice(idx,1);
+  renderChapter('snelinspectie');await saveSnelInspectie();
+};
+window.siUploadFotos=async event=>{
+  const files=Array.from(event.target.files);if(!files.length)return;
+  showToast(files.length+' foto\'s verwerken...');
+  const si=getSI();
+  for(const f of files){
+    const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
+    const compressed=await compressPhoto(url);
+    si.fotos.push({dataUrl:compressed,label:''});
+  }
+  renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
+  event.target.value='';
+};
+window.siHandleDrop=async event=>{
+  event.preventDefault();document.getElementById('si-fotozone')?.classList.remove('drag-over');
+  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(files.length){const fakeEvt={target:{files,value:''}};await siUploadFotos(fakeEvt);}
+};
+window.siVerwijderFoto=async idx=>{
+  getSI().fotos.splice(idx,1);
+  renderChapter('snelinspectie');await saveSnelInspectie();
+};
+window.siUpdateFotoLabel=async(idx,val)=>{
+  const fotos=getSI().fotos;if(fotos[idx])fotos[idx].label=val;
+  await saveSnelInspectie();
 };
 
 // SNELLE INVOER
