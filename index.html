@@ -2239,7 +2239,7 @@ window.siUploadFotos=async event=>{
   for(const f of files){
     const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
     const compressed=await compressPhoto(url);
-    si.fotos.push({dataUrl:compressed,label:''});
+    si.fotos.push({dataUrl:compressed,label:'Foto '+(si.fotos.length+1)});
   }
   renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
   event.target.value='';
