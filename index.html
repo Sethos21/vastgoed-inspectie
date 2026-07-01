@@ -2045,11 +2045,16 @@ function renderSnelInspectie(container){
   '</div>';
 
   if(fotos.length){
-    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;">';
+    const heeftNieuwe=fotos.some(f=>!f.label||/^Foto \d+$/.test(f.label));
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:10px;">';
     fotos.forEach((f,i)=>{
-      html+='<div style="position:relative;border-radius:9px;overflow:hidden;border:0.5px solid var(--border);">'+
+      const isNieuw=!f.label||/^Foto \d+$/.test(f.label);
+      html+='<div style="position:relative;border-radius:9px;overflow:hidden;border:0.5px solid var(--'+(isNieuw?'border2':'blue')+');">'+
         '<img src="'+f.dataUrl+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;" ondblclick="openFotoVolledig(this.src)" title="Dubbelklik voor volledig formaat"/>'+
         '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">'+(i+1)+'</div>'+
+        '<div style="position:absolute;top:4px;right:26px;">'+
+          (isNieuw?'<button onclick="siGenereerEenFoto('+i+')" style="background:rgba(30,100,200,.8);border:none;cursor:pointer;color:#fff;font-size:10px;padding:2px 5px;border-radius:4px;" title="AI beschrijving voor deze foto">✦</button>':'')+
+        '</div>'+
         '<button onclick="siVerwijderFoto('+i+')" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:12px;">×</button>'+
         '<div style="padding:5px 7px;background:var(--bg1);border-top:0.5px solid var(--border);">'+
           '<input value="'+escHtml(f.label||'')+'" placeholder="Bijschrift..." style="width:100%;border:none;background:transparent;font-size:11px;padding:0;font-family:inherit;color:var(--text2);" onchange="siUpdateFotoLabel('+i+',this.value)"/>'+
@@ -2057,8 +2062,15 @@ function renderSnelInspectie(container){
     });
     html+='</div>';
     html+='<div class="btn-row" style="margin-bottom:14px;">'+
-      '<button id="si-gen-btn" class="btn btn-blue btn-sm" onclick="siGenereerBeschrijvingen()">✦ Beschrijvingen genereren</button>'+
-      '<span style="font-size:11px;color:var(--text3);align-self:center;">AI analyseert alle foto\'s en vult bijschriften en omschrijvingen in</span>'+
+      (heeftNieuwe
+        ?'<button id="si-gen-btn" class="btn btn-blue btn-sm" onclick="siGenereerBeschrijvingen()">✦ Beschrijvingen genereren</button>'+
+          '<span style="font-size:11px;color:var(--text3);align-self:center;">Genereert bijschriften voor foto\'s zonder beschrijving en voegt rijen toe</span>'
+        :'<span style="font-size:11px;color:var(--green-text);align-self:center;">✓ Alle foto\'s hebben een beschrijving. Upload nieuwe foto\'s om er meer toe te voegen.</span>'
+      )+
+    '</div>';
+  } else {
+    html+='<div style="font-size:12px;color:var(--text3);background:var(--blue-bg);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:12px;">'+
+      '💡 Tip: Upload alle foto\'s tegelijk voor de beste resultaten. Daarna klik je op "✦ Beschrijvingen genereren" om bijschriften en rijen automatisch in te vullen. Extra foto\'s kun je altijd nog toevoegen met het ✦ knopje per foto.'+
     '</div>';
   }
 
@@ -2671,18 +2683,19 @@ window.genereerBijschriftenParagraaf=async(chId,subTab)=>{
 window.siGenereerBeschrijvingen=async()=>{
   const si=getSI();
   const fotos=si.fotos||[];
-  if(!fotos.length){showToast('Upload eerst foto\'s');return;}
+  // Alleen foto's zonder beschrijving (nog "Foto N" label)
+  const nieuweFotos=fotos.map((f,i)=>({f,i})).filter(({f})=>!f.label||/^Foto \d+$/.test(f.label));
+  if(!nieuweFotos.length){showToast('Alle foto\'s hebben al een beschrijving');return;}
   if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navToChapter('settings');return;}
-  showToast('AI analyseert foto\'s...');
+  showToast('AI analyseert '+nieuweFotos.length+' foto\'s...');
   const btn=document.getElementById('si-gen-btn');
   if(btn){btn.textContent='⏳ Bezig...';btn.disabled=true;}
   try{
-    // Stuur alle fotos (max 8) naar AI voor batch bijschriften + rijen
-    const content=fotos.slice(0,8).map((f,i)=>({
+    const content=nieuweFotos.slice(0,8).map(({f})=>({
       type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}
     }));
     content.push({type:'text',text:
-      'Dit zijn foto\'s van een bouwkundige inspectie. Analyseer elke foto en geef:\n'+
+      'Dit zijn '+nieuweFotos.length+' foto\'s van een bouwkundige inspectie. Analyseer elke foto en geef:\n'+
       '1. Een kort bijschrift van max 4 woorden (bijv. "Voorgevel kozijnen verweerd")\n'+
       '2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n'+
       '3. Een korte omschrijving van de bevinding (1 zin)\n'+
@@ -2696,27 +2709,24 @@ window.siGenereerBeschrijvingen=async()=>{
     const s=clean.indexOf('['),e=clean.lastIndexOf(']');
     if(s<0||e<=s)throw new Error('Ongeldig JSON antwoord');
     const items=JSON.parse(clean.substring(s,e+1));
-
-    // Update bijschriften van foto's
-    items.forEach((item,i)=>{
+    // Update alleen de nieuwe foto's, bestaande niet aanraken
+    items.forEach((item,j)=>{
+      const {f,i}=nieuweFotos[j]||{};
       if(si.fotos[i])si.fotos[i].label=item.bijschrift||si.fotos[i].label;
+      // Voeg rij toe alleen als er nog geen rij is voor dit fotonummer
+      const fotoNr=String(i+1);
+      const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
+      if(!heeftAl){
+        if(!si.rijen)si.rijen=[];
+        si.rijen.unshift({
+          element:item.element||'Overige',
+          omschrijving:item.omschrijving||'',
+          conditie:item.conditie||3,
+          actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',
+          fotos:fotoNr,herstel:0,vervanging:0
+        });
+      }
     });
-
-    // Voeg rijen toe voor elke foto
-    const nieuweRijen=items.map((item,i)=>({
-      element:item.element||'Overige',
-      omschrijving:item.omschrijving||'',
-      conditie:item.conditie||3,
-      actie:'',
-      prioriteit:'gemiddeld',
-      voorrekening:'eigenaar',
-      fotos:String(i+1),
-      herstel:0,
-      vervanging:0
-    }));
-    // Voeg bovenaan toe
-    si.rijen=nieuweRijen.concat(si.rijen||[]);
-
     await saveSnelInspectie();
     renderChapter('snelinspectie');
     showToast(items.length+' beschrijvingen gegenereerd');
@@ -2724,6 +2734,37 @@ window.siGenereerBeschrijvingen=async()=>{
     showToast('Fout: '+err.message);
     if(btn){btn.textContent='✦ Beschrijvingen genereren';btn.disabled=false;}
   }
+};
+
+window.siGenereerEenFoto=async idx=>{
+  const si=getSI();
+  const foto=si.fotos[idx];if(!foto)return;
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');return;}
+  showToast('Foto '+(idx+1)+' analyseren...');
+  try{
+    const raw=await callClaude([
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:foto.dataUrl.split(',')[1]}},
+      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto en geef:\n1. Een kort bijschrift van max 4 woorden\n2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n3. Een korte omschrijving van de bevinding (1 zin)\n4. Conditie 1-5\n\nReageer ALLEEN als JSON:\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3}\nAlleen JSON.'}
+    ]);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const item=JSON.parse(clean);
+    si.fotos[idx].label=item.bijschrift||foto.label;
+    const fotoNr=String(idx+1);
+    const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
+    if(!heeftAl){
+      if(!si.rijen)si.rijen=[];
+      si.rijen.unshift({
+        element:item.element||'Overige',
+        omschrijving:item.omschrijving||'',
+        conditie:item.conditie||3,
+        actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',
+        fotos:fotoNr,herstel:0,vervanging:0
+      });
+    }
+    await saveSnelInspectie();
+    renderChapter('snelinspectie');
+    showToast('Foto '+(idx+1)+' beschreven');
+  }catch(err){showToast('Fout: '+err.message);}
 };
 
 async function verwerkFotos(files,fotoKey){
