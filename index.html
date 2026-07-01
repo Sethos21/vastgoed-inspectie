@@ -515,6 +515,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
 let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null,ingeklapteOpnames=new Set();
 let snelInspectiesLijst=[],currentSnelInspectieId=null,snelInspOpen=true,openSnelMenu=null,aiInspOpen=true;
+let activeSection='ai'; // 'snel' or 'ai'
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
 // FIREBASE HELPERS
@@ -1000,7 +1001,7 @@ window.uitvoerenImport=async()=>{
 window.selectObject=async id=>{
   currentObjId=id;currentObj=objects.find(o=>o.id===id);
   const snap=await db.collection('objects').doc(id).collection('meta').doc('opnames').get();
-  let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'Opname 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+  let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'A.I. inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
   if(!snap.exists)await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst});
   updateSidebar(lijst);
   currentOpnameId=lijst[0].id;
@@ -1047,7 +1048,7 @@ function renderSidebarNav(){
   html+='<div class="insp-toggle'+(snelInspOpen?' open':'')+'" onclick="toggleSnelInsp()"><div class="sb-num">📋</div>Snelle inspecties<span class="sb-chev">›</span></div>';
   if(snelInspOpen){
     snelInspectiesLijst.forEach(si=>{
-      const isActive=si.id===currentSnelInspectieId;
+      const isActive=si.id===currentSnelInspectieId&&activeSection==='snel';
       const menuOpen=openSnelMenu===si.id;
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
         '<div class="opname-head" onclick="switchSnelInspectie(\''+si.id+'\')">'+
@@ -1068,7 +1069,7 @@ function renderSidebarNav(){
 
   if(aiInspOpen){
     opnamesLijst.forEach(o=>{
-      const isActive=o.id===currentOpnameId;
+      const isActive=o.id===currentOpnameId&&activeSection==='ai';
       const menuOpen=openOpnameMenu===o.id;
       const ingeklapt=ingeklapteOpnames.has(o.id);
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
@@ -1081,12 +1082,12 @@ function renderSidebarNav(){
         html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Hele inspectie verwijderen</div></div>';
       }
       html+='</div>';
-      if(!ingeklapt&&isActive){
+      if(!ingeklapt&&isActive&&activeSection==='ai'){
         const verborgen=opn.verborgenParagrafen||[];
         INSP_PARAGRAFEN.forEach(p=>{
           if(verborgen.includes(p.id))return;
           const gevuld=inGevuld(o.id,p.id);
-          html+='<div class="sb-item sub" onclick="navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
+          html+='<div class="sb-item sub" onclick="activeSection=\'ai\';navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
           if(!gevuld){
             html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Niet-geinspecteerd onderdeel verbergen">×</span>';
           }
@@ -1122,7 +1123,7 @@ window.toggleSnelInsp=()=>{snelInspOpen=!snelInspOpen;renderSidebarNav();};
 window.toggleAiInsp=()=>{aiInspOpen=!aiInspOpen;renderSidebarNav();};
 window.toggleSnelMenu=id=>{openSnelMenu=openSnelMenu===id?null:id;renderSidebarNav();};
 window.switchSnelInspectie=id=>{
-  currentSnelInspectieId=id;openSnelMenu=null;
+  currentSnelInspectieId=id;openSnelMenu=null;activeSection='snel';
   renderSidebarNav();
   navToChapter('snelinspectie');
 };
@@ -1227,7 +1228,7 @@ function resetSidebar(){
 
 window.switchOpname=async val=>{
   if(val==='__nieuw'){
-    const naam=prompt('Naam voor de nieuwe inspectie:','Inspectie '+(opnamesLijst.length+1));if(!naam)return;
+    const naam=prompt('Naam voor de nieuwe A.I. inspectie:','A.I. inspectie '+(opnamesLijst.length+1));if(!naam)return;
     const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
     const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
@@ -1235,12 +1236,14 @@ window.switchOpname=async val=>{
     await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').set({lijst});
     opnamesLijst=lijst;currentOpnameId=nieuw.id;
     opnames[nieuw.id]={fotos:{},elementen:[],mjop:[]};
+    activeSection='ai';
     renderSidebarNav();
-    navToChapter('inspectieoverzicht');showToast('Nieuwe inspectie aangemaakt');return;
+    navToChapter('inspectieoverzicht');showToast('Nieuwe A.I. inspectie aangemaakt');return;
   }
   if(val!==currentOpnameId){
     currentOpnameId=val;await loadOpnameData(currentObjId,val);
   }
+  activeSection='ai';
   renderSidebarNav();
   navToChapter('inspectieoverzicht');
 };
@@ -1319,6 +1322,7 @@ window.navToChapter=ch=>{
   currentChapter=ch;navTo('chapter');
   document.querySelectorAll('[data-chapter]').forEach(el=>el.classList.toggle('active',el.dataset.chapter===ch));
   renderChapter(ch);
+  if(currentObjId)renderSidebarNav();
 };
 
 function updateTopbar(page){
