@@ -311,15 +311,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tax-val.primary{font-size:22px;color:var(--blue-text);}
 .ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
 .ratio-row:last-child{border:none;}
-.si-tabel{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;}
-.si-tabel th{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:4px 3px;border-bottom:0.5px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg1);overflow:hidden;}
-.si-row{border-bottom:0.5px solid var(--border);}
-.si-row:hover{background:var(--bg1);}
-.si-row td{padding:3px 3px;vertical-align:middle;}
-.si-sel,.si-ta,.si-inp{width:100%;border:0.5px solid var(--border);border-radius:4px;padding:3px 5px;font-size:11px;background:var(--bg);color:var(--text);font-family:inherit;}
-.si-ta{resize:none;min-height:32px;line-height:1.4;}
+.si-header{display:grid;gap:5px;padding:4px 8px;margin-bottom:3px;}
+.si-header span{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
+.si-rij{display:grid;gap:5px;align-items:center;padding:6px 8px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--bg);}
+.si-rij:hover{background:var(--bg1);}
+.si-sel,.si-inp{border:0.5px solid var(--border2);border-radius:4px;padding:4px 6px;font-size:12px;background:var(--bg);color:var(--text);font-family:inherit;width:100%;}
 .si-sel{-webkit-appearance:none;}
-.si-row td{padding:3px 3px;vertical-align:middle;overflow:hidden;max-width:0;}
 .si-c1{background:var(--green-bg);color:var(--green-text);font-weight:500;}
 .si-c2{background:var(--amber-bg);color:var(--amber-text);font-weight:500;}
 .si-c3{background:var(--orange-bg);color:var(--orange-text);font-weight:500;}
@@ -1874,7 +1871,6 @@ function renderSnelInspectie(container){
   const si=opn.snelInspectie;
   const fotos=si.fotos||[];
   const rijen=si.rijen||[];
-
   const condClass={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
   const prioClass={'hoog':'si-p-hoog','gemiddeld':'si-p-mid','laag':'si-p-laag'};
 
@@ -1897,59 +1893,50 @@ function renderSnelInspectie(container){
         '<button onclick="siVerwijderFoto('+i+')" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;font-size:12px;">×</button>'+
         '<div style="padding:5px 7px;background:var(--bg1);border-top:0.5px solid var(--border);">'+
           '<input value="'+escHtml(f.label||'')+'" placeholder="Bijschrift..." style="width:100%;border:none;background:transparent;font-size:11px;padding:0;font-family:inherit;color:var(--text2);" onchange="siUpdateFotoLabel('+i+',this.value)"/>'+
-        '</div>'+
-      '</div>';
+        '</div></div>';
     });
     html+='</div>';
   }
 
-  // TABEL
-  html+='<table class="si-tabel"><thead><tr>'+
-    '<th style="width:11%;">Element</th>'+
-    '<th style="width:18%;">Omschrijving</th>'+
-    '<th style="width:9%;">Conditie</th>'+
-    '<th style="width:16%;">Voorgestelde actie</th>'+
-    '<th style="width:9%;">Prioriteit</th>'+
-    '<th style="width:10%;">Voor rekening</th>'+
-    '<th style="width:7%;">Foto\'s</th>'+
-    '<th style="width:9%;">Herstel €</th>'+
-    '<th style="width:9%;">Vervang. €</th>'+
-    '<th style="width:2%;"></th>'+
-  '</tr></thead><tbody>';
+  // KOLOMKOPPEN
+  const cols='11% 1fr 9% 1fr 8% 9% 7% 8% 8% 28px';
+  html+='<div class="si-header" style="grid-template-columns:'+cols+';">'+
+    '<span>Element</span><span>Omschrijving</span><span>Conditie</span><span>Voorgestelde actie</span>'+
+    '<span>Prioriteit</span><span>Voor rekening</span><span>Foto\'s</span><span>Herstel €</span><span>Vervang. €</span><span></span>'+
+  '</div>';
 
+  // RIJEN
   rijen.forEach((r,i)=>{
     const cc=condClass[r.conditie||2]||'';
     const pc=prioClass[r.prioriteit||'gemiddeld']||'';
     const vc=r.voorrekening==='huurder'?'si-voor-huur':'si-voor-eig';
-    html+='<tr class="si-row">'+
-      '<td><select class="si-sel" onchange="siUpdate('+i+',\'element\',this.value)">'+
+    html+='<div class="si-rij" style="grid-template-columns:'+cols+';">'+
+      '<select class="si-sel" onchange="siUpdate('+i+',\'element\',this.value)">'+
         SI_ELEMENTEN.map(e=>'<option '+(r.element===e?'selected':'')+'>'+e+'</option>').join('')+
-      '</select></td>'+
-      '<td><textarea class="si-ta" rows="2" onchange="siUpdate('+i+',\'omschrijving\',this.value)">'+escHtml(r.omschrijving||'')+'</textarea></td>'+
-      '<td><select class="si-sel '+cc+'" onchange="siUpdate('+i+',\'conditie\',parseInt(this.value));this.className=\'si-sel '+"'+condClass[parseInt(this.value)]||''"+'\'">'+
+      '</select>'+
+      '<input type="text" class="si-inp" placeholder="Omschrijving..." value="'+escHtml(r.omschrijving||'')+'" oninput="siUpdate('+i+',\'omschrijving\',this.value)"/>'+
+      '<select class="si-sel '+cc+'" onchange="siUpdate('+i+',\'conditie\',parseInt(this.value));siUpdateCondClass(this,parseInt(this.value))">'+
         [1,2,3,4,5].map(n=>'<option value="'+n+'" '+(r.conditie===n?'selected':'')+'>'+n+' '+['Goed','Redelijk','Matig','Slecht','Z.slecht'][n-1]+'</option>').join('')+
-      '</select></td>'+
-      '<td><textarea class="si-ta" rows="2" onchange="siUpdate('+i+',\'actie\',this.value)">'+escHtml(r.actie||'')+'</textarea></td>'+
-      '<td><select class="si-sel '+pc+'" onchange="siUpdate('+i+',\'prioriteit\',this.value);siUpdatePrioClass(this,this.value)">'+
+      '</select>'+
+      '<input type="text" class="si-inp" placeholder="Voorgestelde actie..." value="'+escHtml(r.actie||'')+'" oninput="siUpdate('+i+',\'actie\',this.value)"/>'+
+      '<select class="si-sel '+pc+'" onchange="siUpdate('+i+',\'prioriteit\',this.value);siUpdatePrioClass(this,this.value)">'+
         '<option value="hoog" '+(r.prioriteit==='hoog'?'selected':'')+'>🔴 Hoog</option>'+
         '<option value="gemiddeld" '+(r.prioriteit==='gemiddeld'||!r.prioriteit?'selected':'')+'>🟠 Gemiddeld</option>'+
         '<option value="laag" '+(r.prioriteit==='laag'?'selected':'')+'>🟢 Laag</option>'+
-      '</select></td>'+
-      '<td><select class="si-sel '+vc+'" onchange="siUpdate('+i+',\'voorrekening\',this.value);siUpdateVoorClass(this,this.value)">'+
+      '</select>'+
+      '<select class="si-sel '+vc+'" onchange="siUpdate('+i+',\'voorrekening\',this.value);siUpdateVoorClass(this,this.value)">'+
         '<option value="eigenaar" '+(r.voorrekening!=='huurder'?'selected':'')+'>🏢 Eigenaar</option>'+
         '<option value="huurder" '+(r.voorrekening==='huurder'?'selected':'')+'>🧑 Huurder</option>'+
-      '</select></td>'+
-      '<td><input type="text" class="si-inp" value="'+escHtml(r.fotos||'')+'" placeholder="1,2..." onchange="siUpdate('+i+',\'fotos\',this.value)"/></td>'+
-      '<td><input type="number" class="si-inp" value="'+(r.herstel||'')+'" placeholder="0" onchange="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0)"/></td>'+
-      '<td><input type="number" class="si-inp" value="'+(r.vervanging||'')+'" placeholder="0" onchange="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0)"/></td>'+
-      '<td><button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;">×</button></td>'+
-    '</tr>';
+      '</select>'+
+      '<input type="text" class="si-inp" placeholder="1,2..." value="'+escHtml(r.fotos||'')+'" oninput="siUpdate('+i+',\'fotos\',this.value)"/>'+
+      '<input type="number" class="si-inp" placeholder="0" value="'+(r.herstel||'')+'" oninput="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0)"/>'+
+      '<input type="number" class="si-inp" placeholder="0" value="'+(r.vervanging||'')+'" oninput="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0)"/>'+
+      '<button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;">×</button>'+
+    '</div>';
   });
 
-  html+='</tbody></table>';
-  html+='<button class="bev-add-row" onclick="siVoegRijToe()" style="margin-top:6px;"><i>+</i> Bevinding toevoegen</button>';
+  html+='<button class="bev-add-row" onclick="siVoegRijToe()" style="margin-top:4px;"><i>+</i> Bevinding toevoegen</button>';
 
-  // Totalen
   const totH=rijen.reduce((s,r)=>s+(r.herstel||0),0);
   const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
   html+='<div class="si-totaal" style="margin-top:12px;">'+
@@ -1977,6 +1964,10 @@ window.siUpdate=async(idx,key,val)=>{
   const rijen=getSI().rijen;if(idx<0||idx>=rijen.length)return;
   rijen[idx][key]=val;
   await saveSnelInspectie();
+};
+window.siUpdateCondClass=(el,val)=>{
+  const m={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
+  el.className='si-sel '+(m[val]||'');
 };
 window.siUpdatePrioClass=(el,val)=>{
   el.className='si-sel '+({hoog:'si-p-hoog',gemiddeld:'si-p-mid',laag:'si-p-laag'}[val]||'');
