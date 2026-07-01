@@ -2234,12 +2234,14 @@ window.siVerwijderRij=async idx=>{
 };
 window.siUploadFotos=async event=>{
   const files=Array.from(event.target.files);if(!files.length)return;
-  showToast(files.length+' foto\'s verwerken...');
+  showToast(getApiKey()?'Foto\'s uploaden en bijschriften genereren...':'Foto\'s verwerken...');
   const si=getSI();
   for(const f of files){
     const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
     const compressed=await compressPhoto(url);
-    si.fotos.push({dataUrl:compressed,label:'Foto '+(si.fotos.length+1)});
+    const nr=si.fotos.length+1;
+    const label=await genereerFotoBijschrift(compressed,nr);
+    si.fotos.push({dataUrl:compressed,label});
   }
   renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
   event.target.value='';
@@ -2636,14 +2638,28 @@ window.downloadMJOPPDF=()=>{
 };
 
 // FOTO UPLOAD
+async function genereerFotoBijschrift(dataUrl,nr){
+  if(!getApiKey())return'Foto '+nr;
+  try{
+    const raw=await callClaude([
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:dataUrl.split(',')[1]}},
+      {type:'text',text:'Geef een kort bijschrift van maximaal 4 woorden voor deze bouwkundige inspectiefoto. Beschrijf wat er te zien is (bijv. "Voorgevel kozijnen verweerd" of "Dakrand roestvorming"). Antwoord ALLEEN met het bijschrift, niets anders.'}
+    ]);
+    return raw.trim().replace(/['"]/g,'')||'Foto '+nr;
+  }catch(e){return'Foto '+nr;}
+}
+
 async function verwerkFotos(files,fotoKey){
   const opn=getOpname();if(!opn.fotos[fotoKey])opn.fotos[fotoKey]=[];
   showToast(files.length+' foto\'s verwerken...');
+  const heeftApi=!!getApiKey();
+  if(heeftApi&&files.length>0)showToast('Foto\'s uploaden en bijschriften genereren...');
   for(const f of files){
     const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
     const compressed=await compressPhoto(url);
     const nr=opn.fotos[fotoKey].length+1;
-    opn.fotos[fotoKey].push({dataUrl:compressed,label:'Foto '+nr});
+    const label=await genereerFotoBijschrift(compressed,nr);
+    opn.fotos[fotoKey].push({dataUrl:compressed,label});
   }
   await saveOpnameData();renderChapter(currentChapter);showToast('Foto\'s opgeslagen');
 }
