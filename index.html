@@ -1916,6 +1916,10 @@ function renderBevindingCard(el){
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'+
         '<input class="bev-element-input" style="font-size:13px;font-weight:500;padding:4px 8px;border:0.5px solid var(--border2);border-radius:5px;background:var(--bg);" value="'+escHtml(el.element||'')+'" placeholder="Naam element" oninput="updateBev(\''+el.id+'\',\'element\',this.value)"/>'+
       '</div>'+
+      (el.chapterId==='analyse'?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px;">'+
+        '<div class="field"><label>Hoofdparagraaf</label><input type="text" list="aia-hoofden" value="'+escHtml(el.hoofd||'')+'" onchange="aiaBevEdit(\''+el.id+'\',\'hoofd\',this.value)"/></div>'+
+        '<div class="field"><label>Subparagraaf</label><input type="text" value="'+escHtml(el.sub||'')+'" onchange="aiaBevEdit(\''+el.id+'\',\'sub\',this.value)"/></div>'+
+      '</div>':'')+
       '<div class="field" style="margin-bottom:7px;"><label>Foto\'s bij deze bevinding</label><div class="bev-foto-picker">'+
         fotos.map((f,i)=>'<button class="bev-foto-chip'+(tonenIndices.includes(i)?' sel':'')+'" onclick="toggleBevFoto(\''+el.id+'\','+i+')"><span class="bev-foto-chip-thumb"><img src="'+f.dataUrl+'"/></span>Foto '+(startNr+i)+'</button>').join('')+
         '<button class="bev-foto-add" onclick="document.getElementById(\'eigenfoto-'+el.id+'\').click()">+ Eigen foto</button>'+
@@ -2058,7 +2062,7 @@ function renderOnderhoud(container){
       subs.forEach(sub=>{
         const sEls=hEls.filter(e=>(e.sub||'')===sub);
         if(sub)html+='<div style="padding:5px 12px;border-top:0.5px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;">'+escHtml(sub)+' ('+sEls.length+')</div>';
-        sEls.forEach(e=>{html+=aiaBevRij(e,fotos);});
+        sEls.forEach(e=>{html+=renderBevindingCard(e);});
       });
       html+='</div>';
     }
@@ -2299,7 +2303,7 @@ function renderAIAnalyse(container){
             '<span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;">'+escHtml(sub)+'</span>'+
             '<span style="font-size:10px;color:var(--text3);">('+sEls.length+')</span></div>';
         }
-        if(!sub||!sKlap){sEls.forEach(e=>{html+=aiaBevRij(e,fotos);});}
+        if(!sub||!sKlap){sEls.forEach(e=>{html+=renderBevindingCard(e);});}
       });
     }
     html+='</div>';
@@ -2396,7 +2400,8 @@ function aiaVerwerkItems(opn,items,fotoIndexen){
       conditie:trefwoordNaarConditie(item.conditie_trefwoord)||item.conditie||3,beschrijving,
       kosten:item.kosten||0,kosten_onderbouwing:item.kosten_onderbouwing||'',
       kosten_vervanging:item.kosten_vervanging||0,kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||'',
-      fotos:nrs,isolatie:item.isolatie||'',prijs_herstel:'',prijs_vervanging:'',
+      fotos:nrs,fotoIndices:(Array.isArray(item.fotos)&&item.fotos.length?item.fotos.map(n=>parseInt(n)-1).filter(n=>n>=0):fotoIndexen.slice()),
+      isolatie:item.isolatie||'',prijs_herstel:'',prijs_vervanging:'',
     });
   });
 }
