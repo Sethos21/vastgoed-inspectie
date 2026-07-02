@@ -325,6 +325,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .si-rij input[type="number"]{text-align:right;}
 .si-sel.si-c1,.si-sel.si-c2,.si-sel.si-c3,.si-sel.si-c4,.si-sel.si-c5,.si-sel.si-p-hoog,.si-sel.si-p-mid,.si-sel.si-p-laag,.si-sel.si-voor-eig,.si-sel.si-voor-huur{border-radius:999px;text-align:center;text-align-last:center;padding:4px 8px;}
 .si-tabel .bev-add-row{border:none;border-top:0.5px solid var(--border);border-radius:0;margin:0;width:100%;}
+.si-rij{cursor:pointer;}
+.si-rij input,.si-rij select,.si-rij textarea{cursor:auto;}
+.si-exp{width:22px;height:22px;border:0.5px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;transition:transform .15s;}
+.si-exp.open{transform:rotate(90deg);background:var(--bg1);}
+.si-rij:hover .si-exp{border-color:var(--text3);}
+.si-detail{grid-column:1/-1;background:var(--bg1);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:4px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;cursor:default;}
+.si-detail .field label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;font-weight:600;display:block;margin-bottom:3px;}
+.si-detail input,.si-detail select{width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:12px;background:var(--bg);color:var(--text);height:32px;box-sizing:border-box;}
+.si-detail input:focus,.si-detail select:focus{outline:none;border-color:var(--blue);}
 .si-sel{-webkit-appearance:none;}
 .si-ta{resize:none;height:52px;line-height:1.4;overflow-y:auto;display:block;}
 .si-ta-wrap{position:relative;}
@@ -2409,18 +2418,18 @@ function renderSnelInspectie(container){
     const open_=window._siDetailOpen.has(i);
     let detail='';
     if(open_){
-      detail='<div style="grid-column:1/-1;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;margin-top:2px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;" class="no-print">'+
+      detail='<div class="si-detail no-print" onclick="event.stopPropagation()">'+
         '<div class="field"><label>Hoeveelheid</label><input type="number" min="0" step="any" value="'+(r.hoeveelheid||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'hoeveelheid\',parseFloat(this.value)||0)"/></div>'+
         '<div class="field"><label>Eenheid</label><select onchange="siDetailUpdate('+i+',\'eenheid\',this.value)">'+EENHEDEN.map(e=>'<option '+((r.eenheid||'m²')===e?'selected':'')+'>'+e+'</option>').join('')+'</select></div>'+
         '<div class="field"><label>Prijs herstel € / eenheid</label><input type="number" min="0" step="any" value="'+(r.prijsHerstel||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'prijsHerstel\',parseFloat(this.value)||0)"/></div>'+
         '<div class="field"><label>Prijs vervanging € / eenheid</label><input type="number" min="0" step="any" value="'+(r.prijsVervanging||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'prijsVervanging\',parseFloat(this.value)||0)"/></div>'+
-        '<div style="grid-column:1/-1;font-size:11px;color:var(--text3);">De kolommen Herstel € en Vervang. € worden automatisch berekend als hoeveelheid × prijs. Direct typen in die kolommen blijft ook mogelijk.</div>'+
+        '<div style="grid-column:1/-1;font-size:10.5px;color:var(--text3);">Herstel € en Vervang. € worden automatisch berekend als hoeveelheid × prijs — direct typen in die kolommen kan ook.</div>'+
       '</div>';
     }
     const cc=condClass[r.conditie||2]||'';
     const pc=prioClass[r.prioriteit||'gemiddeld']||'';
     const vc=r.voorrekening==='huurder'?'si-voor-huur':'si-voor-eig';
-    html+='<div class="si-rij" style="grid-template-columns:'+cols+';">'+
+    html+='<div class="si-rij" style="grid-template-columns:'+cols+';" onclick="siRijKlik(event,'+i+')">'+
       '<select class="si-sel" onchange="siUpdate('+i+',\'element\',this.value)">'+
         SI_ELEMENTEN.map(e=>'<option '+(r.element===e?'selected':'')+'>'+e+'</option>').join('')+
       '</select>'+
@@ -2444,9 +2453,9 @@ function renderSnelInspectie(container){
       '<input type="text" class="si-inp" placeholder="1,2..." value="'+escHtml(r.fotos||'')+'" oninput="siUpdate('+i+',\'fotos\',this.value)"/>'+
       '<input type="number" id="si-h-'+i+'" class="si-inp" placeholder="0" value="'+(r.herstel||'')+'" oninput="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0);siTotalen()"/>'+
       '<input type="number" id="si-v-'+i+'" class="si-inp" placeholder="0" value="'+(r.vervanging||'')+'" oninput="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0);siTotalen()"/>'+
-      '<span style="display:flex;align-items:center;gap:2px;">'+
-        '<button onclick="siDetailToggle('+i+')" title="Hoeveelheid en prijs invoeren" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px;">'+(open_?'∨':'›')+'</button>'+
-        '<button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;">×</button>'+
+      '<span style="display:flex;align-items:center;gap:4px;">'+
+        '<button class="si-exp'+(open_?' open':'')+'" onclick="event.stopPropagation();siDetailToggle('+i+')" title="Hoeveelheid en prijs invoeren">›</button>'+
+        '<button onclick="event.stopPropagation();siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;">×</button>'+
       '</span>'+
       detail+
     '</div>';
@@ -2571,6 +2580,11 @@ window.siVoegRijToe=()=>{
   if(window._siDetailOpen)window._siDetailOpen.clear();
   getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');saveSnelInspectie();
+};
+window.siRijKlik=(ev,i)=>{
+  const t=ev.target;
+  if(['INPUT','SELECT','TEXTAREA','BUTTON','OPTION','LABEL'].includes(t.tagName))return;
+  siDetailToggle(i);
 };
 window.siDetailToggle=i=>{
   if(!window._siDetailOpen)window._siDetailOpen=new Set();
