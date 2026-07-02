@@ -1787,9 +1787,9 @@ function renderChapter(chId){
   if(chId==='kosten'){renderKosten(container);return;}
   if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
   if(chId==='snelinspectie'){renderSnelInspectie(container);return;}
-  if(chId==='inspectieoverzicht'||chId==='aianalyse'){renderAIAnalyse(container);return;}
+  if(chId==='inspectieoverzicht'||chId==='aianalyse'){currentChapter='onderhoud';renderOnderhoud(container);return;}
   if(chId==='rapportage'){renderRapportage(container);return;}
-  if(INSP_PARAGRAFEN.some(p=>p.id===chId)){currentChapter='aianalyse';renderAIAnalyse(container);return;}
+  if(INSP_PARAGRAFEN.some(p=>p.id===chId)){currentChapter='onderhoud';renderOnderhoud(container);return;}
 }
 
 function renderInspectie(container,para){
@@ -1990,9 +1990,10 @@ function renderOnderhoud(container){
   });
   // Conditiemeting-rijen
   const cms=snelInspectiesLijst.map(si=>({si,rijen:(opn.snelInspectieData&&opn.snelInspectieData[si.id]?opn.snelInspectieData[si.id].rijen:[])||[]})).filter(c=>c.rijen.length);
+  const insp=opnamesLijst.find(o=>o.id===currentOpnameId);
+  const kop='<div class="section-title">🗂 '+escHtml(insp?insp.naam+' — '+insp.datum:'A.I. Analyse')+' · bevindingen & kosten</div>'+aiaUploadHtml(opn);
   if(!els.length&&!cms.length){
-    container.innerHTML='<div class="section-title">🔧 Onderhoud & herstel</div><div class="empty"><div class="empty-icon">🔧</div><p>Voer eerst een conditiemeting of A.I. analyse uit.<br>De bevindingen verschijnen hier automatisch.</p></div>'+
-      '<button class="btn btn-dark" onclick="navToChapter(\'aianalyse\')">→ Naar A.I. Analyse</button>';return;
+    container.innerHTML=kop+'<div class="empty" style="margin-top:6px;"><div class="empty-icon">🔧</div><p>Upload foto\'s en klik op ✦ Analyseer, of voer een conditiemeting uit.<br>De bevindingen verschijnen hieronder automatisch.</p></div>';return;
   }
   if(!window._aiaKlapH)window._aiaKlapH=new Set();
   if(!window._aiaKlapS)window._aiaKlapS=new Set();
@@ -2003,7 +2004,7 @@ function renderOnderhoud(container){
   els.forEach(e=>{const n=(e.element||'').toLowerCase().trim();if(!n)return;(naamMap[n]=naamMap[n]||[]).push({naam:e.element,bron:e.hoofd});});
   cms.forEach(({si,rijen})=>rijen.forEach(r=>{const n=(r.element||'').toLowerCase().trim();if(!n)return;(naamMap[n]=naamMap[n]||[]).push({naam:r.element,bron:si.naam});}));
   const dubbeleGroepen=Object.values(naamMap).filter(g=>g.length>1&&new Set(g.map(x=>x.bron)).size>1);
-  let html='<div class="section-title">🔧 Onderhoud & herstel — alle bevindingen</div>';
+  let html=kop;
   if(dubbeleGroepen.length){
     html+='<div style="background:var(--amber-bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--amber-text);">'+
       '⚠️ <strong>'+dubbeleGroepen.length+' element(en) komen mogelijk dubbel voor</strong> — dit kan tot dubbele kosten leiden. Controleer: '+
@@ -2232,25 +2233,17 @@ function aiaIcon(naam){const n=(naam||'').toLowerCase();const hit=AIA_ICONS.find
 function aiaEls(opn){return (opn.elementen||[]).filter(e=>e.chapterId==='analyse');}
 function aiaHoofden(opn){return [...new Set(aiaEls(opn).map(e=>e.hoofd||'Overige bevindingen'))];}
 
-function renderAIAnalyse(container){
-  const opn=getOpname();
-  const insp=opnamesLijst.find(o=>o.id===currentOpnameId);
+
+function aiaUploadHtml(opn){
   const fotos=opn.fotos['analyse']||[];
   const els=aiaEls(opn);
-  if(!window._aiaKlapH)window._aiaKlapH=new Set();
-  if(!window._aiaKlapS)window._aiaKlapS=new Set();
-  if(!window._aiaOpen)window._aiaOpen=new Set();
-  let html='<div class="section-title">🗂 '+escHtml(insp?insp.naam+' — '+insp.datum:'A.I. Analyse')+'</div>';
-
-  // Uploadzone
+  let html='';
   html+='<div class="foto-zone" id="fotozone-analyse" onclick="document.getElementById(\'fotoinput-analyse\').click()" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" ondrop="handleDrop(event,\'analyse\')">'+
     '<div style="font-size:20px;">📷</div>'+
-    '<div style="font-size:13px;font-weight:600;">'+(fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden')+'</div>'+
+    '<div style="font-size:13px;font-weight:600;">'+(fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden voor A.I. analyse')+'</div>'+
     '<div style="font-size:11px;color:var(--text3);">Tik of sleep meerdere foto\'s tegelijk hierheen</div>'+
     '<input type="file" id="fotoinput-analyse" accept="image/*" multiple style="display:none;" onchange="handleFotoUpload(event,\'analyse\')"/>'+
   '</div>';
-
-  // Fotogrid
   if(fotos.length){
     html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:10px 0;">';
     fotos.forEach((f,i)=>{
@@ -2272,91 +2265,9 @@ function renderAIAnalyse(container){
       :'<span class="no-print" style="font-size:11px;color:var(--green-text);">✓ Alle foto\'s zijn geanalyseerd — upload nieuwe foto\'s om aan te vullen</span>')+
     '</div>';
   }
-
-  // Paragrafen met bevindingen
-  if(!els.length&&!fotos.length){
-    html+='<div class="empty" style="margin-top:10px;"><div class="empty-icon">🗂</div><p>Upload foto\'s en laat de AI de analyse opbouwen.<br>De AI bepaalt zelf de hoofd- en subparagrafen.</p></div>';
-  }
-  const hoofden=aiaHoofden(opn);
-  hoofden.forEach(h=>{
-    const hEls=els.filter(e=>(e.hoofd||'Overige bevindingen')===h);
-    const hKlap=window._aiaKlapH.has(h);
-    const totH=hEls.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-    const totV=hEls.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-    html+='<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;">';
-    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg1);cursor:pointer;" onclick="aiaKlapH(\''+escHtml(h).replace(/'/g,"\\'")+'\')">'+
-      '<span style="font-size:13px;">'+(hKlap?'›':'∨')+'</span>'+
-      '<span style="font-size:12px;font-weight:600;flex:1;">'+aiaIcon(h)+' '+escHtml(h)+'</span>'+
-      '<span style="font-size:11px;color:var(--text2);">'+hEls.length+' bevinding'+(hEls.length===1?'':'en')+'</span>'+
-      (totH?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(totH).toLocaleString('nl-NL')+'</span>':'')+
-      (totV?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(totV).toLocaleString('nl-NL')+'</span>':'')+
-    '</div>';
-    if(!hKlap){
-      const subs=[...new Set(hEls.map(e=>e.sub||''))];
-      subs.forEach(sub=>{
-        const sEls=hEls.filter(e=>(e.sub||'')===sub);
-        const sKey=h+'||'+sub;
-        const sKlap=window._aiaKlapS.has(sKey);
-        if(sub){
-          html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-top:0.5px solid var(--border);cursor:pointer;" onclick="aiaKlapS(\''+escHtml(sKey).replace(/'/g,"\\'")+'\')">'+
-            '<span style="font-size:11px;">'+(sKlap?'›':'∨')+'</span>'+
-            '<span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;">'+escHtml(sub)+'</span>'+
-            '<span style="font-size:10px;color:var(--text3);">('+sEls.length+')</span></div>';
-        }
-        if(!sub||!sKlap){sEls.forEach(e=>{html+=renderBevindingCard(e);});}
-      });
-    }
-    html+='</div>';
-  });
-
-  if(els.length){
-    const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-    const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">'+
-      '<div class="kosten-totaal-banner"><div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div><div class="kosten-totaal-amt">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🔧</div></div>'+
-      '<div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);"><div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div><div style="font-size:24px;font-weight:600;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🏗</div></div>'+
-    '</div>';
-    html+='<div class="btn-row" style="margin-top:14px;"><button class="btn btn-light" onclick="navToChapter(\'onderhoud\')">→ Totaaloverzicht bevindingen &amp; kosten</button><button class="btn btn-dark" onclick="navToChapter(\'mjop\')">→ MJOP</button></div>';
-  }
-  html+='<datalist id="aia-hoofden">'+hoofden.map(h=>'<option value="'+escHtml(h)+'">').join('')+'</datalist>';
-  container.innerHTML=html;
-}
-
-function aiaBevRij(e,fotos){
-  const open=window._aiaOpen.has(e.id);
-  const cond=CONDITIE[e.conditie||3]||'Matig';
-  const condKleuren={1:'var(--green-bg);color:var(--green-text)',2:'var(--green-bg);color:var(--green-text)',3:'var(--amber-bg);color:var(--amber-text)',4:'var(--orange-bg);color:var(--orange-text)',5:'var(--red-bg);color:var(--red-text)'};
-  let html='<div style="border-top:0.5px solid var(--border);">';
-  html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;" onclick="aiaToggleBev(\''+e.id+'\')">'+
-    '<span style="flex:1;min-width:0;">'+
-      '<span style="font-size:12px;font-weight:500;display:block;">'+escHtml(e.element||'Element')+'</span>'+
-      '<span style="font-size:10.5px;color:var(--text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(e.fotos?'📷 Foto '+escHtml(e.fotos)+' · ':'')+escHtml((e.beschrijving||'').substring(0,120))+'</span>'+
-    '</span>'+
-    '<span style="background:'+(condKleuren[e.conditie||3]||condKleuren[3])+';border-radius:4px;padding:2px 8px;font-size:10px;flex-shrink:0;">'+cond+'</span>'+
-    (e.kosten?'<span style="font-size:11px;flex-shrink:0;">🔧 €'+Math.round(e.kosten).toLocaleString('nl-NL')+'</span>':'')+
-    (e.kosten_vervanging?'<span style="font-size:11px;flex-shrink:0;color:var(--orange-text);">🏗 €'+Math.round(e.kosten_vervanging).toLocaleString('nl-NL')+'</span>':'')+
-    '<span style="font-size:12px;color:var(--text3);flex-shrink:0;" title="Verplaatsen of bewerken">'+(open?'∨':'›')+'</span>'+
-  '</div>';
-  if(open){
-    html+='<div style="padding:10px 12px;background:var(--bg1);display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
-      '<div class="field"><label>Element</label><input type="text" value="'+escHtml(e.element||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'element\',this.value)"/></div>'+
-      '<div class="field"><label>Conditie</label><select onchange="aiaBevEdit(\''+e.id+'\',\'conditie\',this.value)">'+[1,2,3,4,5].map(c=>'<option value="'+c+'"'+(c===(e.conditie||3)?' selected':'')+'>'+c+' '+CONDITIE[c]+'</option>').join('')+'</select></div>'+
-      '<div class="field"><label>Hoofdparagraaf</label><input type="text" list="aia-hoofden" id="aia-hoofd-'+e.id+'" value="'+escHtml(e.hoofd||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'hoofd\',this.value)"/></div>'+
-      '<div class="field"><label>Subparagraaf</label><input type="text" value="'+escHtml(e.sub||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'sub\',this.value)"/></div>'+
-      '<div class="field" style="grid-column:1/-1;"><label>Beschrijving</label><textarea rows="3" style="width:100%;resize:vertical;" onchange="aiaBevEdit(\''+e.id+'\',\'beschrijving\',this.value)">'+escHtml(e.beschrijving||'')+'</textarea></div>'+
-      '<div class="field"><label>Herstelkosten €</label><input type="number" min="0" value="'+(e.kosten||0)+'" onchange="aiaBevEdit(\''+e.id+'\',\'kosten\',this.value)"/></div>'+
-      '<div class="field"><label>Vervangingskosten €</label><input type="number" min="0" value="'+(e.kosten_vervanging||0)+'" onchange="aiaBevEdit(\''+e.id+'\',\'kosten_vervanging\',this.value)"/></div>'+
-      '<div class="field"><label>Foto\'s (nummers)</label><input type="text" value="'+escHtml(e.fotos||'')+'" placeholder="bv. 1, 4" onchange="aiaBevEdit(\''+e.id+'\',\'fotos\',this.value)"/></div>'+
-      '<div style="display:flex;align-items:flex-end;justify-content:flex-end;"><button class="btn btn-light btn-sm" onclick="aiaBevVerwijder(\''+e.id+'\')">🗑 Verwijderen</button></div>'+
-    '</div>';
-  }
-  html+='</div>';
   return html;
 }
 
-window.aiaKlapH=h=>{window._aiaKlapH.has(h)?window._aiaKlapH.delete(h):window._aiaKlapH.add(h);renderChapter(currentChapter);};
-window.aiaKlapS=k=>{window._aiaKlapS.has(k)?window._aiaKlapS.delete(k):window._aiaKlapS.add(k);renderChapter(currentChapter);};
-window.aiaToggleBev=id=>{window._aiaOpen.has(id)?window._aiaOpen.delete(id):window._aiaOpen.add(id);renderChapter(currentChapter);};
 window.aiaBevEdit=async(id,veld,waarde)=>{
   const opn=getOpname();const e=opn.elementen.find(x=>x.id===id);if(!e)return;
   if(['kosten','kosten_vervanging'].includes(veld))e[veld]=parseFloat(waarde)||0;
@@ -2374,7 +2285,7 @@ window.aiaBevVerwijder=async id=>{
 window.aiaFotoLabel=async(i,val)=>{const opn=getOpname();if(opn.fotos['analyse']&&opn.fotos['analyse'][i]){opn.fotos['analyse'][i].label=val;await saveOpnameData();}};
 window.aiaFotoVerwijder=async i=>{
   const opn=getOpname();if(!confirm('Foto '+(i+1)+' verwijderen? Let op: fotonummers in bevindingen schuiven niet automatisch mee.'))return;
-  opn.fotos['analyse'].splice(i,1);await saveOpnameData();renderChapter('aianalyse');
+  opn.fotos['analyse'].splice(i,1);await saveOpnameData();renderChapter(currentChapter);
 };
 
 function aiaPromptBasis(bestaandeStructuur){
@@ -2443,7 +2354,7 @@ window.analyseAIFotos=async()=>{
     }
     showToast(totaalItems+' bevindingen toegevoegd aan de analyse');
   }catch(err){showToast('Analyse mislukt: '+err.message);}
-  renderChapter('aianalyse');renderSidebarNav();
+  renderChapter('onderhoud');renderSidebarNav();
 };
 
 window.analyseAIFoto=async idx=>{
@@ -2468,7 +2379,7 @@ window.analyseAIFoto=async idx=>{
     await saveOpnameData();
     showToast((data.bevindingen||[]).length+' bevinding(en) toegevoegd');
   }catch(err){showToast('Fout: '+err.message);}
-  renderChapter('aianalyse');renderSidebarNav();
+  renderChapter('onderhoud');renderSidebarNav();
 };
 
 
