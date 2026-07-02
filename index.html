@@ -1061,7 +1061,7 @@ window.selectObject=async id=>{
   currentObjId=id;currentObj=objects.find(o=>o.id===id);
   activeSection='ai'; // Reset zodat geen snelle inspectie blauw blijft
   const snap=await db.collection('objects').doc(id).collection('meta').doc('opnames').get();
-  let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'A.I. inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+  let lijst=snap.exists?snap.data().lijst||[]:[{id:'opname_1',naam:'A.I. Analyse 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
   if(!snap.exists)await db.collection('objects').doc(id).collection('meta').doc('opnames').set({lijst});
   updateSidebar(lijst);
   currentOpnameId=lijst[0].id;
@@ -1099,7 +1099,7 @@ function renderSidebarNav(){
 
   const isChapter=ch=>{
     if(currentChapter!==ch)return'';
-    const isInspPara=INSP_PARAGRAFEN.some(p=>p.id===ch)||ch==='inspectieoverzicht';
+    const isInspPara=ch==='aianalyse'||ch==='inspectieoverzicht';
     if(isInspPara)return activeSection==='ai'?'active':'';
     if(activeSection==='snel')return'';
     return'active';
@@ -1113,7 +1113,7 @@ function renderSidebarNav(){
   html+='<div class="sb-section-label">Inspecties</div>';
 
   // SNELLE INSPECTIES
-  html+='<div class="insp-toggle'+(snelInspOpen?' open':'')+'" onclick="toggleSnelInsp()"><div class="sb-num">📋</div>Snelle inspecties<span class="sb-chev">›</span></div>';
+  html+='<div class="insp-toggle'+(snelInspOpen?' open':'')+'" onclick="toggleSnelInsp()"><div class="sb-num">📋</div>Conditiemetingen<span class="sb-chev">›</span></div>';
   if(snelInspOpen){
     snelInspectiesLijst.forEach(si=>{
       const isActive=si.id===currentSnelInspectieId&&activeSection==='snel';
@@ -1129,49 +1129,27 @@ function renderSidebarNav(){
       html+='</div>';
     });
   }
-  html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie</button>';
+  html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe conditiemeting</button>';
 
   // A.I. INSPECTIES
-  html+='<div class="insp-toggle'+(aiInspOpen?' open':'')+'" onclick="toggleAiInsp()"><div class="sb-num">🗂</div>A.I. inspecties<span class="sb-chev">›</span></div>'+
-    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe A.I. inspectie</button>';
+  html+='<div class="insp-toggle'+(aiInspOpen?' open':'')+'" onclick="toggleAiInsp()"><div class="sb-num">🗂</div>A.I. Analyses<span class="sb-chev">›</span></div>'+
+    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe A.I. analyse</button>';
 
   if(aiInspOpen){
     opnamesLijst.forEach(o=>{
-      const isActive=o.id===currentOpnameId&&activeSection==='ai'&&(currentChapter==='inspectieoverzicht'||INSP_PARAGRAFEN.some(p=>p.id===currentChapter)||['onderhoud','mjop','kosten','rapportage','snellinvoer'].includes(currentChapter));
+      const isActive=o.id===currentOpnameId&&activeSection==='ai'&&(currentChapter==='aianalyse'||currentChapter==='inspectieoverzicht'||['onderhoud','mjop','kosten','rapportage','snellinvoer'].includes(currentChapter));
       const menuOpen=openOpnameMenu===o.id;
       const ingeklapt=ingeklapteOpnames.has(o.id);
       html+='<div class="opname-block'+(isActive?' active':'')+'">'+
         '<div class="opname-head" onclick="switchOpname(\''+o.id+'\')">'+
-          '<span onclick="event.stopPropagation();toggleOpnameKlap(\''+o.id+'\')" style="cursor:pointer;font-size:11px;margin-right:3px;color:var(--text3);">'+(ingeklapt?'›':'∨')+'</span>'+
-          '📅 '+escHtml(o.naam)+' — '+escHtml(o.datum)+
+          '🗂 '+escHtml(o.naam)+' — '+escHtml(o.datum)+
           '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')">⋯</span>'+
         '</div>';
       if(menuOpen){
         html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Hele inspectie verwijderen</div></div>';
       }
       html+='</div>';
-      if(!ingeklapt&&isActive&&activeSection==='ai'){
-        const verborgen=opn.verborgenParagrafen||[];
-        INSP_PARAGRAFEN.forEach(p=>{
-          if(verborgen.includes(p.id))return;
-          const gevuld=inGevuld(o.id,p.id);
-          html+='<div class="sb-item sub '+(currentChapter===p.id&&activeSection==='ai'?'active':'')+'" onclick="activeSection=\'ai\';navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
-          if(!gevuld){
-            html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Niet-geinspecteerd onderdeel verbergen">×</span>';
-          }
-          html+='</div>';
-          if(confirmVerwijderParagraaf&&confirmVerwijderParagraaf.opnId===o.id&&confirmVerwijderParagraaf.chId===p.id){
-            html+='<div class="confirm-box">"'+p.naam+'" verbergen uit deze opname? Dit onderdeel is niet geïnspecteerd en verdwijnt uit de lijst. Je kunt het later weer terugzetten.'+
-              '<div class="confirm-row">'+
-                '<button class="confirm-btn danger" onclick="verbergParagraaf(\''+o.id+'\',\''+p.id+'\')">Verbergen</button>'+
-                '<button class="confirm-btn" onclick="toggleParagraafConfirm(null,null)">Annuleren</button>'+
-              '</div></div>';
-          }
-        });
-        if(verborgen.length){
-          html+='<button class="sb-show-hidden" onclick="toonVerborgenParagrafen(\''+o.id+'\')">↺ Toon '+verborgen.length+' verborgen onderdeel'+(verborgen.length>1?'en':'')+'</button>';
-        }
-      }
+
     });
   }
 
@@ -1197,7 +1175,7 @@ window.switchSnelInspectie=id=>{
 };
 window.nieuweSnelInspectie=async()=>{
   const nr=snelInspectiesLijst.length+1;
-  const naam=prompt('Naam voor de nieuwe snelle inspectie:','Snelle inspectie '+nr);
+  const naam=prompt('Naam voor de nieuwe conditiemeting:','Conditiemeting '+nr);
   if(!naam)return;
   const id='si_'+Date.now();
   snelInspectiesLijst.push({id,naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()});
@@ -1207,7 +1185,7 @@ window.nieuweSnelInspectie=async()=>{
   opn.snelInspectieData[id]={fotos:[],rijen:[]};
   await saveSnelInspectie();
   renderSidebarNav();const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
-  showToast('Nieuwe snelle inspectie aangemaakt');
+  showToast('Nieuwe conditiemeting aangemaakt');
 };
 window.verwijderSnelInspectie=async id=>{
   const si=snelInspectiesLijst.find(x=>x.id===id);
@@ -1297,7 +1275,7 @@ function resetSidebar(){
 
 window.switchOpname=async val=>{
   if(val==='__nieuw'){
-    const naam=prompt('Naam voor de nieuwe A.I. inspectie:','A.I. inspectie '+(opnamesLijst.length+1));if(!naam)return;
+    const naam=prompt('Naam voor de nieuwe A.I. analyse:','A.I. Analyse '+(opnamesLijst.length+1));if(!naam)return;
     const snap=await db.collection('objects').doc(currentObjId).collection('meta').doc('opnames').get();
     const lijst=snap.exists?snap.data().lijst||[]:[]; 
     const nieuw={id:'opname_'+Date.now(),naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()};
@@ -1307,14 +1285,14 @@ window.switchOpname=async val=>{
     opnames[nieuw.id]={fotos:{},elementen:[],mjop:[]};
     activeSection='ai';
     renderSidebarNav();
-    navToChapter('inspectieoverzicht');showToast('Nieuwe A.I. inspectie aangemaakt');return;
+    navToChapter('aianalyse');showToast('Nieuwe A.I. analyse aangemaakt');return;
   }
   if(val!==currentOpnameId){
     currentOpnameId=val;await loadOpnameData(currentObjId,val);
   }
   activeSection='ai';
   renderSidebarNav();
-  navToChapter('inspectieoverzicht');
+  navToChapter('aianalyse');
 };
 
 async function loadOpnameData(objId,opnId){
@@ -1339,7 +1317,7 @@ async function loadOpnameData(objId,opnId){
         const legacyData=sisData.data||{fotos:[],rijen:[]};
         if(legacyData.rijen?.length||legacyData.fotos?.length){
           const id='si_'+Date.now();
-          snelInspectiesLijst=[{id,naam:'Snelle inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+          snelInspectiesLijst=[{id,naam:'Conditiemeting 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
           currentSnelInspectieId=id;
           opnames[opnId].snelInspectieData={[id]:legacyData};
         } else {
@@ -1400,7 +1378,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Snelle inspectie',i:'📋'},inspectieoverzicht:{n:'Inspectie overzicht',i:'🗂'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Conditiemeting',i:'📋'},inspectieoverzicht:{n:'A.I. Analyse',i:'🗂'},aianalyse:{n:'A.I. Analyse',i:'🗂'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
     const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
@@ -1767,7 +1745,7 @@ function renderHuurTaxatie(container){
   '</div></div>'+
   '<div class="btn-row" style="margin-top:14px;">'+
     '<button class="btn btn-light" onclick="navToChapter(\'gebouwpaspoort\')">← Vorige: Gebouwpaspoort</button>'+
-    '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">Volgende: Gevels &amp; exterieur →</button>'+
+    '<button class="btn btn-dark" onclick="navToChapter(\'aianalyse\')">Volgende: A.I. Analyse →</button>'+
   '</div>';
 
   container.innerHTML=html;
@@ -1809,11 +1787,9 @@ function renderChapter(chId){
   if(chId==='kosten'){renderKosten(container);return;}
   if(chId==='snellinvoer'){renderSnelInvoer(container);return;}
   if(chId==='snelinspectie'){renderSnelInspectie(container);return;}
-  if(chId==='inspectieoverzicht'){renderInspectieOverzicht(container);return;}
+  if(chId==='inspectieoverzicht'||chId==='aianalyse'){renderAIAnalyse(container);return;}
   if(chId==='rapportage'){renderRapportage(container);return;}
-  const para=INSP_PARAGRAFEN.find(p=>p.id===chId);
-  if(!para)return;
-  renderInspectie(container,para);
+  if(INSP_PARAGRAFEN.some(p=>p.id===chId)){currentChapter='aianalyse';renderAIAnalyse(container);return;}
 }
 
 function renderInspectie(container,para){
@@ -2003,43 +1979,91 @@ window.addSubTab=chId=>{
 // ONDERHOUD & HERSTEL
 function renderOnderhoud(container){
   const opn=getOpname();
-  const els=opn.elementen.filter(e=>e.chapterId!=='snellinvoer');
-  if(!els.length){
-    container.innerHTML='<div class="section-title">🔧 Onderhoud & herstel</div><div class="empty"><div class="empty-icon">🔧</div><p>Voer eerst inspecties uit in de paragrafen.<br>De bevindingen verschijnen hier automatisch.</p></div>'+
-      '<button class="btn btn-dark" onclick="navToChapter(\'gevels\')">→ Naar inspectie</button>';return;
-  }
-  // Detecteer dubbele elementnamen over verschillende paragrafen heen
-  const naamMap={};
-  els.forEach(e=>{
-    const naam=(e.element||'').toLowerCase().trim();if(!naam)return;
-    if(!naamMap[naam])naamMap[naam]=[];
-    naamMap[naam].push(e);
+  // A.I. Analyse-bevindingen (nieuw formaat + legacy paragraafdata)
+  const els=(opn.elementen||[]).filter(e=>e.chapterId!=='snellinvoer').map(e=>{
+    if(!e.hoofd){const p=INSP_PARAGRAFEN.find(p=>p.id===e.chapterId);e.hoofd=p?p.naam:(e.chapterId==='analyse'?'Overige bevindingen':e.chapterId);}
+    return e;
   });
-  const dubbeleGroepen=Object.values(naamMap).filter(g=>g.length>1&&new Set(g.map(e=>e.chapterId)).size>1);
+  // Conditiemeting-rijen
+  const cms=snelInspectiesLijst.map(si=>({si,rijen:(opn.snelInspectieData&&opn.snelInspectieData[si.id]?opn.snelInspectieData[si.id].rijen:[])||[]})).filter(c=>c.rijen.length);
+  if(!els.length&&!cms.length){
+    container.innerHTML='<div class="section-title">🔧 Onderhoud & herstel</div><div class="empty"><div class="empty-icon">🔧</div><p>Voer eerst een conditiemeting of A.I. analyse uit.<br>De bevindingen verschijnen hier automatisch.</p></div>'+
+      '<button class="btn btn-dark" onclick="navToChapter(\'aianalyse\')">→ Naar A.I. Analyse</button>';return;
+  }
+  if(!window._aiaKlapH)window._aiaKlapH=new Set();
+  if(!window._aiaKlapS)window._aiaKlapS=new Set();
+  if(!window._aiaOpen)window._aiaOpen=new Set();
+  if(!window._onderhoudIngeklapt)window._onderhoudIngeklapt=new Set();
+  // Dubbel-detectie over beide instrumenten
+  const naamMap={};
+  els.forEach(e=>{const n=(e.element||'').toLowerCase().trim();if(!n)return;(naamMap[n]=naamMap[n]||[]).push({naam:e.element,bron:e.hoofd});});
+  cms.forEach(({si,rijen})=>rijen.forEach(r=>{const n=(r.element||'').toLowerCase().trim();if(!n)return;(naamMap[n]=naamMap[n]||[]).push({naam:r.element,bron:si.naam});}));
+  const dubbeleGroepen=Object.values(naamMap).filter(g=>g.length>1&&new Set(g.map(x=>x.bron)).size>1);
   let html='<div class="section-title">🔧 Onderhoud & herstel — alle bevindingen</div>';
   if(dubbeleGroepen.length){
     html+='<div style="background:var(--amber-bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--amber-text);">'+
-      '⚠️ <strong>'+dubbeleGroepen.length+' element(en) komen mogelijk dubbel voor</strong> in meerdere paragrafen — dit kan tot dubbele kosten leiden. Controleer: '+
-      dubbeleGroepen.map(g=>escHtml(g[0].element)+' ('+g.map(e=>INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId).join(', ')+')').join('; ')+
+      '⚠️ <strong>'+dubbeleGroepen.length+' element(en) komen mogelijk dubbel voor</strong> — dit kan tot dubbele kosten leiden. Controleer: '+
+      dubbeleGroepen.map(g=>escHtml(g[0].naam)+' ('+[...new Set(g.map(x=>x.bron))].map(escHtml).join(', ')+')').join('; ')+
     '</div>';
   }
-  if(!window._onderhoudIngeklapt)window._onderhoudIngeklapt=new Set();
-  INSP_PARAGRAFEN.forEach(para=>{
-    const paraEls=els.filter(e=>e.chapterId===para.id);if(!paraEls.length)return;
-    const ingeklapt=window._onderhoudIngeklapt.has(para.id);
-    const totH=paraEls.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-    const totV=paraEls.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
-    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleOnderhoudPara(\''+para.id+'\')">'+
+  let totH=0,totV=0;
+  // Conditiemetingen
+  cms.forEach(({si,rijen})=>{
+    const key='cm_'+si.id;
+    const ingeklapt=window._onderhoudIngeklapt.has(key);
+    const h=rijen.reduce((s,r)=>s+(parseFloat(r.herstel)||0),0);
+    const v=rijen.reduce((s,r)=>s+(parseFloat(r.vervanging)||0),0);
+    totH+=h;totV+=v;
+    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleOnderhoudPara(\''+key+'\')">'+
       '<span style="font-size:13px;">'+(ingeklapt?'›':'∨')+'</span>'+
-      '<span style="font-size:12px;font-weight:600;color:var(--text2);flex:1;">'+para.icon+' '+para.naam+'</span>'+
-      '<span style="font-size:11px;color:var(--text2);">'+paraEls.length+' bevinding'+(paraEls.length===1?'':'en')+'</span>'+
-      (totH?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(totH).toLocaleString('nl-NL')+'</span>':'')+
-      (totV?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(totV).toLocaleString('nl-NL')+'</span>':'')+
+      '<span style="font-size:12px;font-weight:600;color:var(--text2);flex:1;">📋 '+escHtml(si.naam)+' — '+escHtml(si.datum)+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);">'+rijen.length+' bevinding'+(rijen.length===1?'':'en')+'</span>'+
+      (h?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(h).toLocaleString('nl-NL')+'</span>':'')+
+      (v?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(v).toLocaleString('nl-NL')+'</span>':'')+
     '</div>';
-    if(!ingeklapt){paraEls.forEach(el=>{html+=renderBevindingCard(el);});}
+    if(!ingeklapt){
+      const condKleuren={1:'var(--green-bg);color:var(--green-text)',2:'var(--green-bg);color:var(--green-text)',3:'var(--amber-bg);color:var(--amber-text)',4:'var(--orange-bg);color:var(--orange-text)',5:'var(--red-bg);color:var(--red-text)'};
+      html+='<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;">';
+      rijen.forEach(r=>{
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:0.5px solid var(--border);">'+
+          '<span style="flex:1;min-width:0;"><span style="font-size:12px;font-weight:500;display:block;">'+escHtml(r.element||'Element')+'</span>'+
+          '<span style="font-size:10.5px;color:var(--text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.fotos?'📷 Foto '+escHtml(String(r.fotos))+' · ':'')+escHtml((r.omschrijving||'').substring(0,120))+'</span></span>'+
+          '<span style="background:'+(condKleuren[r.conditie||3]||condKleuren[3])+';border-radius:4px;padding:2px 8px;font-size:10px;flex-shrink:0;">'+(CONDITIE[r.conditie||3]||'')+'</span>'+
+          ((parseFloat(r.herstel)||0)?'<span style="font-size:11px;flex-shrink:0;">🔧 €'+Math.round(parseFloat(r.herstel)).toLocaleString('nl-NL')+'</span>':'')+
+          ((parseFloat(r.vervanging)||0)?'<span style="font-size:11px;flex-shrink:0;color:var(--orange-text);">🏗 €'+Math.round(parseFloat(r.vervanging)).toLocaleString('nl-NL')+'</span>':'')+
+        '</div>';
+      });
+      html+='</div>';
+    }
   });
-  const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+  // A.I. Analyse-paragrafen
+  const fotos=(opn.fotos&&opn.fotos['analyse'])||[];
+  const hoofden=[...new Set(els.map(e=>e.hoofd))];
+  hoofden.forEach(h=>{
+    const hEls=els.filter(e=>e.hoofd===h);
+    const ingeklapt=window._onderhoudIngeklapt.has('h_'+h);
+    const hH=hEls.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const hV=hEls.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+    totH+=hH;totV+=hV;
+    html+='<div style="margin-bottom:6px;padding:7px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer;" data-h="h_'+escHtml(h)+'" onclick="toggleOnderhoudPara(this.dataset.h)">'+
+      '<span style="font-size:13px;">'+(ingeklapt?'›':'∨')+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--text2);flex:1;">'+aiaIcon(h)+' '+escHtml(h)+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);">'+hEls.length+' bevinding'+(hEls.length===1?'':'en')+'</span>'+
+      (hH?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(hH).toLocaleString('nl-NL')+'</span>':'')+
+      (hV?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(hV).toLocaleString('nl-NL')+'</span>':'')+
+    '</div>';
+    if(!ingeklapt){
+      html+='<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;">';
+      const subs=[...new Set(hEls.map(e=>e.sub||''))];
+      subs.forEach(sub=>{
+        const sEls=hEls.filter(e=>(e.sub||'')===sub);
+        if(sub)html+='<div style="padding:5px 12px;border-top:0.5px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;">'+escHtml(sub)+' ('+sEls.length+')</div>';
+        sEls.forEach(e=>{html+=aiaBevRij(e,fotos);});
+      });
+      html+='</div>';
+    }
+  });
+  html+='<datalist id="aia-hoofden">'+hoofden.map(h=>'<option value="'+escHtml(h)+'">').join('')+'</datalist>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">'+
     '<div class="kosten-totaal-banner"><div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div><div class="kosten-totaal-amt">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🔧</div></div>'+
     '<div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);"><div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div><div style="font-size:24px;font-weight:600;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🏗</div></div>'+
@@ -2159,7 +2183,7 @@ window.genereerMJOP=async()=>{
   mjopEditMode=false;
   const loadEl=document.getElementById('mjop-loading');const pbar=document.getElementById('mjop-pbar');
   if(loadEl)loadEl.style.display='block';if(pbar)pbar.style.width='20%';
-  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): conditie '+CONDITIE[e.conditie||3]+' | herstel €'+( e.kosten||0)+' | vervanging €'+(e.kosten_vervanging||0)).join('\n');
+  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+(e.hoofd||INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): conditie '+CONDITIE[e.conditie||3]+' | herstel €'+( e.kosten||0)+' | vervanging €'+(e.kosten_vervanging||0)).join('\n');
   const obj=currentObj;
   try{
     if(pbar)pbar.style.width='50%';
@@ -2197,15 +2221,261 @@ Alleen JSON, niets anders.`}]);
 };
 
 
+
+// A.I. ANALYSE (nieuwe opzet: AI bepaalt hoofd- en subparagrafen)
+const AIA_ICONS=[['gevel','🧱'],['dak','🏠'],['kozijn','🪟'],['beglazing','🪟'],['install','⚙️'],['binnen','🏢'],['terrein','🌳'],['buiten','🌳'],['constructie','🏗'],['entree','🚪'],['toegang','🚪']];
+function aiaIcon(naam){const n=(naam||'').toLowerCase();const hit=AIA_ICONS.find(([k])=>n.includes(k));return hit?hit[1]:'📁';}
+function aiaEls(opn){return (opn.elementen||[]).filter(e=>e.chapterId==='analyse');}
+function aiaHoofden(opn){return [...new Set(aiaEls(opn).map(e=>e.hoofd||'Overige bevindingen'))];}
+
+function renderAIAnalyse(container){
+  const opn=getOpname();
+  const insp=opnamesLijst.find(o=>o.id===currentOpnameId);
+  const fotos=opn.fotos['analyse']||[];
+  const els=aiaEls(opn);
+  if(!window._aiaKlapH)window._aiaKlapH=new Set();
+  if(!window._aiaKlapS)window._aiaKlapS=new Set();
+  if(!window._aiaOpen)window._aiaOpen=new Set();
+  let html='<div class="section-title">🗂 '+escHtml(insp?insp.naam+' — '+insp.datum:'A.I. Analyse')+'</div>';
+
+  // Uploadzone
+  html+='<div class="foto-zone" id="fotozone-analyse" onclick="document.getElementById(\'fotoinput-analyse\').click()" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" ondrop="handleDrop(event,\'analyse\')">'+
+    '<div style="font-size:20px;">📷</div>'+
+    '<div style="font-size:13px;font-weight:600;">'+(fotos.length?fotos.length+' foto\'s geladen':'Foto\'s uploaden')+'</div>'+
+    '<div style="font-size:11px;color:var(--text3);">Tik of sleep meerdere foto\'s tegelijk hierheen</div>'+
+    '<input type="file" id="fotoinput-analyse" accept="image/*" multiple style="display:none;" onchange="handleFotoUpload(event,\'analyse\')"/>'+
+  '</div>';
+
+  // Fotogrid
+  if(fotos.length){
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:10px 0;">';
+    fotos.forEach((f,i)=>{
+      html+='<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;position:relative;">'+
+        '<span style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:1px 6px;border-radius:4px;">'+(i+1)+(f.geanalyseerd?' ✓':'')+'</span>'+
+        '<span style="position:absolute;top:4px;right:4px;display:flex;gap:3px;">'+
+          (!f.geanalyseerd?'<button onclick="analyseAIFoto('+i+')" style="background:rgba(30,100,200,.85);border:none;cursor:pointer;color:#fff;font-size:10px;padding:2px 5px;border-radius:4px;" title="Deze foto apart analyseren">✦</button>':'')+
+          '<button onclick="aiaFotoVerwijder('+i+')" style="background:rgba(0,0,0,.55);border:none;cursor:pointer;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;" title="Foto verwijderen">×</button>'+
+        '</span>'+
+        '<img src="'+f.dataUrl+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;"/>'+
+        '<input type="text" value="'+escHtml(f.label||'')+'" onchange="aiaFotoLabel('+i+',this.value)" style="width:100%;border:none;border-top:0.5px solid var(--border);padding:4px 7px;font-size:10.5px;background:var(--bg);color:var(--text);"/>'+
+      '</div>';
+    });
+    html+='</div>';
+    const nieuw=fotos.filter(f=>!f.geanalyseerd).length;
+    html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">'+
+      (nieuw?'<button id="aia-gen-btn" class="btn btn-blue btn-sm" onclick="analyseAIFotos()">✦ Analyseer '+nieuw+' foto\'s</button>'+
+        '<span class="no-print" style="font-size:11px;color:var(--text3);">AI groepeert bevindingen zelf in hoofd- en subparagrafen'+(els.length?' en vult de bestaande structuur aan':'')+'</span>'
+      :'<span class="no-print" style="font-size:11px;color:var(--green-text);">✓ Alle foto\'s zijn geanalyseerd — upload nieuwe foto\'s om aan te vullen</span>')+
+    '</div>';
+  }
+
+  // Paragrafen met bevindingen
+  if(!els.length&&!fotos.length){
+    html+='<div class="empty" style="margin-top:10px;"><div class="empty-icon">🗂</div><p>Upload foto\'s en laat de AI de analyse opbouwen.<br>De AI bepaalt zelf de hoofd- en subparagrafen.</p></div>';
+  }
+  const hoofden=aiaHoofden(opn);
+  hoofden.forEach(h=>{
+    const hEls=els.filter(e=>(e.hoofd||'Overige bevindingen')===h);
+    const hKlap=window._aiaKlapH.has(h);
+    const totH=hEls.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const totV=hEls.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+    html+='<div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg1);cursor:pointer;" onclick="aiaKlapH(\''+escHtml(h).replace(/'/g,"\\'")+'\')">'+
+      '<span style="font-size:13px;">'+(hKlap?'›':'∨')+'</span>'+
+      '<span style="font-size:12px;font-weight:600;flex:1;">'+aiaIcon(h)+' '+escHtml(h)+'</span>'+
+      '<span style="font-size:11px;color:var(--text2);">'+hEls.length+' bevinding'+(hEls.length===1?'':'en')+'</span>'+
+      (totH?'<span style="font-size:11px;color:var(--text2);">🔧 €'+Math.round(totH).toLocaleString('nl-NL')+'</span>':'')+
+      (totV?'<span style="font-size:11px;color:var(--orange-text);">🏗 €'+Math.round(totV).toLocaleString('nl-NL')+'</span>':'')+
+    '</div>';
+    if(!hKlap){
+      const subs=[...new Set(hEls.map(e=>e.sub||''))];
+      subs.forEach(sub=>{
+        const sEls=hEls.filter(e=>(e.sub||'')===sub);
+        const sKey=h+'||'+sub;
+        const sKlap=window._aiaKlapS.has(sKey);
+        if(sub){
+          html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-top:0.5px solid var(--border);cursor:pointer;" onclick="aiaKlapS(\''+escHtml(sKey).replace(/'/g,"\\'")+'\')">'+
+            '<span style="font-size:11px;">'+(sKlap?'›':'∨')+'</span>'+
+            '<span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;">'+escHtml(sub)+'</span>'+
+            '<span style="font-size:10px;color:var(--text3);">('+sEls.length+')</span></div>';
+        }
+        if(!sub||!sKlap){sEls.forEach(e=>{html+=aiaBevRij(e,fotos);});}
+      });
+    }
+    html+='</div>';
+  });
+
+  if(els.length){
+    const totH=els.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+    const totV=els.reduce((s,e)=>s+(parseFloat(e.kosten_vervanging)||0),0);
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">'+
+      '<div class="kosten-totaal-banner"><div><div class="kosten-totaal-label">Totaal herstel / onderhoud</div><div class="kosten-totaal-amt">€ '+Math.round(totH).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🔧</div></div>'+
+      '<div class="kosten-totaal-banner" style="background:var(--orange-bg);color:var(--orange-text);"><div><div class="kosten-totaal-label" style="opacity:.7;">Totaal vervanging</div><div style="font-size:24px;font-weight:600;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</div></div><div style="font-size:20px;opacity:.4;">🏗</div></div>'+
+    '</div>';
+    html+='<div class="btn-row" style="margin-top:14px;"><button class="btn btn-light" onclick="navToChapter(\'onderhoud\')">→ Totaaloverzicht bevindingen &amp; kosten</button><button class="btn btn-dark" onclick="navToChapter(\'mjop\')">→ MJOP</button></div>';
+  }
+  html+='<datalist id="aia-hoofden">'+hoofden.map(h=>'<option value="'+escHtml(h)+'">').join('')+'</datalist>';
+  container.innerHTML=html;
+}
+
+function aiaBevRij(e,fotos){
+  const open=window._aiaOpen.has(e.id);
+  const cond=CONDITIE[e.conditie||3]||'Matig';
+  const condKleuren={1:'var(--green-bg);color:var(--green-text)',2:'var(--green-bg);color:var(--green-text)',3:'var(--amber-bg);color:var(--amber-text)',4:'var(--orange-bg);color:var(--orange-text)',5:'var(--red-bg);color:var(--red-text)'};
+  let html='<div style="border-top:0.5px solid var(--border);">';
+  html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;" onclick="aiaToggleBev(\''+e.id+'\')">'+
+    '<span style="flex:1;min-width:0;">'+
+      '<span style="font-size:12px;font-weight:500;display:block;">'+escHtml(e.element||'Element')+'</span>'+
+      '<span style="font-size:10.5px;color:var(--text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(e.fotos?'📷 Foto '+escHtml(e.fotos)+' · ':'')+escHtml((e.beschrijving||'').substring(0,120))+'</span>'+
+    '</span>'+
+    '<span style="background:'+(condKleuren[e.conditie||3]||condKleuren[3])+';border-radius:4px;padding:2px 8px;font-size:10px;flex-shrink:0;">'+cond+'</span>'+
+    (e.kosten?'<span style="font-size:11px;flex-shrink:0;">🔧 €'+Math.round(e.kosten).toLocaleString('nl-NL')+'</span>':'')+
+    (e.kosten_vervanging?'<span style="font-size:11px;flex-shrink:0;color:var(--orange-text);">🏗 €'+Math.round(e.kosten_vervanging).toLocaleString('nl-NL')+'</span>':'')+
+    '<span style="font-size:12px;color:var(--text3);flex-shrink:0;" title="Verplaatsen of bewerken">'+(open?'∨':'›')+'</span>'+
+  '</div>';
+  if(open){
+    html+='<div style="padding:10px 12px;background:var(--bg1);display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+      '<div class="field"><label>Element</label><input type="text" value="'+escHtml(e.element||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'element\',this.value)"/></div>'+
+      '<div class="field"><label>Conditie</label><select onchange="aiaBevEdit(\''+e.id+'\',\'conditie\',this.value)">'+[1,2,3,4,5].map(c=>'<option value="'+c+'"'+(c===(e.conditie||3)?' selected':'')+'>'+c+' '+CONDITIE[c]+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>Hoofdparagraaf</label><input type="text" list="aia-hoofden" id="aia-hoofd-'+e.id+'" value="'+escHtml(e.hoofd||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'hoofd\',this.value)"/></div>'+
+      '<div class="field"><label>Subparagraaf</label><input type="text" value="'+escHtml(e.sub||'')+'" onchange="aiaBevEdit(\''+e.id+'\',\'sub\',this.value)"/></div>'+
+      '<div class="field" style="grid-column:1/-1;"><label>Beschrijving</label><textarea rows="3" style="width:100%;resize:vertical;" onchange="aiaBevEdit(\''+e.id+'\',\'beschrijving\',this.value)">'+escHtml(e.beschrijving||'')+'</textarea></div>'+
+      '<div class="field"><label>Herstelkosten €</label><input type="number" min="0" value="'+(e.kosten||0)+'" onchange="aiaBevEdit(\''+e.id+'\',\'kosten\',this.value)"/></div>'+
+      '<div class="field"><label>Vervangingskosten €</label><input type="number" min="0" value="'+(e.kosten_vervanging||0)+'" onchange="aiaBevEdit(\''+e.id+'\',\'kosten_vervanging\',this.value)"/></div>'+
+      '<div class="field"><label>Foto\'s (nummers)</label><input type="text" value="'+escHtml(e.fotos||'')+'" placeholder="bv. 1, 4" onchange="aiaBevEdit(\''+e.id+'\',\'fotos\',this.value)"/></div>'+
+      '<div style="display:flex;align-items:flex-end;justify-content:flex-end;"><button class="btn btn-light btn-sm" onclick="aiaBevVerwijder(\''+e.id+'\')">🗑 Verwijderen</button></div>'+
+    '</div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+window.aiaKlapH=h=>{window._aiaKlapH.has(h)?window._aiaKlapH.delete(h):window._aiaKlapH.add(h);renderChapter(currentChapter);};
+window.aiaKlapS=k=>{window._aiaKlapS.has(k)?window._aiaKlapS.delete(k):window._aiaKlapS.add(k);renderChapter(currentChapter);};
+window.aiaToggleBev=id=>{window._aiaOpen.has(id)?window._aiaOpen.delete(id):window._aiaOpen.add(id);renderChapter(currentChapter);};
+window.aiaBevEdit=async(id,veld,waarde)=>{
+  const opn=getOpname();const e=opn.elementen.find(x=>x.id===id);if(!e)return;
+  if(['kosten','kosten_vervanging'].includes(veld))e[veld]=parseFloat(waarde)||0;
+  else if(veld==='conditie')e[veld]=parseInt(waarde)||3;
+  else e[veld]=waarde;
+  await saveOpnameData();
+  if(['hoofd','sub','kosten','kosten_vervanging','conditie'].includes(veld))renderChapter(currentChapter);
+};
+window.aiaBevVerwijder=async id=>{
+  const opn=getOpname();const e=opn.elementen.find(x=>x.id===id);
+  if(!confirm('Bevinding "'+(e?.element||'')+'" verwijderen?'))return;
+  opn.elementen=opn.elementen.filter(x=>x.id!==id);
+  await saveOpnameData();renderChapter(currentChapter);
+};
+window.aiaFotoLabel=async(i,val)=>{const opn=getOpname();if(opn.fotos['analyse']&&opn.fotos['analyse'][i]){opn.fotos['analyse'][i].label=val;await saveOpnameData();}};
+window.aiaFotoVerwijder=async i=>{
+  const opn=getOpname();if(!confirm('Foto '+(i+1)+' verwijderen? Let op: fotonummers in bevindingen schuiven niet automatisch mee.'))return;
+  opn.fotos['analyse'].splice(i,1);await saveOpnameData();renderChapter('aianalyse');
+};
+
+function aiaPromptBasis(bestaandeStructuur){
+  return 'BELANGRIJK — Conditiewoord en beschrijving MOETEN consistent zijn. Kies EERST het conditiewoord, gebruik daarna exact dat woord:\n'+
+  '- "Goed": geen zichtbare gebreken\n- "Redelijk": lichte cosmetische gebreken\n- "Matig": zichtbare slijtage, onderhoud middellange termijn\n- "Slecht": duidelijke gebreken, korte termijn herstel\n- "Zeer slecht": ernstige schade, directe actie\n\n'+
+  'PARAGRAAFINDELING — Groepeer elke bevinding zelf onder een logische hoofdparagraaf (bijv. "Gevels & exterieur", "Dak & hemelwaterafvoer", "Kozijnen & beglazing", "Installaties", "Binnenzijde", "Buitenterrein") en een specifiekere subparagraaf (bijv. "Gevelconstructie", "Entree & luifel", "Dakvlak").\n'+
+  (bestaandeStructuur?'HERGEBRUIK deze bestaande paragrafen waar passend (maak alleen nieuwe aan als het echt niet past):\n'+bestaandeStructuur+'\n\n':'')+
+  'Per bevinding ook: element, materiaal, hoeveelheid+eenheid (m², m¹, stuks), beschrijving met fotoverwijzing, herstelkosten (0 bij Goed/Redelijk zonder onderhoud) met onderbouwing "uit te voeren werkzaamheden: [omschrijving] ([hoeveelheid] × €[prijs] = €[totaal])", vervangingskosten met onderbouwing, en fotos: array met fotonummers.\n';
+}
+function aiaBestaandeStructuur(opn){
+  const els=aiaEls(opn);if(!els.length)return'';
+  const map={};els.forEach(e=>{const h=e.hoofd||'Overige bevindingen';if(!map[h])map[h]=new Set();if(e.sub)map[h].add(e.sub);});
+  return Object.entries(map).map(([h,subs])=>'- '+h+(subs.size?' ('+[...subs].join(', ')+')':'')).join('\n');
+}
+function aiaVerwerkItems(opn,items,fotoIndexen){
+  items.forEach((item,i)=>{
+    let beschrijving=item.beschrijving||'';
+    const nrs=Array.isArray(item.fotos)?item.fotos.join(', '):(item.fotos||'');
+    opn.elementen.push({
+      id:'analyse_'+Date.now()+'_'+Math.floor(Math.random()*1e5)+'_'+i,chapterId:'analyse',aiAnalyse:true,
+      hoofd:item.hoofdparagraaf||'Overige bevindingen',sub:item.subparagraaf||'',
+      element:item.element||'Element',materiaal:item.materiaal||'',hoeveelheid:item.hoeveelheid||'',eenheid:item.eenheid||'',
+      conditie:trefwoordNaarConditie(item.conditie_trefwoord)||item.conditie||3,beschrijving,
+      kosten:item.kosten||0,kosten_onderbouwing:item.kosten_onderbouwing||'',
+      kosten_vervanging:item.kosten_vervanging||0,kosten_vervanging_onderbouwing:item.kosten_vervanging_onderbouwing||'',
+      fotos:nrs,isolatie:item.isolatie||'',prijs_herstel:'',prijs_vervanging:'',
+    });
+  });
+}
+
+window.analyseAIFotos=async()=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navTo('settings');return;}
+  const opn=getOpname();
+  const fotos=opn.fotos['analyse']||[];
+  const nieuwe=fotos.map((f,i)=>({f,i})).filter(({f})=>!f.geanalyseerd);
+  if(!nieuwe.length){showToast('Alle foto\'s zijn al geanalyseerd');return;}
+  const btn=document.getElementById('aia-gen-btn');
+  if(btn){btn.textContent='⏳ Bezig...';btn.disabled=true;}
+  const CHUNK=6;
+  let totaalItems=0;
+  try{
+    for(let c=0;c<nieuwe.length;c+=CHUNK){
+      const chunk=nieuwe.slice(c,c+CHUNK);
+      if(btn)btn.textContent='⏳ Foto '+(c+1)+'–'+Math.min(c+CHUNK,nieuwe.length)+' van '+nieuwe.length+'...';
+      const content=chunk.map(({f})=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}}));
+      const nummering=chunk.map(({i})=>'Foto '+(i+1)).join(', ');
+      content.push({type:'text',text:
+        'Dit zijn foto\'s van een bouwkundige inspectie van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+'). Fotonummering in deze set: '+nummering+'\n\n'+
+        aiaPromptBasis(aiaBestaandeStructuur(opn))+
+        '\nGeef ook per foto een kort bijschrift van max 4 woorden in foto_omschrijvingen (zelfde volgorde als de foto\'s).\n\n'+
+        'Reageer ALLEEN als JSON:\n{"foto_omschrijvingen":["Voorgevel overzicht","Detail kozijn"],"bevindingen":[{"hoofdparagraaf":"Gevels & exterieur","subparagraaf":"Gevelconstructie","element":"Stalen gevelplaten","materiaal":"Staal trapeziumprofiel","hoeveelheid":"800","eenheid":"m²","conditie_trefwoord":"Redelijk","beschrijving":"Plaatselijk corrosie bij maaiveld, zie foto 1","fotos":[1,4],"kosten":2400,"kosten_onderbouwing":"uit te voeren werkzaamheden: plaatselijk behandelen (60 m² × €40/m² = €2.400)","kosten_vervanging":80000,"kosten_vervanging_onderbouwing":"vervanging: nieuwe beplating (800 m² × €100/m² = €80.000)","isolatie":""}]}\nAlleen JSON, niets anders.'});
+      const raw=await callClaude(content);
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const s=clean.indexOf('{'),e=clean.lastIndexOf('}');
+      if(s<0||e<=s)throw new Error('Ongeldig JSON antwoord');
+      const data=JSON.parse(clean.substring(s,e+1));
+      (data.foto_omschrijvingen||[]).forEach((label,li)=>{
+        const {i}=chunk[li]||{};
+        if(fotos[i]&&(!fotos[i].label||/^Foto \d+$/.test(fotos[i].label)))fotos[i].label=label;
+      });
+      chunk.forEach(({f})=>{f.geanalyseerd=true;});
+      aiaVerwerkItems(opn,data.bevindingen||[],chunk.map(({i})=>i));
+      totaalItems+=(data.bevindingen||[]).length;
+      await saveOpnameData();
+    }
+    showToast(totaalItems+' bevindingen toegevoegd aan de analyse');
+  }catch(err){showToast('Analyse mislukt: '+err.message);}
+  renderChapter('aianalyse');renderSidebarNav();
+};
+
+window.analyseAIFoto=async idx=>{
+  if(!getApiKey()){showToast('Stel eerst je API-sleutel in');return;}
+  const opn=getOpname();
+  const foto=(opn.fotos['analyse']||[])[idx];if(!foto)return;
+  showToast('Foto '+(idx+1)+' analyseren...');
+  try{
+    const raw=await callClaude([
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:foto.dataUrl.split(',')[1]}},
+      {type:'text',text:'Dit is foto '+(idx+1)+' van een bouwkundige inspectie (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+
+        aiaPromptBasis(aiaBestaandeStructuur(opn))+
+        '\nGeef ook een kort bijschrift van max 4 woorden in foto_omschrijving.\n\nReageer ALLEEN als JSON:\n{"foto_omschrijving":"Kozijn onderdorpel","bevindingen":[{"hoofdparagraaf":"Kozijnen & beglazing","subparagraaf":"Entreepui","element":"Aluminium kozijn","materiaal":"Aluminium","hoeveelheid":"1","eenheid":"stuks","conditie_trefwoord":"Matig","beschrijving":"Onderdorpel beschadigd, zie foto '+(idx+1)+'","fotos":['+(idx+1)+'],"kosten":450,"kosten_onderbouwing":"uit te voeren werkzaamheden: herstel dorpel (1 stuks × €450 = €450)","kosten_vervanging":2200,"kosten_vervanging_onderbouwing":"vervanging: nieuw kozijndeel (1 stuks × €2.200 = €2.200)","isolatie":""}]}\nAlleen JSON.'}
+    ]);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const s=clean.indexOf('{'),e=clean.lastIndexOf('}');
+    if(s<0||e<=s)throw new Error('Ongeldig JSON antwoord');
+    const data=JSON.parse(clean.substring(s,e+1));
+    if(data.foto_omschrijving&&(!foto.label||/^Foto \d+$/.test(foto.label)))foto.label=data.foto_omschrijving;
+    foto.geanalyseerd=true;
+    aiaVerwerkItems(opn,data.bevindingen||[],[idx]);
+    await saveOpnameData();
+    showToast((data.bevindingen||[]).length+' bevinding(en) toegevoegd');
+  }catch(err){showToast('Fout: '+err.message);}
+  renderChapter('aianalyse');renderSidebarNav();
+};
+
+
 // SNELLE INSPECTIE
 const SI_ELEMENTEN=['Gevel','Kozijn','Dak','Boeibord','Hemelwaterafvoer','Terrein','Overige'];
 
 function renderSnelInspectie(container){
   const activeSI=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
   if(!currentSnelInspectieId||!activeSI){
-    container.innerHTML='<div class="section-title">📋 Snelle inspectie</div>'+
-      '<div class="empty"><div class="empty-icon">📋</div><p>Nog geen snelle inspectie aangemaakt.<br>Maak er een aan via de zijbalk.</p></div>'+
-      '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie aanmaken</button>';
+    container.innerHTML='<div class="section-title">📋 Conditiemeting</div>'+
+      '<div class="empty"><div class="empty-icon">📋</div><p>Nog geen conditiemeting aangemaakt.<br>Maak er een aan via de zijbalk.</p></div>'+
+      '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe conditiemeting aanmaken</button>';
     return;
   }
   const si=getSI();
@@ -2316,7 +2586,7 @@ window.exportSnelInspectieExcel=async()=>{
   const rijen=getSI().rijen||[];
   const wb=XLSX.utils.book_new();
   const rows=[
-    ['Snelle inspectie — '+(currentObj?.naam||'')],
+    ['Conditiemeting — '+(currentObj?.naam||'')],
     [si?.naam||'',' — ',si?.datum||''],
     ['Datum export: '+new Date().toLocaleDateString('nl-NL')],
     [],
@@ -2327,7 +2597,7 @@ window.exportSnelInspectieExcel=async()=>{
   ];
   const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:14},{wch:28},{wch:10},{wch:24},{wch:12},{wch:14},{wch:8},{wch:12},{wch:12}];
-  XLSX.utils.book_append_sheet(wb,ws,'Snelle inspectie');
+  XLSX.utils.book_append_sheet(wb,ws,'Conditiemeting');
   XLSX.writeFile(wb,'SnelleInspectie_'+(si?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.xlsx');
   showToast('Excel gedownload');
 };
@@ -2355,7 +2625,7 @@ window.exportSnelInspectiePDF=()=>{
   const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
   tabel+='<tr style="font-weight:bold;background:#f0f0f0;"><td colspan="7" style="border:1px solid #ccc;padding:4pt;">Totaal</td><td style="border:1px solid #ccc;padding:4pt;text-align:right;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</td><td style="border:1px solid #ccc;padding:4pt;text-align:right;">€ '+Math.round(totV).toLocaleString('nl-NL')+'</td></tr></table>';
   win.document.write('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>'+escHtml(si?.naam||'')+'</title><style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5;}@media print{body{margin:1.5cm;}}</style></head><body>'+
-    '<h1 style="font-size:16pt;">Snelle inspectie</h1>'+
+    '<h1 style="font-size:16pt;">Conditiemeting</h1>'+
     '<h2 style="font-size:13pt;font-weight:normal;">'+escHtml(currentObj?.naam||'')+'</h2>'+
     '<p style="color:#666;">'+escHtml(si?.naam||'')+' — '+escHtml(si?.datum||'')+'</p>'+
     tabel+'</body></html>');
@@ -2369,7 +2639,7 @@ window.exportSnelInspectieWord=async()=>{
     if(!window.docx){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/docx@8.5.0/build/index.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
     const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,AlignmentType}=docx;
     const children=[];
-    children.push(new Paragraph({children:[new TextRun({text:'Snelle inspectie — '+(si?.naam||''),bold:true,size:36,font:'Arial'})],spacing:{after:200}}));
+    children.push(new Paragraph({children:[new TextRun({text:'Conditiemeting — '+(si?.naam||''),bold:true,size:36,font:'Arial'})],spacing:{after:200}}));
     children.push(new Paragraph({children:[new TextRun({text:(currentObj?.naam||'')+' — '+(si?.datum||''),size:24,font:'Arial'})],spacing:{after:400}}));
     const hdrs=['Element','Omschrijving','Conditie','Voorgestelde actie','Prioriteit','Voor rekening','Foto\'s','Herstel €','Vervanging €'];
     const tblRows=[new TableRow({children:hdrs.map(h=>new TableCell({children:[new Paragraph({children:[new TextRun({text:h,bold:true,font:'Arial',size:18})]})]}))})];
@@ -2610,7 +2880,7 @@ function renderRapportage(container){
       '<div class="rapport-opt" onclick="generateRapport(\'conditie\')"><div class="rapport-opt-icon">🔍</div><div class="rapport-opt-title">Conditiemeting rapport</div><div class="rapport-opt-sub">Alle bevindingen incl. foto\'s en kostenraming herstel per element.</div></div>'+
       '<div class="rapport-opt" onclick="generateRapport(\'mjop\')"><div class="rapport-opt-icon">📅</div><div class="rapport-opt-title">MJOP export</div><div class="rapport-opt-sub">Meerjaren plan met jaarlijkse voorziening. Export naar Excel of PDF.</div></div>'+
       '<div class="rapport-opt" onclick="generateRapport(\'volledig\')"><div class="rapport-opt-icon">📄</div><div class="rapport-opt-title">Volledig rapport</div><div class="rapport-opt-sub">Alles in één: paspoort, inspectie, kosten en MJOP.</div></div>'+
-      '<div class="rapport-opt" onclick="generateRapport(\'snelinspectie\')"><div class="rapport-opt-icon">📋</div><div class="rapport-opt-title">Rapportage snelle inspectie</div><div class="rapport-opt-sub">Overzicht van alle snelle inspecties met bevindingen, prioriteiten en kosten.</div></div>'+
+      '<div class="rapport-opt" onclick="generateRapport(\'snelinspectie\')"><div class="rapport-opt-icon">📋</div><div class="rapport-opt-title">Rapportage conditiemeting</div><div class="rapport-opt-sub">Overzicht van alle conditiemetingen met bevindingen, prioriteiten en kosten.</div></div>'+
     '</div>'+
     '<div id="rapport-loading" style="display:none;"><div class="loading-row"><div class="dots"><span></span><span></span><span></span></div><span id="rapport-load-status">Rapport genereren...</span></div><div class="progress-wrap"><div class="progress-bar" id="rapport-pbar" style="width:0%"></div></div></div>';
   if(rapportTekst){
@@ -2633,14 +2903,14 @@ window.generateRapport=async type=>{
   if(pbar)pbar.style.width='20%';if(statusEl)statusEl.textContent='Rapport samenstellen...';
   const datum=new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
   const totaal=opn.elementen.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): '+CONDITIE[e.conditie||3]+' | €'+( e.kosten||0)).join('\n');
+  const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+(e.hoofd||INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): '+CONDITIE[e.conditie||3]+' | €'+( e.kosten||0)).join('\n');
   const gp=obj?.gp||{};
   const gpStr='Constructie: '+(gp.constructie||'?')+' | Dak: '+(gp.dak1||'?')+' | Gevel: '+(gp.gevel1||'?')+' | Energielabel: '+(gp.energielabel||'?');
   let prompt='';
   if(type==='snelinspectie'){
     const opn=getOpname();
     const siData=opn.snelInspectieData||{};
-    let siTekst='# Rapportage snelle inspectie\n\n';
+    let siTekst='# Rapportage conditiemeting\n\n';
     siTekst+='**Object:** '+( obj?.naam||'—')+'\n**Datum:** '+datum+'\n\n';
     if(!snelInspectiesLijst.length){siTekst+='Geen snelle inspecties beschikbaar.';}
     else{
