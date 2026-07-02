@@ -313,11 +313,18 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tax-val.primary{font-size:22px;color:var(--blue-text);}
 .ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
 .ratio-row:last-child{border:none;}
-.si-header{display:grid;gap:5px;padding:4px 8px;margin-bottom:3px;}
-.si-header span{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
-.si-rij{display:grid;gap:5px;align-items:center;padding:6px 8px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:4px;background:var(--bg);}
+.si-tabel{border:0.5px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);}
+.si-header{display:grid;gap:5px;padding:8px 10px;margin-bottom:0;background:var(--bg1);}
+.si-header span{font-size:11px;font-weight:500;color:var(--text3);text-transform:none;letter-spacing:0;}
+.si-rij{display:grid;gap:5px;align-items:center;padding:9px 10px;border:none;border-top:0.5px solid var(--border);border-radius:0;margin-bottom:0;background:transparent;}
 .si-rij:hover{background:var(--bg1);}
-.si-sel,.si-inp{border:0.5px solid var(--border2);border-radius:4px;padding:4px 6px;font-size:12px;background:var(--bg);color:var(--text);font-family:inherit;width:100%;}
+.si-sel,.si-inp{border:0.5px solid transparent;border-radius:6px;padding:4px 6px;font-size:12px;background:transparent;color:var(--text);font-family:inherit;width:100%;}
+.si-rij .si-sel:hover,.si-rij .si-inp:hover{border-color:var(--border);}
+.si-sel:focus,.si-inp:focus{border-color:var(--border2);background:var(--bg);outline:none;}
+.si-rij>.si-sel:first-child{font-weight:500;}
+.si-rij input[type="number"]{text-align:right;}
+.si-sel.si-c1,.si-sel.si-c2,.si-sel.si-c3,.si-sel.si-c4,.si-sel.si-c5,.si-sel.si-p-hoog,.si-sel.si-p-mid,.si-sel.si-p-laag,.si-sel.si-voor-eig,.si-sel.si-voor-huur{border-radius:999px;text-align:center;text-align-last:center;padding:4px 8px;}
+.si-tabel .bev-add-row{border:none;border-top:0.5px solid var(--border);border-radius:0;margin:0;width:100%;}
 .si-sel{-webkit-appearance:none;}
 .si-ta{resize:none;height:52px;line-height:1.4;overflow-y:auto;display:block;}
 .si-ta-wrap{position:relative;}
@@ -2239,6 +2246,7 @@ function renderSnelInspectie(container){
 
   // KOLOMKOPPEN
   const cols='10% 1fr 8% 1fr 7.5% 7.5% 8% 6% 7% 7% 46px';
+  html+='<div class="si-tabel">';
   html+='<div class="si-header" style="grid-template-columns:'+cols+';">'+
     '<span>Element</span><span>Omschrijving</span><span>Conditie</span><span>Voorgestelde actie</span>'+
     '<span>Termijn</span><span>Prioriteit</span><span>Voor rekening</span><span>Foto\'s</span><span>Herstel €</span><span>Vervang. €</span><span></span>'+
@@ -2294,7 +2302,8 @@ function renderSnelInspectie(container){
     '</div>';
   });
 
-  html+='<button class="bev-add-row" onclick="siVoegRijToe()" style="margin-top:4px;"><i>+</i> Bevinding toevoegen</button>';
+  html+='<button class="bev-add-row" onclick="siVoegRijToe()"><i>+</i> Bevinding toevoegen</button>';
+  html+='</div>';
 
   const totH=rijen.reduce((s,r)=>s+(r.herstel||0),0);
   const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
@@ -2893,6 +2902,42 @@ window.genereerBijschriftenParagraaf=async(chId,subTab)=>{
   }catch(err){showToast('Fout: '+err.message);}
 };
 window.siCount=t=>{const c=t.parentNode.querySelector('.si-count');if(c)c.textContent=t.value.length+'/130';};
+
+// STAP 2: AI vult ook actie, termijn, hoeveelheid, eenheid en prijzen
+function siAiInstructie(){
+  return 'Per foto geef je:\n'+
+  '1. bijschrift: max 4 woorden (bijv. "Voorgevel kozijnen verweerd")\n'+
+  '2. element: EXACT een uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n'+
+  '3. omschrijving: de bevinding in 1 zin, maximaal 130 tekens\n'+
+  '4. conditie: 1-5 (1=Goed, 2=Redelijk, 3=Matig, 4=Slecht, 5=Zeer slecht) — consistent met de omschrijving\n'+
+  '5. actie: concrete voorgestelde actie in maximaal 130 tekens (bijv. "Dorpel plaatselijk herstellen, schuren en tweelaags aflakken"). Bij conditie 1 zonder onderhoud: lege string\n'+
+  '6. termijn: wanneer de actie nodig is — EXACT een uit: "direct", "1-2", "3-5", "6-10" (jaren). Richtlijn: conditie 5=direct, 4=1-2, 3=1-2 of 3-5, 1-2=6-10\n'+
+  '7. hoeveelheid: geschatte hoeveelheid als getal (schat uit de foto)\n'+
+  '8. eenheid: EXACT een uit: m², m¹, stuks, uur, post\n'+
+  '9. prijs_herstel: realistische herstelprijs in euro per eenheid (Nederlands prijspeil incl. arbeid, excl. btw). 0 als geen herstel nodig\n'+
+  '10. prijs_vervanging: realistische vervangingsprijs in euro per eenheid\n';
+}
+function siRijUitAI(item,fotoNr){
+  const h=parseFloat(item.hoeveelheid)||0;
+  const ph=parseFloat(item.prijs_herstel)||0;
+  const pv=parseFloat(item.prijs_vervanging)||0;
+  const cond=parseInt(item.conditie)||3;
+  const prio=cond>=4?'hoog':(cond<=2?'laag':'gemiddeld');
+  const term=['direct','1-2','3-5','6-10'].includes(item.termijn)?item.termijn:(cond>=5?'direct':cond===4?'1-2':cond===3?'3-5':'6-10');
+  return {
+    element:SI_ELEMENTEN.includes(item.element)?item.element:'Overige',
+    omschrijving:String(item.omschrijving||'').substring(0,130),
+    conditie:cond,
+    actie:String(item.actie||'').substring(0,130),
+    termijn:term,prioriteit:prio,voorrekening:'eigenaar',
+    fotos:fotoNr,
+    hoeveelheid:h||'',eenheid:['m²','m¹','stuks','uur','post'].includes(item.eenheid)?item.eenheid:'m²',
+    prijsHerstel:ph||'',prijsVervanging:pv||'',
+    herstel:(h&&ph)?Math.round(h*ph):0,
+    vervanging:(h&&pv)?Math.round(h*pv):0
+  };
+}
+
 window.siGenereerBeschrijvingen=async()=>{
   const si=getSI();
   const fotos=si.fotos||[];
@@ -2908,13 +2953,10 @@ window.siGenereerBeschrijvingen=async()=>{
       type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}
     }));
     content.push({type:'text',text:
-      'Dit zijn '+nieuweFotos.length+' foto\'s van een bouwkundige inspectie. Analyseer elke foto en geef:\n'+
-      '1. Een kort bijschrift van max 4 woorden (bijv. "Voorgevel kozijnen verweerd")\n'+
-      '2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n'+
-      '3. Een korte omschrijving van de bevinding (1 zin, maximaal 130 tekens)\n'+
-      '4. Conditie 1-5 (1=Goed, 5=Zeer slecht)\n\n'+
-      'Reageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
-      '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3}]\n'+
+      'Dit zijn '+nieuweFotos.length+' foto\'s van een bouwkundige inspectie van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+
+      siAiInstructie()+
+      '\nReageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
+      '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}]\n'+
       'Alleen JSON, niets anders.'
     });
     const raw=await callClaude(content);
@@ -2931,13 +2973,7 @@ window.siGenereerBeschrijvingen=async()=>{
       const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
       if(!heeftAl){
         if(!si.rijen)si.rijen=[];
-        si.rijen.unshift({
-          element:item.element||'Overige',
-          omschrijving:item.omschrijving||'',
-          conditie:item.conditie||3,
-          actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',
-          fotos:fotoNr,herstel:0,vervanging:0
-        });
+        si.rijen.unshift(siRijUitAI(item,fotoNr));
       }
     });
     await saveSnelInspectie();
@@ -2957,7 +2993,7 @@ window.siGenereerEenFoto=async idx=>{
   try{
     const raw=await callClaude([
       {type:'image',source:{type:'base64',media_type:'image/jpeg',data:foto.dataUrl.split(',')[1]}},
-      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto en geef:\n1. Een kort bijschrift van max 4 woorden\n2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n3. Een korte omschrijving van de bevinding (1 zin, maximaal 130 tekens)\n4. Conditie 1-5\n\nReageer ALLEEN als JSON:\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3}\nAlleen JSON.'}
+      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+siAiInstructie()+'\nReageer ALLEEN als JSON (één object):\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen","termijn":"1-2","hoeveelheid":12,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}\nAlleen JSON.'}
     ]);
     const clean=raw.replace(/```json|```/g,'').trim();
     const item=JSON.parse(clean);
@@ -2966,13 +3002,7 @@ window.siGenereerEenFoto=async idx=>{
     const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
     if(!heeftAl){
       if(!si.rijen)si.rijen=[];
-      si.rijen.unshift({
-        element:item.element||'Overige',
-        omschrijving:item.omschrijving||'',
-        conditie:item.conditie||3,
-        actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',
-        fotos:fotoNr,herstel:0,vervanging:0
-      });
+      si.rijen.unshift(siRijUitAI(item,fotoNr));
     }
     await saveSnelInspectie();
     const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
