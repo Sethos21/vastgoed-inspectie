@@ -1817,44 +1817,51 @@ function renderPlanningPagina(container){
       snelInspectiesLijst.map(s=>'<option value="'+s.id+'" '+(s.id===window._planInspId?'selected':'')+'>'+escHtml(s.naam)+' — '+escHtml(s.datum)+'</option>').join('')+
     '</select></div>';
 
-  // ===== ACTIELIJST =====
+  // ===== ACTIELIJSTEN (gesplitst: eigenaar / huurder) =====
   const rijen=si.rijen||[];
-  const acties=rijen.map((r,i)=>({r,i})).filter(({r})=>r.termijn==='direct'||r.termijn==='1-2'||!r.termijn)
-    .sort((a,b)=>(a.r.termijn==='direct'?0:1)-(b.r.termijn==='direct'?0:1)||(b.r.conditie||3)-(a.r.conditie||3));
-  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">🔧 Direct onderhoud (≤ 2 jaar)</div>';
-  html+='<div style="border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;background:var(--bg);">';
-  if(!acties.length){
-    html+='<div style="padding:14px;font-size:12px;color:var(--text3);">Geen bevindingen met termijn direct of 1–2 jaar in deze inspectie.</div>';
-  }
+  const kandidaten=rijen.map((r,i)=>({r,i})).filter(({r})=>r.termijn==='direct'||r.termijn==='1-2'||!r.termijn)
+    .sort((a,b)=>(a.r.uitgevoerd?1:0)-(b.r.uitgevoerd?1:0)||(a.r.termijn==='direct'?0:1)-(b.r.termijn==='direct'?0:1)||(b.r.conditie||3)-(a.r.conditie||3));
+  const eigAct=kandidaten.filter(({r})=>r.voorrekening!=='huurder');
+  const huurAct=kandidaten.filter(({r})=>r.voorrekening==='huurder');
   const condK={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
-  let actTot=0;
-  acties.forEach(({r},j)=>{
-    const bedrag=parseFloat(r.herstel)||0;actTot+=bedrag;
-    html+='<div style="padding:9px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
-      '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<span style="font-size:12.5px;font-weight:500;flex:1;">'+escHtml(r.element||'Element')+'</span>'+
-        '<span class="'+(condK[r.conditie||3])+'" style="border-radius:999px;padding:2px 9px;font-size:10.5px;">'+(r.conditie||3)+' '+(['Goed','Redelijk','Matig','Slecht','Z.slecht'][(r.conditie||3)-1])+'</span>'+
-        '<span style="font-size:11px;color:var(--text3);">'+(PLAN_TERMIJN[r.termijn]||'1–2 jaar')+(r.fotos?' · foto '+escHtml(String(r.fotos)):'')+'</span>'+
-        '<span style="font-size:12.5px;font-weight:600;min-width:70px;text-align:right;">€ '+Math.round(bedrag).toLocaleString('nl-NL')+'</span>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">'+
-        '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">Omschrijving</div><div style="font-size:11.5px;color:var(--text2);line-height:1.5;">'+escHtml(r.omschrijving||'—')+'</div></div>'+
-        '<div><div style="font-size:10px;color:var(--blue-text);text-transform:uppercase;letter-spacing:.3px;">Voorgestelde actie</div><div style="font-size:11.5px;line-height:1.5;">'+escHtml(r.actie||'—')+(r.hoeveelheid&&r.prijsHerstel?' <span style="color:var(--text3);">('+r.hoeveelheid+' '+(r.eenheid||'')+' × € '+r.prijsHerstel+' = € '+Math.round(bedrag).toLocaleString('nl-NL')+')</span>':'')+'</div></div>'+
-      '</div></div>';
-  });
-  if(acties.length){
-    html+='<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:0.5px solid var(--border2);font-size:12px;font-weight:600;background:var(--bg1);"><span>Totaal actielijst</span><span>€ '+Math.round(actTot).toLocaleString('nl-NL')+'</span></div>';
-  }
-  html+='</div>';
+  const maakLijst=(titel,items,leeg)=>{
+    let h='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">'+titel+'</div>';
+    h+='<div style="border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;background:var(--bg);">';
+    if(!items.length){h+='<div style="padding:14px;font-size:12px;color:var(--text3);">'+leeg+'</div></div>';return h;}
+    let open=0,klaar=0;
+    items.forEach(({r,i},j)=>{
+      const bedrag=parseFloat(r.herstel)||0;
+      if(r.uitgevoerd)klaar+=bedrag;else open+=bedrag;
+      h+='<div style="padding:9px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+(r.uitgevoerd?'opacity:.55;':'')+'">'+
+        '<div style="display:flex;align-items:center;gap:8px;">'+
+          '<input type="checkbox" '+(r.uitgevoerd?'checked':'')+' onchange="plVink('+i+',this.checked)" title="Afvinken als uitgevoerd" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;"/>'+
+          '<span style="font-size:12.5px;font-weight:500;flex:1;'+(r.uitgevoerd?'text-decoration:line-through;':'')+'">'+escHtml(r.element||'Element')+'</span>'+
+          (r.uitgevoerd?'<span style="font-size:10.5px;color:var(--green-text);">✓ uitgevoerd'+(r.uitgevoerdOp?' '+escHtml(r.uitgevoerdOp):'')+'</span>':'')+
+          '<span class="'+(condK[r.conditie||3])+'" style="border-radius:999px;padding:2px 9px;font-size:10.5px;">'+(r.conditie||3)+' '+(['Goed','Redelijk','Matig','Slecht','Z.slecht'][(r.conditie||3)-1])+'</span>'+
+          '<span style="font-size:11px;color:var(--text3);">'+(PLAN_TERMIJN[r.termijn]||'1–2 jaar')+(r.fotos?' · foto '+escHtml(String(r.fotos)):'')+'</span>'+
+          '<span style="font-size:12.5px;font-weight:600;min-width:70px;text-align:right;">€ '+Math.round(bedrag).toLocaleString('nl-NL')+'</span>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;padding-left:24px;">'+
+          '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">Omschrijving</div><div style="font-size:11.5px;color:var(--text2);line-height:1.5;">'+escHtml(r.omschrijving||'—')+'</div></div>'+
+          '<div><div style="font-size:10px;color:var(--blue-text);text-transform:uppercase;letter-spacing:.3px;">Voorgestelde actie</div><div style="font-size:11.5px;line-height:1.5;">'+escHtml(r.actie||'—')+(r.hoeveelheid&&r.prijsHerstel?' <span style="color:var(--text3);">('+r.hoeveelheid+' '+(r.eenheid||'')+' × € '+r.prijsHerstel+' = € '+Math.round(bedrag).toLocaleString('nl-NL')+')</span>':'')+'</div></div>'+
+        '</div></div>';
+    });
+    h+='<div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 12px;border-top:0.5px solid var(--border2);font-size:12px;background:var(--bg1);">'+
+      (klaar?'<span style="color:var(--text3);">Uitgevoerd <strong style="color:var(--green-text);">€ '+Math.round(klaar).toLocaleString('nl-NL')+'</strong></span>':'')+
+      '<span>Openstaand <strong>€ '+Math.round(open).toLocaleString('nl-NL')+'</strong></span></div></div>';
+    return h;
+  };
+  html+=maakLijst('🔧 Planning eigenaar — direct onderhoud (≤ 2 jaar)',eigAct,'Geen openstaande bevindingen voor rekening eigenaar.');
+  html+=maakLijst('🧑 Planning huurder — te delen met de huurder',huurAct,'Geen bevindingen voor rekening huurder. Zet "Voor rekening" in de inspectietabel op Huurder om ze hier te tonen.');
 
   // ===== MJOP =====
-  if(!si.mjop||!si.mjop.length)plBouwMjop(si,false);
+  if(!si.mjopHandmatig)plBouwMjop(si);
   const m=si.mjop||[];
   const t1=m.reduce((s,e)=>s+(parseFloat(e.jaar1_3)||0),0);
   const t2=m.reduce((s,e)=>s+(parseFloat(e.jaar4_7)||0),0);
   const t3=m.reduce((s,e)=>s+(parseFloat(e.jaar8_10)||0),0);
   const tot=t1+t2+t3;
-  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 MJOP 10 jaar</div>';
+  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 MJOP 10 jaar <span style="font-weight:400;color:var(--text3);">— excl. kosten voor rekening huurder en uitgevoerde acties</span></div>';
   html+='<div class="mjop-banner">'+
     '<div class="mjop-stat"><div class="mjop-stat-val" id="pl-st-tot">€ '+Math.round(tot).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
     '<div class="mjop-stat"><div class="mjop-stat-val" id="pl-st-jr">€ '+Math.round(tot/10).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
@@ -1887,6 +1894,8 @@ function plBouwMjop(si,handhaafMelding){
   const rijen=si.rijen||[];
   const m=[];
   rijen.forEach(r=>{
+    if(r.voorrekening==='huurder')return;
+    if(r.uitgevoerd)return;
     const herstel=parseFloat(r.herstel)||0;
     const verv=parseFloat(r.vervanging)||0;
     if(!herstel&&!verv)return;
@@ -1901,16 +1910,25 @@ function plBouwMjop(si,handhaafMelding){
   si.mjop=m;
 }
 window.plKies=id=>{window._planInspId=id;renderChapter('planning');};
+window.plVink=(i,checked)=>{
+  const si=plGetSI();if(!si||!si.rijen[i])return;
+  si.rijen[i].uitgevoerd=checked;
+  si.rijen[i].uitgevoerdOp=checked?new Date().toLocaleDateString('nl-NL'):null;
+  renderChapter('planning');
+  saveSnelInspectie();
+};
 window.plHerbereken=async()=>{
   const si=plGetSI();if(!si)return;
   if(si.mjop&&si.mjop.length&&!confirm('Herberekenen overschrijft de MJOP-tabel, inclusief handmatige wijzigingen. Doorgaan?'))return;
   plBouwMjop(si);
-  await saveSnelInspectie();
+  si.mjopHandmatig=false;
   renderChapter('planning');
-  showToast('MJOP herberekend uit bevindingen');
+  saveSnelInspectie();
+  showToast('MJOP herberekend — volgt nu weer automatisch de bevindingen');
 };
 window.plEdit=async(i,veld,val)=>{
   const si=plGetSI();if(!si||!si.mjop[i])return;
+  si.mjopHandmatig=true;
   const e=si.mjop[i];
   if(veld==='element')e.element=val;
   else e[veld]=parseFloat(val)||0;
@@ -1931,20 +1949,23 @@ function plTotalen(si){
   const sj=document.getElementById('pl-st-jr');if(sj)sj.textContent='€ '+Math.round(tot/10).toLocaleString('nl-NL');
   const sc=document.getElementById('pl-st-cnt');if(sc)sc.textContent=m.length;
 }
-window.plVerwijder=async i=>{
+window.plVerwijder=i=>{
   const si=plGetSI();if(!si)return;
   const e=si.mjop[i];
   if(!confirm('Element "'+(e?.element||'')+'" uit het MJOP verwijderen?'))return;
   si.mjop.splice(i,1);
-  await saveSnelInspectie();
+  si.mjopHandmatig=true;
   renderChapter('planning');
+  saveSnelInspectie();
 };
-window.plToevoegen=async()=>{
+window.plToevoegen=()=>{
   const si=plGetSI();if(!si)return;
   if(!si.mjop)si.mjop=[];
   si.mjop.push({element:'',cyclus:15,jaar1_3:0,jaar4_7:0,jaar8_10:0,bron:'handmatig toegevoegd'});
-  await saveSnelInspectie();
+  si.mjopHandmatig=true;
   renderChapter('planning');
+  saveSnelInspectie();
+  setTimeout(()=>{const inps=document.querySelectorAll('.mjop-inp');if(inps.length)inps[inps.length-5]?.focus();},50);
 };
 
 function renderChapter(chId){
@@ -3080,12 +3101,15 @@ function siAiInstructie(){
   '8. eenheid: EXACT een uit: m², m¹, stuks, uur, post\n'+
   '9. prijs_herstel: realistische herstelprijs in euro per eenheid (Nederlands prijspeil incl. arbeid, excl. btw). 0 als geen herstel nodig\n'+
   '10. prijs_vervanging: realistische vervangingsprijs in euro per eenheid\n'+
-  '\nVERPLICHT: vul ALLE velden bij ELKE foto in, ook hoeveelheid, eenheid, prijs_herstel en prijs_vervanging. Gebruik altijd je beste schatting als getal; laat nooit een veld weg en gebruik nooit null of lege waarden.\n';
+  '\nVERPLICHT: vul ALLE velden bij ELKE foto in, ook hoeveelheid, eenheid, prijs_herstel en prijs_vervanging. Gebruik altijd je beste schatting als getal; laat nooit een veld weg en gebruik nooit null of lege waarden. prijs_vervanging is ALTIJD groter dan 0: elk element heeft een vervangingswaarde, ook in goede staat — de vervangingskosten voeden het meerjarenonderhoudsplan.\n';
 }
 function siRijUitAI(item,fotoNr){
-  const h=parseFloat(item.hoeveelheid??item.aantal??item.quantity)||0;
+  let h=parseFloat(item.hoeveelheid??item.aantal??item.quantity)||0;
   const ph=parseFloat(item.prijs_herstel??item.prijsHerstel??item.prijs)||0;
-  const pv=parseFloat(item.prijs_vervanging??item.prijsVervanging)||0;
+  let pv=parseFloat(item.prijs_vervanging??item.prijsVervanging)||0;
+  let eenheidFallback=null;
+  if(!h&&(ph||pv)){h=1;eenheidFallback='post';}
+  if(!pv&&ph)pv=Math.round(ph*3.5);
   const cond=parseInt(item.conditie)||3;
   const prio=cond>=4?'hoog':(cond<=2?'laag':'gemiddeld');
   const term=['direct','1-2','3-5','6-10'].includes(item.termijn)?item.termijn:(cond>=5?'direct':cond===4?'1-2':cond===3?'3-5':'6-10');
@@ -3096,7 +3120,7 @@ function siRijUitAI(item,fotoNr){
     actie:String(item.actie||'').substring(0,130),
     termijn:term,prioriteit:prio,voorrekening:'eigenaar',
     fotos:fotoNr,
-    hoeveelheid:h||'',eenheid:['m²','m¹','stuks','uur','post'].includes(item.eenheid)?item.eenheid:'m²',
+    hoeveelheid:h||'',eenheid:eenheidFallback||(['m²','m¹','stuks','uur','post'].includes(item.eenheid)?item.eenheid:'m²'),
     prijsHerstel:ph||'',prijsVervanging:pv||'',
     herstel:(h&&ph)?Math.round(h*ph):(parseFloat(item.herstel)||0),
     vervanging:(h&&pv)?Math.round(h*pv):(parseFloat(item.vervanging)||0)
@@ -3110,43 +3134,52 @@ window.siGenereerBeschrijvingen=async()=>{
   const nieuweFotos=fotos.map((f,i)=>({f,i})).filter(({f})=>!f.label||/^Foto \d+$/.test(f.label));
   if(!nieuweFotos.length){showToast('Alle foto\'s hebben al een beschrijving');return;}
   if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navToChapter('settings');return;}
-  showToast('AI analyseert '+nieuweFotos.length+' foto\'s...');
   const btn=document.getElementById('si-gen-btn');
-  if(btn){btn.textContent='⏳ Bezig...';btn.disabled=true;}
+  if(btn){btn.disabled=true;}
+  const CHUNK=4;
+  let totaal=0;
   try{
-    const content=nieuweFotos.slice(0,8).map(({f})=>({
-      type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.dataUrl.split(',')[1]}
-    }));
-    content.push({type:'text',text:
-      'Dit zijn '+nieuweFotos.length+' foto\'s van een bouwkundige inspectie van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+
-      siAiInstructie()+
-      '\nReageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
-      '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}]\n'+
-      'Alleen JSON, niets anders.'
-    });
-    const raw=await callClaude(content);
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const s=clean.indexOf('['),e=clean.lastIndexOf(']');
-    if(s<0||e<=s)throw new Error('Ongeldig JSON antwoord');
-    const items=JSON.parse(clean.substring(s,e+1));
-    // Update alleen de nieuwe foto's, bestaande niet aanraken
-    items.forEach((item,j)=>{
-      const {f,i}=nieuweFotos[j]||{};
-      if(si.fotos[i])si.fotos[i].label=item.bijschrift||si.fotos[i].label;
-      // Voeg rij toe alleen als er nog geen rij is voor dit fotonummer
-      const fotoNr=String(i+1);
-      const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
-      if(!heeftAl){
-        if(!si.rijen)si.rijen=[];
-        si.rijen.unshift(siRijUitAI(item,fotoNr));
+    for(let c=0;c<nieuweFotos.length;c+=CHUNK){
+      const chunk=nieuweFotos.slice(c,c+CHUNK);
+      if(btn)btn.textContent='⏳ Foto '+(c+1)+'–'+Math.min(c+CHUNK,nieuweFotos.length)+' van '+nieuweFotos.length+'...';
+      else showToast('AI analyseert foto '+(c+1)+'–'+Math.min(c+CHUNK,nieuweFotos.length)+' van '+nieuweFotos.length+'...');
+      const content=[];
+      for(const {f} of chunk){
+        const klein=await compressVoorAI(f.dataUrl);
+        content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:klein.split(',')[1]}});
       }
-    });
-    await saveSnelInspectie();
+      content.push({type:'text',text:
+        'Dit zijn '+chunk.length+' foto\'s van een bouwkundige inspectie van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+
+        siAiInstructie()+
+        '\nReageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
+        '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}]\n'+
+        'Alleen JSON, niets anders.'
+      });
+      const raw=await callClaude(content);
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+      if(s<0||e<=s)throw new Error('Ongeldig JSON antwoord');
+      const items=JSON.parse(clean.substring(s,e+1));
+      items.forEach((item,j)=>{
+        const {f,i}=chunk[j]||{};
+        if(i===undefined)return;
+        if(si.fotos[i])si.fotos[i].label=item.bijschrift||si.fotos[i].label;
+        const fotoNr=String(i+1);
+        const heeftAl=(si.rijen||[]).some(r=>String(r.fotos).split(',').map(x=>x.trim()).includes(fotoNr));
+        if(!heeftAl){
+          if(!si.rijen)si.rijen=[];
+          si.rijen.unshift(siRijUitAI(item,fotoNr));
+        }
+      });
+      totaal+=items.length;
+      await saveSnelInspectie();
+    }
     const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
-    showToast(items.length+' beschrijvingen gegenereerd');
+    showToast(totaal+' beschrijvingen gegenereerd');
   }catch(err){
     showToast('Fout: '+err.message);
     if(btn){btn.textContent='✦ Beschrijvingen genereren';btn.disabled=false;}
+    const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);
   }
 };
 
@@ -3157,7 +3190,7 @@ window.siGenereerEenFoto=async idx=>{
   showToast('Foto '+(idx+1)+' analyseren...');
   try{
     const raw=await callClaude([
-      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:foto.dataUrl.split(',')[1]}},
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:(await compressVoorAI(foto.dataUrl)).split(',')[1]}},
       {type:'text',text:'Analyseer deze bouwkundige inspectiefoto van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+siAiInstructie()+'\nReageer ALLEEN als JSON (één object):\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen","termijn":"1-2","hoeveelheid":12,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}\nAlleen JSON.'}
     ]);
     const clean=raw.replace(/```json|```/g,'').trim();
@@ -3385,7 +3418,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.bag-wrap'))hideBagD
 window.toggleSidebar=()=>{const sb=document.getElementById('sidebar');const ov=document.getElementById('sb-overlay');sb.classList.toggle('open');ov.classList.toggle('show');};
 window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('show');};
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function compressPhoto(url,max=1024){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>max){h=Math.round(h*max/w);w=max;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.75));};img.onerror=()=>res(url);img.src=url;});}
+function compressPhoto(url,max=1024,q=.75){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;const zijde=Math.max(w,h);if(zijde>max){const f=max/zijde;w=Math.round(w*f);h=Math.round(h*f);}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',q));};img.onerror=()=>res(url);img.src=url;});}
+function compressVoorAI(url){return compressPhoto(url,900,.6);}
 window.printHuidigePagina=()=>{
   const titel=document.getElementById('topbar-title')?.textContent||'VastgoedInspectie';
   const sub=document.getElementById('topbar-sub')?.textContent||'';
