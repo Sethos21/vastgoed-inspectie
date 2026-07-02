@@ -1138,6 +1138,7 @@ window.toggleSnelInsp=()=>{snelInspOpen=!snelInspOpen;renderSidebarNav();};
 window.toggleAiInsp=()=>{aiInspOpen=!aiInspOpen;renderSidebarNav();};
 window.toggleSnelMenu=id=>{openSnelMenu=openSnelMenu===id?null:id;renderSidebarNav();};
 window.switchSnelInspectie=id=>{
+  if(window._siDetailOpen)window._siDetailOpen.clear();
   currentSnelInspectieId=id;openSnelMenu=null;activeSection='snel';
   renderSidebarNav();
   navToChapter('snelinspectie');
@@ -1754,7 +1755,7 @@ const OBJ_SECTIES=[
   {id:'huurtax',naam:'Huur & taxatie',icon:'€',render:c=>renderHuurTaxatie(c)},
 ];
 function renderObjectPagina(container){
-  if(!window._objKlap)window._objKlap=new Set();
+  if(!window._objKlap)window._objKlap=new Set(OBJ_SECTIES.map(s=>s.id));
   let html='<div class="section-title">🏢 Object</div>';
   OBJ_SECTIES.forEach(s=>{
     const dicht=window._objKlap.has(s.id);
@@ -2237,14 +2238,27 @@ function renderSnelInspectie(container){
   }
 
   // KOLOMKOPPEN
-  const cols='10% 1fr 8% 1fr 7.5% 7.5% 8% 6% 7% 7% 28px';
+  const cols='10% 1fr 8% 1fr 7.5% 7.5% 8% 6% 7% 7% 46px';
   html+='<div class="si-header" style="grid-template-columns:'+cols+';">'+
     '<span>Element</span><span>Omschrijving</span><span>Conditie</span><span>Voorgestelde actie</span>'+
     '<span>Termijn</span><span>Prioriteit</span><span>Voor rekening</span><span>Foto\'s</span><span>Herstel €</span><span>Vervang. €</span><span></span>'+
   '</div>';
 
   // RIJEN
+  if(!window._siDetailOpen)window._siDetailOpen=new Set();
+  const EENHEDEN=['m²','m¹','stuks','uur','post'];
   rijen.forEach((r,i)=>{
+    const open_=window._siDetailOpen.has(i);
+    let detail='';
+    if(open_){
+      detail='<div style="grid-column:1/-1;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;margin-top:2px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;" class="no-print">'+
+        '<div class="field"><label>Hoeveelheid</label><input type="number" min="0" step="any" value="'+(r.hoeveelheid||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'hoeveelheid\',parseFloat(this.value)||0)"/></div>'+
+        '<div class="field"><label>Eenheid</label><select onchange="siDetailUpdate('+i+',\'eenheid\',this.value)">'+EENHEDEN.map(e=>'<option '+((r.eenheid||'m²')===e?'selected':'')+'>'+e+'</option>').join('')+'</select></div>'+
+        '<div class="field"><label>Prijs herstel € / eenheid</label><input type="number" min="0" step="any" value="'+(r.prijsHerstel||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'prijsHerstel\',parseFloat(this.value)||0)"/></div>'+
+        '<div class="field"><label>Prijs vervanging € / eenheid</label><input type="number" min="0" step="any" value="'+(r.prijsVervanging||'')+'" placeholder="0" onchange="siDetailUpdate('+i+',\'prijsVervanging\',parseFloat(this.value)||0)"/></div>'+
+        '<div style="grid-column:1/-1;font-size:11px;color:var(--text3);">De kolommen Herstel € en Vervang. € worden automatisch berekend als hoeveelheid × prijs. Direct typen in die kolommen blijft ook mogelijk.</div>'+
+      '</div>';
+    }
     const cc=condClass[r.conditie||2]||'';
     const pc=prioClass[r.prioriteit||'gemiddeld']||'';
     const vc=r.voorrekening==='huurder'?'si-voor-huur':'si-voor-eig';
@@ -2270,9 +2284,13 @@ function renderSnelInspectie(container){
         '<option value="huurder" '+(r.voorrekening==='huurder'?'selected':'')+'>🧑 Huurder</option>'+
       '</select>'+
       '<input type="text" class="si-inp" placeholder="1,2..." value="'+escHtml(r.fotos||'')+'" oninput="siUpdate('+i+',\'fotos\',this.value)"/>'+
-      '<input type="number" class="si-inp" placeholder="0" value="'+(r.herstel||'')+'" oninput="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0)"/>'+
-      '<input type="number" class="si-inp" placeholder="0" value="'+(r.vervanging||'')+'" oninput="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0)"/>'+
-      '<button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;">×</button>'+
+      '<input type="number" id="si-h-'+i+'" class="si-inp" placeholder="0" value="'+(r.herstel||'')+'" oninput="siUpdate('+i+',\'herstel\',parseFloat(this.value)||0);siTotalen()"/>'+
+      '<input type="number" id="si-v-'+i+'" class="si-inp" placeholder="0" value="'+(r.vervanging||'')+'" oninput="siUpdate('+i+',\'vervanging\',parseFloat(this.value)||0);siTotalen()"/>'+
+      '<span style="display:flex;align-items:center;gap:2px;">'+
+        '<button onclick="siDetailToggle('+i+')" title="Hoeveelheid en prijs invoeren" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px;">'+(open_?'∨':'›')+'</button>'+
+        '<button onclick="siVerwijderRij('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;">×</button>'+
+      '</span>'+
+      detail+
     '</div>';
   });
 
@@ -2282,9 +2300,9 @@ function renderSnelInspectie(container){
   const totV=rijen.reduce((s,r)=>s+(r.vervanging||0),0);
   html+='<div class="si-totaal" style="margin-top:12px;">'+
     '<span style="font-size:12px;color:var(--text2);">Totaal herstel</span>'+
-    '<span style="font-size:15px;font-weight:600;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</span>'+
+    '<span id="si-tot-h" style="font-size:15px;font-weight:600;">€ '+Math.round(totH).toLocaleString('nl-NL')+'</span>'+
     '<span style="font-size:12px;color:var(--text2);margin-left:14px;">Totaal vervanging</span>'+
-    '<span style="font-size:15px;font-weight:600;color:var(--orange-text);">€ '+Math.round(totV).toLocaleString('nl-NL')+'</span>'+
+    '<span id="si-tot-v" style="font-size:15px;font-weight:600;color:var(--orange-text);">€ '+Math.round(totV).toLocaleString('nl-NL')+'</span>'+
   '</div>'+
   '<div class="btn-row" style="margin-top:12px;">'+
     '<button class="btn btn-light btn-sm" onclick="exportSnelInspectieExcel()">⬇ Excel</button>'+
@@ -2391,8 +2409,36 @@ function getSI(){
   return opn.snelInspectieData[currentSnelInspectieId];
 }
 window.siVoegRijToe=()=>{
+  if(window._siDetailOpen)window._siDetailOpen.clear();
   getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');saveSnelInspectie();
+};
+window.siDetailToggle=i=>{
+  if(!window._siDetailOpen)window._siDetailOpen=new Set();
+  window._siDetailOpen.has(i)?window._siDetailOpen.delete(i):window._siDetailOpen.add(i);
+  const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
+};
+window.siDetailUpdate=async(i,veld,val)=>{
+  const r=getSI().rijen[i];if(!r)return;
+  r[veld]=val;
+  const h=parseFloat(r.hoeveelheid)||0;
+  if(h&&(parseFloat(r.prijsHerstel)||0)){
+    r.herstel=Math.round(h*parseFloat(r.prijsHerstel));
+    const el=document.getElementById('si-h-'+i);if(el)el.value=r.herstel;
+  }
+  if(h&&(parseFloat(r.prijsVervanging)||0)){
+    r.vervanging=Math.round(h*parseFloat(r.prijsVervanging));
+    const el=document.getElementById('si-v-'+i);if(el)el.value=r.vervanging;
+  }
+  siTotalen();
+  await saveSnelInspectie();
+};
+window.siTotalen=()=>{
+  const rijen=getSI().rijen||[];
+  const h=rijen.reduce((s,r)=>s+(parseFloat(r.herstel)||0),0);
+  const v=rijen.reduce((s,r)=>s+(parseFloat(r.vervanging)||0),0);
+  const eh=document.getElementById('si-tot-h');if(eh)eh.textContent='€ '+Math.round(h).toLocaleString('nl-NL');
+  const ev=document.getElementById('si-tot-v');if(ev)ev.textContent='€ '+Math.round(v).toLocaleString('nl-NL');
 };
 window.siUpdate=async(idx,key,val)=>{
   const rijen=getSI().rijen;if(idx<0||idx>=rijen.length)return;
@@ -2410,6 +2456,7 @@ window.siUpdateVoorClass=(el,val)=>{
   el.className='si-sel '+(val==='huurder'?'si-voor-huur':'si-voor-eig');
 };
 window.siVerwijderRij=async idx=>{
+  if(window._siDetailOpen)window._siDetailOpen.clear();
   getSI().rijen.splice(idx,1);
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();
 };
