@@ -91,7 +91,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .topbar-chapter-sub{font-size:11px;color:var(--text3);margin-top:1px;}
 .icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0;}
 #content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.page{display:none;padding:20px;padding-bottom:calc(20px + var(--safe-bot));max-width:960px;}
+.page{display:none;padding:20px;padding-bottom:calc(20px + var(--safe-bot));max-width:1500px;}
 .page.active{display:block;}
 #page-login{max-width:100%;padding:0;}
 #page-login.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;}
@@ -276,6 +276,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .mjop-table tr:hover td{background:var(--bg1);}
 .mjop-amt-h{color:#3b6d11;font-weight:500;}
 .mjop-amt-v{color:#993c1d;font-weight:500;}
+.mjop-inp{width:100%;border:0.5px solid var(--border);border-radius:5px;padding:4px 7px;font-size:12px;background:var(--bg);color:var(--text);}
+.mjop-inp:focus{outline:none;border-color:var(--blue);}
 .mjop-banner{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
 .mjop-stat{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;}
 .mjop-stat-val{font-size:20px;font-weight:600;}
@@ -317,6 +319,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .si-rij:hover{background:var(--bg1);}
 .si-sel,.si-inp{border:0.5px solid var(--border2);border-radius:4px;padding:4px 6px;font-size:12px;background:var(--bg);color:var(--text);font-family:inherit;width:100%;}
 .si-sel{-webkit-appearance:none;}
+.si-ta{resize:none;height:52px;line-height:1.4;overflow-y:auto;display:block;}
+.si-ta-wrap{position:relative;}
+.si-count{position:absolute;bottom:3px;right:6px;font-size:9px;color:var(--text3);background:var(--bg);padding:0 3px;border-radius:3px;display:none;pointer-events:none;}
+.si-ta-wrap:focus-within .si-count{display:block;}
 .si-c1{background:var(--green-bg);color:var(--green-text);font-weight:500;}
 .si-c2{background:var(--amber-bg);color:var(--amber-text);font-weight:500;}
 .si-c3{background:var(--orange-bg);color:var(--orange-text);font-weight:500;}
@@ -549,6 +555,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
 let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null,ingeklapteOpnames=new Set();
 let snelInspectiesLijst=[],currentSnelInspectieId=null,snelInspOpen=true,openSnelMenu=null,aiInspOpen=true;
+let mjopEditMode=false;
 let activeSection='ai'; // 'snel' or 'ai'
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
@@ -1381,6 +1388,7 @@ window.navTo=page=>{
 };
 
 window.navToChapter=ch=>{
+  if(ch!=='mjop')mjopEditMode=false;
   currentChapter=ch;
   const objectChapters=['objectgegevens','gebouwpaspoort','huurtaxatie','kosten','rapportage','snellinvoer','onderhoud','mjop'];
   if(objectChapters.includes(ch))activeSection=null;
@@ -2053,35 +2061,102 @@ function renderMJOP(container){
   const totaal=opn.mjop.reduce((s,e)=>s+(e.kosten_totaal||0),0);
   const jaarlijks=Math.round(totaal/10);
   html+='<div class="mjop-banner">'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+Math.round(totaal).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+jaarlijks.toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">'+opn.mjop.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-tot">€ '+Math.round(totaal).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-jr">€ '+jaarlijks.toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-cnt">'+opn.mjop.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
   '</div>';
-  html+='<table class="mjop-table"><thead><tr><th>Element</th><th>Cyclus</th><th>Jaar 1–3</th><th>Jaar 4–7</th><th>Jaar 8–10</th><th>Totaal</th></tr></thead><tbody>';
-  opn.mjop.forEach(e=>{
-    html+='<tr><td><strong>'+escHtml(e.element)+'</strong><div style="font-size:11px;color:var(--text3);">'+escHtml(e.omschrijving||'')+'</div></td>'+
-      '<td>'+escHtml(e.cyclus||'—')+'</td>'+
-      '<td class="'+(e.jaar1_3?'mjop-amt-h':'')+'">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td class="'+(e.jaar4_7?'mjop-amt-h':'')+'">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td class="'+(e.jaar8_10?'mjop-amt-v':'')+'">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td></tr>';
-  });
-  html+='<tr><td><strong>Totaal</strong></td><td></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(totaal).toLocaleString('nl-NL')+'</strong></td></tr></tbody></table>';
-  html+='<div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">'+
-    '<div style="font-size:12px;font-weight:600;margin-bottom:4px;">📊 Jaarlijkse voorziening</div>'+
-    '<div style="font-size:13px;">Op basis van het 10-jaars MJOP dient jaarlijks <strong>€ '+jaarlijks.toLocaleString('nl-NL')+'</strong> gereserveerd te worden voor onderhoud en vervanging.</div>'+
-  '</div>';
-  html+='<div class="btn-row"><button class="btn btn-blue btn-sm" onclick="genereerMJOP()">↺ Herbereken MJOP</button><button class="btn btn-light btn-sm" onclick="downloadMJOPExcel()">⬇ Excel</button><button class="btn btn-light btn-sm" onclick="downloadMJOPPDF()">⬇ PDF</button></div>';
+  if(mjopEditMode){
+    html+='<table class="mjop-table"><thead><tr><th>Element</th><th style="width:9%;">Cyclus</th><th style="width:11%;">Jaar 1–3</th><th style="width:11%;">Jaar 4–7</th><th style="width:11%;">Jaar 8–10</th><th style="width:11%;">Totaal</th><th style="width:28px;"></th></tr></thead><tbody>';
+    opn.mjop.forEach((e,i)=>{
+      html+='<tr>'+
+        '<td><input type="text" class="mjop-inp" value="'+escHtml(e.element||'')+'" placeholder="Element" oninput="mjopEdit('+i+',\'element\',this.value)" style="font-weight:600;margin-bottom:3px;"/>'+
+        '<input type="text" class="mjop-inp" value="'+escHtml(e.omschrijving||'')+'" placeholder="Omschrijving" oninput="mjopEdit('+i+',\'omschrijving\',this.value)" style="font-size:11px;"/></td>'+
+        '<td><input type="text" class="mjop-inp" value="'+escHtml(e.cyclus||'')+'" placeholder="bv. 15 jaar" oninput="mjopEdit('+i+',\'cyclus\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar1_3||0)+'" oninput="mjopEdit('+i+',\'jaar1_3\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar4_7||0)+'" oninput="mjopEdit('+i+',\'jaar4_7\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar8_10||0)+'" oninput="mjopEdit('+i+',\'jaar8_10\',this.value)"/></td>'+
+        '<td id="mjop-rt-'+i+'"><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td>'+
+        '<td style="text-align:center;"><button onclick="mjopVerwijderRij('+i+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;" title="Rij verwijderen">×</button></td></tr>';
+    });
+    html+=mjopFooterRij(opn);
+    html+='</tbody></table>';
+    html+='<button class="btn btn-light btn-sm" onclick="mjopRijToevoegen()" style="width:100%;border-style:dashed;margin-bottom:12px;">+ Element toevoegen</button>';
+    html+='<div class="btn-row"><button class="btn btn-blue btn-sm" onclick="mjopKlaar()">✓ Klaar met bewerken</button></div>';
+  }else{
+    html+='<table class="mjop-table"><thead><tr><th>Element</th><th>Cyclus</th><th>Jaar 1–3</th><th>Jaar 4–7</th><th>Jaar 8–10</th><th>Totaal</th></tr></thead><tbody>';
+    opn.mjop.forEach(e=>{
+      html+='<tr><td><strong>'+escHtml(e.element)+'</strong><div style="font-size:11px;color:var(--text3);">'+escHtml(e.omschrijving||'')+'</div></td>'+
+        '<td>'+escHtml(e.cyclus||'—')+'</td>'+
+        '<td class="'+(e.jaar1_3?'mjop-amt-h':'')+'">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td class="'+(e.jaar4_7?'mjop-amt-h':'')+'">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td class="'+(e.jaar8_10?'mjop-amt-v':'')+'">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td></tr>';
+    });
+    html+=mjopFooterRij(opn);
+    html+='</tbody></table>';
+    html+='<div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">'+
+      '<div style="font-size:12px;font-weight:600;margin-bottom:4px;">📊 Jaarlijkse voorziening</div>'+
+      '<div style="font-size:13px;">Op basis van het 10-jaars MJOP dient jaarlijks <strong>€ '+jaarlijks.toLocaleString('nl-NL')+'</strong> gereserveerd te worden voor onderhoud en vervanging.</div>'+
+    '</div>';
+    html+='<div class="btn-row"><button class="btn btn-light btn-sm" onclick="mjopStartBewerken()">✏️ Bewerken</button><button class="btn btn-blue btn-sm" onclick="genereerMJOP()">↺ Herbereken MJOP</button><button class="btn btn-light btn-sm" onclick="downloadMJOPExcel()">⬇ Excel</button><button class="btn btn-light btn-sm" onclick="downloadMJOPPDF()">⬇ PDF</button></div>';
+  }
   container.innerHTML=html;
 }
+function mjopFooterRij(opn){
+  return '<tr><td><strong>Totaal</strong></td><td></td>'+
+    '<td id="mjop-ft-1"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-2"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-3"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-tot"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.kosten_totaal||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    (mjopEditMode?'<td></td>':'')+'</tr>';
+}
+window.mjopStartBewerken=()=>{mjopEditMode=true;renderChapter('mjop');};
+window.mjopEdit=(i,veld,waarde)=>{
+  const opn=getOpname();const rij=opn.mjop[i];if(!rij)return;
+  if(['jaar1_3','jaar4_7','jaar8_10'].includes(veld)){
+    rij[veld]=parseFloat(waarde)||0;
+    rij.kosten_totaal=(rij.jaar1_3||0)+(rij.jaar4_7||0)+(rij.jaar8_10||0);
+    const rt=document.getElementById('mjop-rt-'+i);
+    if(rt)rt.innerHTML='<strong>€ '+Math.round(rij.kosten_totaal).toLocaleString('nl-NL')+'</strong>';
+    mjopHerberekenTotalen(opn);
+  }else{rij[veld]=waarde;}
+};
+function mjopHerberekenTotalen(opn){
+  const t1=opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0);
+  const t2=opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0);
+  const t3=opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0);
+  const tot=t1+t2+t3;
+  const zet=(id,val)=>{const el=document.getElementById(id);if(el)el.innerHTML='<strong>€ '+Math.round(val).toLocaleString('nl-NL')+'</strong>';};
+  zet('mjop-ft-1',t1);zet('mjop-ft-2',t2);zet('mjop-ft-3',t3);zet('mjop-ft-tot',tot);
+  const st=document.getElementById('mjop-st-tot');if(st)st.textContent='€ '+Math.round(tot).toLocaleString('nl-NL');
+  const sj=document.getElementById('mjop-st-jr');if(sj)sj.textContent='€ '+Math.round(tot/10).toLocaleString('nl-NL');
+  const sc=document.getElementById('mjop-st-cnt');if(sc)sc.textContent=opn.mjop.length;
+}
+window.mjopVerwijderRij=i=>{
+  const opn=getOpname();const rij=opn.mjop[i];
+  if(!confirm('Element "'+(rij?.element||'')+'" uit het MJOP verwijderen?'))return;
+  opn.mjop.splice(i,1);renderChapter('mjop');
+};
+window.mjopRijToevoegen=()=>{
+  const opn=getOpname();if(!opn.mjop)opn.mjop=[];
+  opn.mjop.push({element:'',omschrijving:'',cyclus:'',jaar1_3:0,jaar4_7:0,jaar8_10:0,kosten_totaal:0,toelichting:'Handmatig toegevoegd'});
+  renderChapter('mjop');
+  setTimeout(()=>{const inps=document.querySelectorAll('.mjop-inp');if(inps.length)inps[inps.length-6]?.focus();},50);
+};
+window.mjopKlaar=async()=>{
+  const opn=getOpname();
+  opn.mjop=(opn.mjop||[]).filter(r=>(r.element||'').trim()||r.kosten_totaal>0);
+  mjopEditMode=false;
+  await saveMjopData();
+  renderChapter('mjop');
+  showToast('MJOP opgeslagen');
+};
 
 window.genereerMJOP=async()=>{
   if(!getApiKey()){showToast('API-sleutel ontbreekt');navTo('settings');return;}
   const opn=getOpname();
+  if(opn.mjop&&opn.mjop.length&&!confirm('Herberekenen overschrijft het volledige MJOP, inclusief handmatige wijzigingen. Doorgaan?'))return;
+  mjopEditMode=false;
   const loadEl=document.getElementById('mjop-loading');const pbar=document.getElementById('mjop-pbar');
   if(loadEl)loadEl.style.display='block';if(pbar)pbar.style.width='20%';
   const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): conditie '+CONDITIE[e.conditie||3]+' | herstel €'+( e.kosten||0)+' | vervanging €'+(e.kosten_vervanging||0)).join('\n');
@@ -2168,12 +2243,12 @@ function renderSnelInspectie(container){
     html+='<div class="btn-row" style="margin-bottom:14px;">'+
       (heeftNieuwe
         ?'<button id="si-gen-btn" class="btn btn-blue btn-sm" onclick="siGenereerBeschrijvingen()">✦ Beschrijvingen genereren</button>'+
-          '<span style="font-size:11px;color:var(--text3);align-self:center;">Genereert bijschriften voor foto\'s zonder beschrijving en voegt rijen toe</span>'
-        :'<span style="font-size:11px;color:var(--green-text);align-self:center;">✓ Alle foto\'s hebben een beschrijving. Upload nieuwe foto\'s om er meer toe te voegen.</span>'
+          '<span class="no-print" style="font-size:11px;color:var(--text3);align-self:center;">Genereert bijschriften voor foto\'s zonder beschrijving en voegt rijen toe</span>'
+        :'<span class="no-print" style="font-size:11px;color:var(--green-text);align-self:center;">✓ Alle foto\'s hebben een beschrijving. Upload nieuwe foto\'s om er meer toe te voegen.</span>'
       )+
     '</div>';
   } else {
-    html+='<div style="font-size:12px;color:var(--text3);background:var(--blue-bg);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:12px;">'+
+    html+='<div class="no-print" style="font-size:12px;color:var(--text3);background:var(--blue-bg);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:12px;">'+
       '💡 Tip: Upload alle foto\'s tegelijk voor de beste resultaten. Daarna klik je op "✦ Beschrijvingen genereren" om bijschriften en rijen automatisch in te vullen. Extra foto\'s kun je altijd nog toevoegen met het ✦ knopje per foto.'+
     '</div>';
   }
@@ -2194,11 +2269,11 @@ function renderSnelInspectie(container){
       '<select class="si-sel" onchange="siUpdate('+i+',\'element\',this.value)">'+
         SI_ELEMENTEN.map(e=>'<option '+(r.element===e?'selected':'')+'>'+e+'</option>').join('')+
       '</select>'+
-      '<input type="text" class="si-inp" placeholder="Omschrijving..." value="'+escHtml(r.omschrijving||'')+'" oninput="siUpdate('+i+',\'omschrijving\',this.value)"/>'+
+      '<div class="si-ta-wrap"><textarea class="si-inp si-ta" maxlength="130" placeholder="Omschrijving..." onfocus="siCount(this)" oninput="siUpdate('+i+',\'omschrijving\',this.value);siCount(this)">'+escHtml(r.omschrijving||'')+'</textarea><span class="si-count"></span></div>'+
       '<select class="si-sel '+cc+'" onchange="siUpdate('+i+',\'conditie\',parseInt(this.value));siUpdateCondClass(this,parseInt(this.value))">'+
         [1,2,3,4,5].map(n=>'<option value="'+n+'" '+(r.conditie===n?'selected':'')+'>'+n+' '+['Goed','Redelijk','Matig','Slecht','Z.slecht'][n-1]+'</option>').join('')+
       '</select>'+
-      '<input type="text" class="si-inp" placeholder="Voorgestelde actie..." value="'+escHtml(r.actie||'')+'" oninput="siUpdate('+i+',\'actie\',this.value)"/>'+
+      '<div class="si-ta-wrap"><textarea class="si-inp si-ta" maxlength="130" placeholder="Voorgestelde actie..." onfocus="siCount(this)" oninput="siUpdate('+i+',\'actie\',this.value);siCount(this)">'+escHtml(r.actie||'')+'</textarea><span class="si-count"></span></div>'+
       '<select class="si-sel '+pc+'" onchange="siUpdate('+i+',\'prioriteit\',this.value);siUpdatePrioClass(this,this.value)">'+
         '<option value="hoog" '+(r.prioriteit==='hoog'?'selected':'')+'>🔴 Hoog</option>'+
         '<option value="gemiddeld" '+(r.prioriteit==='gemiddeld'||!r.prioriteit?'selected':'')+'>🟠 Gemiddeld</option>'+
@@ -2784,6 +2859,7 @@ window.genereerBijschriftenParagraaf=async(chId,subTab)=>{
     showToast(labels.length+' bijschriften gegenereerd');
   }catch(err){showToast('Fout: '+err.message);}
 };
+window.siCount=t=>{const c=t.parentNode.querySelector('.si-count');if(c)c.textContent=t.value.length+'/130';};
 window.siGenereerBeschrijvingen=async()=>{
   const si=getSI();
   const fotos=si.fotos||[];
@@ -2802,7 +2878,7 @@ window.siGenereerBeschrijvingen=async()=>{
       'Dit zijn '+nieuweFotos.length+' foto\'s van een bouwkundige inspectie. Analyseer elke foto en geef:\n'+
       '1. Een kort bijschrift van max 4 woorden (bijv. "Voorgevel kozijnen verweerd")\n'+
       '2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n'+
-      '3. Een korte omschrijving van de bevinding (1 zin)\n'+
+      '3. Een korte omschrijving van de bevinding (1 zin, maximaal 130 tekens)\n'+
       '4. Conditie 1-5 (1=Goed, 5=Zeer slecht)\n\n'+
       'Reageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
       '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3}]\n'+
@@ -2848,7 +2924,7 @@ window.siGenereerEenFoto=async idx=>{
   try{
     const raw=await callClaude([
       {type:'image',source:{type:'base64',media_type:'image/jpeg',data:foto.dataUrl.split(',')[1]}},
-      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto en geef:\n1. Een kort bijschrift van max 4 woorden\n2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n3. Een korte omschrijving van de bevinding (1 zin)\n4. Conditie 1-5\n\nReageer ALLEEN als JSON:\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3}\nAlleen JSON.'}
+      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto en geef:\n1. Een kort bijschrift van max 4 woorden\n2. Een element uit: Gevel, Kozijn, Dak, Boeibord, Hemelwaterafvoer, Terrein, Overige\n3. Een korte omschrijving van de bevinding (1 zin, maximaal 130 tekens)\n4. Conditie 1-5\n\nReageer ALLEEN als JSON:\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3}\nAlleen JSON.'}
     ]);
     const clean=raw.replace(/```json|```/g,'').trim();
     const item=JSON.parse(clean);
@@ -3088,38 +3164,82 @@ window.printHuidigePagina=()=>{
   const activePage=document.querySelector('.page.active');
   if(!activePage){window.print();return;}
 
-  // Kloon de pagina en vervang alle inputs/selects/textareas door hun waarden
+  // Kloon de pagina en synchroniseer eerst de LIVE waarden van alle invoervelden
   const kloon=activePage.cloneNode(true);
+  const origVelden=activePage.querySelectorAll('input,select,textarea');
+  const kloonVelden=kloon.querySelectorAll('input,select,textarea');
+  origVelden.forEach((o,i)=>{
+    const k=kloonVelden[i];if(!k)return;
+    if(o.tagName==='SELECT')k.selectedIndex=o.selectedIndex;
+    else k.value=o.value;
+  });
+
+  // Zet si-grids (snelle inspectie / snelle invoer) om naar echte tabellen
+  let heeftSiTabel=false;
+  kloon.querySelectorAll('.si-header').forEach(hdr=>{
+    const labels=[...hdr.querySelectorAll('span')].map(s=>s.textContent.trim()).filter(t=>t);
+    let rijen=[];let n=hdr.nextElementSibling;
+    while(n){
+      if(n.classList&&(n.classList.contains('si-rij')||n.classList.contains('si-row'))){rijen.push(n);n=n.nextElementSibling;}
+      else if(n.id==='si-list'){rijen=rijen.concat([...n.children].filter(c=>c.classList.contains('si-row')||c.classList.contains('si-rij')));const na=n.nextElementSibling;n.remove();n=na;}
+      else break;
+    }
+    if(!rijen.length){hdr.remove();return;}
+    let t='<table class="print-si-table"><tr>'+labels.map(l=>'<th>'+l+'</th>').join('')+'</tr>';
+    rijen.forEach(r=>{
+      const cellen=[...r.querySelectorAll('input,select,textarea')].map(el=>{
+        if(el.tagName==='SELECT')return el.selectedOptions[0]?el.selectedOptions[0].textContent:'—';
+        return el.value||'—';
+      });
+      t+='<tr>'+cellen.slice(0,labels.length).map(c=>'<td>'+c.replace(/</g,'&lt;')+'</td>').join('')+'</tr>';
+      r.remove();
+    });
+    t+='</table>';
+    const wrap=document.createElement('div');wrap.innerHTML=t;
+    hdr.parentNode.replaceChild(wrap.firstChild,hdr);
+    heeftSiTabel=true;
+  });
+
+  // Vervang overige inputs/selects/textareas door hun waarden
   kloon.querySelectorAll('input,select,textarea').forEach(el=>{
-    const val=el.value||'';
+    let val=el.tagName==='SELECT'?(el.selectedOptions[0]?el.selectedOptions[0].textContent:''):(el.value||'');
+    if(el.tagName==='SELECT'&&/^—\s*Kies\s*—$/i.test(val.trim()))val='';
     const span=document.createElement('span');
+    span.className='print-val';
     span.textContent=val||'—';
-    span.style.cssText='display:inline-block;min-width:60px;';
     el.parentNode.replaceChild(span,el);
   });
-  // Verwijder knoppen en navigatie-elementen
-  kloon.querySelectorAll('button,.btn,.icon-btn,.foto-zone,.bev-add-row,.bev-savebar,.para-x,.sb-new-opname,.confirm-box,.bev-chevron,.kosten-acc-arrow,.si-gen-btn').forEach(el=>el.remove());
+  // Verwijder knoppen, navigatie, hulpteksten en invoerhulpmiddelen
+  kloon.querySelectorAll('button,.btn,.btn-row,.icon-btn,.foto-zone,.bev-add-row,.bev-savebar,.para-x,.sb-new-opname,.confirm-box,.bev-chevron,.kosten-acc-arrow,.si-gen-btn,.si-add,.rapport-keuze,#rapport-loading,.no-print').forEach(el=>el.remove());
   // Zorg dat ingeklapte bev-body's zichtbaar zijn
   kloon.querySelectorAll('.bev-body,.kosten-acc-body').forEach(el=>el.style.display='block');
 
+  // Kopieer de volledige app-stylesheet zodat de print exact gelijk is aan het scherm
+  const appCss=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+
   const win=window.open('','_blank');
   if(!win){showToast('Pop-up geblokkeerd door browser');return;}
-  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>${titel}</title><style>
-    body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5;color:#000;}
+  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>${titel}</title>
+  <style>${appCss}</style>
+  <style>
+    /* Print-overrides: app-layout resetten, kleuren behouden */
+    html,body{height:auto;overflow:visible;background:#fff;color:#000;}
+    body{margin:2cm;font-size:11pt;line-height:1.5;}
+    body *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     h1{font-size:16pt;margin-bottom:4pt;}
-    .section-title{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#666;margin:12pt 0 4pt;border-bottom:1px solid #eee;padding-bottom:2pt;}
-    .card,.bevinding-card,.kosten-accordion{border:1px solid #ccc;border-radius:4pt;margin-bottom:8pt;padding:8pt;break-inside:avoid;}
-    .card-header,.bev-header,.kosten-acc-header{font-weight:600;margin-bottom:4pt;padding:6pt;background:#f5f5f5;border-radius:3pt;}
-    .bev-body,.kosten-acc-body{display:block!important;padding:6pt;}
-    .badge{border:1px solid #ccc;border-radius:3pt;padding:1pt 5pt;font-size:9pt;}
-    img{max-width:100%;height:auto;border-radius:3pt;break-inside:avoid;}
-    table{width:100%;border-collapse:collapse;font-size:10pt;margin:4pt 0;}
-    td,th{border:1px solid #ccc;padding:4pt 6pt;}
-    .foto-grid-groot,.foto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4pt;}
-    .field label{font-size:9pt;color:#666;font-weight:600;}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8pt;}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8pt;}
-    div[style*="background:#"]{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .print-val{display:block;min-height:1.3em;padding:2pt 0 4pt;font-size:11pt;color:#000;}
+    .field{break-inside:avoid;margin-bottom:6pt;}
+    .field label{display:block;font-size:8.5pt;color:#666;font-weight:600;margin-bottom:1pt;}
+    .card,.bevinding-card,.kosten-accordion{break-inside:avoid;}
+    .page>div[style*="border-radius"]{break-inside:avoid;}
+    img{max-width:100%;height:auto;break-inside:avoid;}
+    .bev-body,.kosten-acc-body{display:block!important;}
+    .print-si-table{width:100%;border-collapse:collapse;font-size:8.5pt;margin:6pt 0;}
+    .print-si-table th{background:#f0f0f0;text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.3px;}
+    .print-si-table th,.print-si-table td{border:1px solid #ccc;padding:3pt 5pt;vertical-align:top;}
+    .print-si-table tr{break-inside:avoid;}
+    .si-totaal{display:flex;justify-content:flex-end;gap:10pt;border-top:none;}
+    ${heeftSiTabel?'@media print{@page{size:A4 landscape;}}':''}
     @media print{body{margin:1.5cm;}@page{margin:1.5cm;}}
   </style></head><body>
     <h1>${titel}</h1>
