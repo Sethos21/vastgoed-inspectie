@@ -276,6 +276,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .mjop-table tr:hover td{background:var(--bg1);}
 .mjop-amt-h{color:#3b6d11;font-weight:500;}
 .mjop-amt-v{color:#993c1d;font-weight:500;}
+.mjop-inp{width:100%;border:0.5px solid var(--border);border-radius:5px;padding:4px 7px;font-size:12px;background:var(--bg);color:var(--text);}
+.mjop-inp:focus{outline:none;border-color:var(--blue);}
 .mjop-banner{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
 .mjop-stat{background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;}
 .mjop-stat-val{font-size:20px;font-weight:600;}
@@ -553,6 +555,7 @@ const MJOP_ELEMENTEN=['Dak','Schilderwerk','Kozijnen & gevel','Bestrating'];
 let currentUser=null,objects=[],eigenaren=[],currentObjId=null,currentOpnameId=null,currentEigenaarId=null;
 let opnamesLijst=[],inspectiesOpen=true,openOpnameMenu=null,ingeklapteOpnames=new Set();
 let snelInspectiesLijst=[],currentSnelInspectieId=null,snelInspOpen=true,openSnelMenu=null,aiInspOpen=true;
+let mjopEditMode=false;
 let activeSection='ai'; // 'snel' or 'ai'
 let opnames={},currentChapter='gevels',currentSubTab=null,currentObj=null,rapportTekst='';
 
@@ -1385,6 +1388,7 @@ window.navTo=page=>{
 };
 
 window.navToChapter=ch=>{
+  if(ch!=='mjop')mjopEditMode=false;
   currentChapter=ch;
   const objectChapters=['objectgegevens','gebouwpaspoort','huurtaxatie','kosten','rapportage','snellinvoer','onderhoud','mjop'];
   if(objectChapters.includes(ch))activeSection=null;
@@ -2057,35 +2061,102 @@ function renderMJOP(container){
   const totaal=opn.mjop.reduce((s,e)=>s+(e.kosten_totaal||0),0);
   const jaarlijks=Math.round(totaal/10);
   html+='<div class="mjop-banner">'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+Math.round(totaal).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">€ '+jaarlijks.toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
-    '<div class="mjop-stat"><div class="mjop-stat-val">'+opn.mjop.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-tot">€ '+Math.round(totaal).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-jr">€ '+jaarlijks.toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="mjop-st-cnt">'+opn.mjop.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
   '</div>';
-  html+='<table class="mjop-table"><thead><tr><th>Element</th><th>Cyclus</th><th>Jaar 1–3</th><th>Jaar 4–7</th><th>Jaar 8–10</th><th>Totaal</th></tr></thead><tbody>';
-  opn.mjop.forEach(e=>{
-    html+='<tr><td><strong>'+escHtml(e.element)+'</strong><div style="font-size:11px;color:var(--text3);">'+escHtml(e.omschrijving||'')+'</div></td>'+
-      '<td>'+escHtml(e.cyclus||'—')+'</td>'+
-      '<td class="'+(e.jaar1_3?'mjop-amt-h':'')+'">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td class="'+(e.jaar4_7?'mjop-amt-h':'')+'">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td class="'+(e.jaar8_10?'mjop-amt-v':'')+'">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
-      '<td><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td></tr>';
-  });
-  html+='<tr><td><strong>Totaal</strong></td><td></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
-    '<td><strong>€ '+Math.round(totaal).toLocaleString('nl-NL')+'</strong></td></tr></tbody></table>';
-  html+='<div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">'+
-    '<div style="font-size:12px;font-weight:600;margin-bottom:4px;">📊 Jaarlijkse voorziening</div>'+
-    '<div style="font-size:13px;">Op basis van het 10-jaars MJOP dient jaarlijks <strong>€ '+jaarlijks.toLocaleString('nl-NL')+'</strong> gereserveerd te worden voor onderhoud en vervanging.</div>'+
-  '</div>';
-  html+='<div class="btn-row"><button class="btn btn-blue btn-sm" onclick="genereerMJOP()">↺ Herbereken MJOP</button><button class="btn btn-light btn-sm" onclick="downloadMJOPExcel()">⬇ Excel</button><button class="btn btn-light btn-sm" onclick="downloadMJOPPDF()">⬇ PDF</button></div>';
+  if(mjopEditMode){
+    html+='<table class="mjop-table"><thead><tr><th>Element</th><th style="width:9%;">Cyclus</th><th style="width:11%;">Jaar 1–3</th><th style="width:11%;">Jaar 4–7</th><th style="width:11%;">Jaar 8–10</th><th style="width:11%;">Totaal</th><th style="width:28px;"></th></tr></thead><tbody>';
+    opn.mjop.forEach((e,i)=>{
+      html+='<tr>'+
+        '<td><input type="text" class="mjop-inp" value="'+escHtml(e.element||'')+'" placeholder="Element" oninput="mjopEdit('+i+',\'element\',this.value)" style="font-weight:600;margin-bottom:3px;"/>'+
+        '<input type="text" class="mjop-inp" value="'+escHtml(e.omschrijving||'')+'" placeholder="Omschrijving" oninput="mjopEdit('+i+',\'omschrijving\',this.value)" style="font-size:11px;"/></td>'+
+        '<td><input type="text" class="mjop-inp" value="'+escHtml(e.cyclus||'')+'" placeholder="bv. 15 jaar" oninput="mjopEdit('+i+',\'cyclus\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar1_3||0)+'" oninput="mjopEdit('+i+',\'jaar1_3\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar4_7||0)+'" oninput="mjopEdit('+i+',\'jaar4_7\',this.value)"/></td>'+
+        '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar8_10||0)+'" oninput="mjopEdit('+i+',\'jaar8_10\',this.value)"/></td>'+
+        '<td id="mjop-rt-'+i+'"><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td>'+
+        '<td style="text-align:center;"><button onclick="mjopVerwijderRij('+i+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;" title="Rij verwijderen">×</button></td></tr>';
+    });
+    html+=mjopFooterRij(opn);
+    html+='</tbody></table>';
+    html+='<button class="btn btn-light btn-sm" onclick="mjopRijToevoegen()" style="width:100%;border-style:dashed;margin-bottom:12px;">+ Element toevoegen</button>';
+    html+='<div class="btn-row"><button class="btn btn-blue btn-sm" onclick="mjopKlaar()">✓ Klaar met bewerken</button></div>';
+  }else{
+    html+='<table class="mjop-table"><thead><tr><th>Element</th><th>Cyclus</th><th>Jaar 1–3</th><th>Jaar 4–7</th><th>Jaar 8–10</th><th>Totaal</th></tr></thead><tbody>';
+    opn.mjop.forEach(e=>{
+      html+='<tr><td><strong>'+escHtml(e.element)+'</strong><div style="font-size:11px;color:var(--text3);">'+escHtml(e.omschrijving||'')+'</div></td>'+
+        '<td>'+escHtml(e.cyclus||'—')+'</td>'+
+        '<td class="'+(e.jaar1_3?'mjop-amt-h':'')+'">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td class="'+(e.jaar4_7?'mjop-amt-h':'')+'">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td class="'+(e.jaar8_10?'mjop-amt-v':'')+'">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
+        '<td><strong>€ '+Math.round(e.kosten_totaal||0).toLocaleString('nl-NL')+'</strong></td></tr>';
+    });
+    html+=mjopFooterRij(opn);
+    html+='</tbody></table>';
+    html+='<div style="background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">'+
+      '<div style="font-size:12px;font-weight:600;margin-bottom:4px;">📊 Jaarlijkse voorziening</div>'+
+      '<div style="font-size:13px;">Op basis van het 10-jaars MJOP dient jaarlijks <strong>€ '+jaarlijks.toLocaleString('nl-NL')+'</strong> gereserveerd te worden voor onderhoud en vervanging.</div>'+
+    '</div>';
+    html+='<div class="btn-row"><button class="btn btn-light btn-sm" onclick="mjopStartBewerken()">✏️ Bewerken</button><button class="btn btn-blue btn-sm" onclick="genereerMJOP()">↺ Herbereken MJOP</button><button class="btn btn-light btn-sm" onclick="downloadMJOPExcel()">⬇ Excel</button><button class="btn btn-light btn-sm" onclick="downloadMJOPPDF()">⬇ PDF</button></div>';
+  }
   container.innerHTML=html;
 }
+function mjopFooterRij(opn){
+  return '<tr><td><strong>Totaal</strong></td><td></td>'+
+    '<td id="mjop-ft-1"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-2"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-3"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="mjop-ft-tot"><strong>€ '+Math.round(opn.mjop.reduce((s,e)=>s+(e.kosten_totaal||0),0)).toLocaleString('nl-NL')+'</strong></td>'+
+    (mjopEditMode?'<td></td>':'')+'</tr>';
+}
+window.mjopStartBewerken=()=>{mjopEditMode=true;renderChapter('mjop');};
+window.mjopEdit=(i,veld,waarde)=>{
+  const opn=getOpname();const rij=opn.mjop[i];if(!rij)return;
+  if(['jaar1_3','jaar4_7','jaar8_10'].includes(veld)){
+    rij[veld]=parseFloat(waarde)||0;
+    rij.kosten_totaal=(rij.jaar1_3||0)+(rij.jaar4_7||0)+(rij.jaar8_10||0);
+    const rt=document.getElementById('mjop-rt-'+i);
+    if(rt)rt.innerHTML='<strong>€ '+Math.round(rij.kosten_totaal).toLocaleString('nl-NL')+'</strong>';
+    mjopHerberekenTotalen(opn);
+  }else{rij[veld]=waarde;}
+};
+function mjopHerberekenTotalen(opn){
+  const t1=opn.mjop.reduce((s,e)=>s+(e.jaar1_3||0),0);
+  const t2=opn.mjop.reduce((s,e)=>s+(e.jaar4_7||0),0);
+  const t3=opn.mjop.reduce((s,e)=>s+(e.jaar8_10||0),0);
+  const tot=t1+t2+t3;
+  const zet=(id,val)=>{const el=document.getElementById(id);if(el)el.innerHTML='<strong>€ '+Math.round(val).toLocaleString('nl-NL')+'</strong>';};
+  zet('mjop-ft-1',t1);zet('mjop-ft-2',t2);zet('mjop-ft-3',t3);zet('mjop-ft-tot',tot);
+  const st=document.getElementById('mjop-st-tot');if(st)st.textContent='€ '+Math.round(tot).toLocaleString('nl-NL');
+  const sj=document.getElementById('mjop-st-jr');if(sj)sj.textContent='€ '+Math.round(tot/10).toLocaleString('nl-NL');
+  const sc=document.getElementById('mjop-st-cnt');if(sc)sc.textContent=opn.mjop.length;
+}
+window.mjopVerwijderRij=i=>{
+  const opn=getOpname();const rij=opn.mjop[i];
+  if(!confirm('Element "'+(rij?.element||'')+'" uit het MJOP verwijderen?'))return;
+  opn.mjop.splice(i,1);renderChapter('mjop');
+};
+window.mjopRijToevoegen=()=>{
+  const opn=getOpname();if(!opn.mjop)opn.mjop=[];
+  opn.mjop.push({element:'',omschrijving:'',cyclus:'',jaar1_3:0,jaar4_7:0,jaar8_10:0,kosten_totaal:0,toelichting:'Handmatig toegevoegd'});
+  renderChapter('mjop');
+  setTimeout(()=>{const inps=document.querySelectorAll('.mjop-inp');if(inps.length)inps[inps.length-6]?.focus();},50);
+};
+window.mjopKlaar=async()=>{
+  const opn=getOpname();
+  opn.mjop=(opn.mjop||[]).filter(r=>(r.element||'').trim()||r.kosten_totaal>0);
+  mjopEditMode=false;
+  await saveMjopData();
+  renderChapter('mjop');
+  showToast('MJOP opgeslagen');
+};
 
 window.genereerMJOP=async()=>{
   if(!getApiKey()){showToast('API-sleutel ontbreekt');navTo('settings');return;}
   const opn=getOpname();
+  if(opn.mjop&&opn.mjop.length&&!confirm('Herberekenen overschrijft het volledige MJOP, inclusief handmatige wijzigingen. Doorgaan?'))return;
+  mjopEditMode=false;
   const loadEl=document.getElementById('mjop-loading');const pbar=document.getElementById('mjop-pbar');
   if(loadEl)loadEl.style.display='block';if(pbar)pbar.style.width='20%';
   const bevStr=opn.elementen.map(e=>'- '+e.element+' ('+( INSP_PARAGRAFEN.find(p=>p.id===e.chapterId)?.naam||e.chapterId)+'): conditie '+CONDITIE[e.conditie||3]+' | herstel €'+( e.kosten||0)+' | vervanging €'+(e.kosten_vervanging||0)).join('\n');
