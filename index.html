@@ -1781,12 +1781,162 @@ window.toggleObjSectie=id=>{
   renderChapter('object');
 };
 
-// PLANNINGPAGINA (stap 3 vult deze met actielijst + MJOP-tabel)
-function renderPlanningPagina(container){
-  container.innerHTML='<div class="section-title">📅 Planning & MJOP</div>'+
-    '<div class="empty"><div class="empty-icon">📅</div>'+
-    '<p>Hier komen in de volgende bouwstap de actielijst voor direct onderhoud (≤ 2 jaar)<br>en de meerjarenplanning, automatisch berekend uit de termijnen in je inspecties.</p></div>';
+
+// STAP 3: PLANNING — actielijst (≤ 2 jaar) + werkbare MJOP-tabel uit termijnen
+const PLAN_TERMIJN={'direct':'Direct','1-2':'1–2 jaar','3-5':'3–5 jaar','6-10':'6–10 jaar'};
+const PLAN_CYCLUS={'Dak':25,'Gevel':30,'Kozijn':30,'Boeibord':15,'Hemelwaterafvoer':20,'Terrein':30,'Overige':15};
+function plGetSI(){
+  const opn=getOpname();
+  if(!opn.snelInspectieData)opn.snelInspectieData={};
+  if(!window._planInspId||!opn.snelInspectieData[window._planInspId]){
+    window._planInspId=currentSnelInspectieId||(snelInspectiesLijst[0]&&snelInspectiesLijst[0].id)||null;
+  }
+  if(!window._planInspId)return null;
+  if(!opn.snelInspectieData[window._planInspId])opn.snelInspectieData[window._planInspId]={fotos:[],rijen:[]};
+  return opn.snelInspectieData[window._planInspId];
 }
+function renderPlanningPagina(container){
+  const si=plGetSI();
+  let html='<div class="section-title">📅 Planning & MJOP</div>';
+  if(!si){
+    container.innerHTML=html+'<div class="empty"><div class="empty-icon">📅</div><p>Maak eerst een inspectie aan.<br>De planning wordt berekend uit de termijnen in je inspectie.</p></div>';return;
+  }
+  // Inspectiekeuze
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'+
+    '<span style="font-size:12px;color:var(--text2);">Op basis van inspectie:</span>'+
+    '<select onchange="plKies(this.value)" style="border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:12px;background:var(--bg);color:var(--text);">'+
+      snelInspectiesLijst.map(s=>'<option value="'+s.id+'" '+(s.id===window._planInspId?'selected':'')+'>'+escHtml(s.naam)+' — '+escHtml(s.datum)+'</option>').join('')+
+    '</select></div>';
+
+  // ===== ACTIELIJST =====
+  const rijen=si.rijen||[];
+  const acties=rijen.map((r,i)=>({r,i})).filter(({r})=>r.termijn==='direct'||r.termijn==='1-2'||!r.termijn)
+    .sort((a,b)=>(a.r.termijn==='direct'?0:1)-(b.r.termijn==='direct'?0:1)||(b.r.conditie||3)-(a.r.conditie||3));
+  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">🔧 Direct onderhoud (≤ 2 jaar)</div>';
+  html+='<div style="border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;background:var(--bg);">';
+  if(!acties.length){
+    html+='<div style="padding:14px;font-size:12px;color:var(--text3);">Geen bevindingen met termijn direct of 1–2 jaar in deze inspectie.</div>';
+  }
+  const condK={1:'si-c1',2:'si-c2',3:'si-c3',4:'si-c4',5:'si-c5'};
+  let actTot=0;
+  acties.forEach(({r},j)=>{
+    const bedrag=parseFloat(r.herstel)||0;actTot+=bedrag;
+    html+='<div style="padding:9px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<span style="font-size:12.5px;font-weight:500;flex:1;">'+escHtml(r.element||'Element')+'</span>'+
+        '<span class="'+(condK[r.conditie||3])+'" style="border-radius:999px;padding:2px 9px;font-size:10.5px;">'+(r.conditie||3)+' '+(['Goed','Redelijk','Matig','Slecht','Z.slecht'][(r.conditie||3)-1])+'</span>'+
+        '<span style="font-size:11px;color:var(--text3);">'+(PLAN_TERMIJN[r.termijn]||'1–2 jaar')+(r.fotos?' · foto '+escHtml(String(r.fotos)):'')+'</span>'+
+        '<span style="font-size:12.5px;font-weight:600;min-width:70px;text-align:right;">€ '+Math.round(bedrag).toLocaleString('nl-NL')+'</span>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">'+
+        '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">Omschrijving</div><div style="font-size:11.5px;color:var(--text2);line-height:1.5;">'+escHtml(r.omschrijving||'—')+'</div></div>'+
+        '<div><div style="font-size:10px;color:var(--blue-text);text-transform:uppercase;letter-spacing:.3px;">Voorgestelde actie</div><div style="font-size:11.5px;line-height:1.5;">'+escHtml(r.actie||'—')+(r.hoeveelheid&&r.prijsHerstel?' <span style="color:var(--text3);">('+r.hoeveelheid+' '+(r.eenheid||'')+' × € '+r.prijsHerstel+' = € '+Math.round(bedrag).toLocaleString('nl-NL')+')</span>':'')+'</div></div>'+
+      '</div></div>';
+  });
+  if(acties.length){
+    html+='<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:0.5px solid var(--border2);font-size:12px;font-weight:600;background:var(--bg1);"><span>Totaal actielijst</span><span>€ '+Math.round(actTot).toLocaleString('nl-NL')+'</span></div>';
+  }
+  html+='</div>';
+
+  // ===== MJOP =====
+  if(!si.mjop||!si.mjop.length)plBouwMjop(si,false);
+  const m=si.mjop||[];
+  const t1=m.reduce((s,e)=>s+(parseFloat(e.jaar1_3)||0),0);
+  const t2=m.reduce((s,e)=>s+(parseFloat(e.jaar4_7)||0),0);
+  const t3=m.reduce((s,e)=>s+(parseFloat(e.jaar8_10)||0),0);
+  const tot=t1+t2+t3;
+  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 MJOP 10 jaar</div>';
+  html+='<div class="mjop-banner">'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="pl-st-tot">€ '+Math.round(tot).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Totaal 10 jaar</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="pl-st-jr">€ '+Math.round(tot/10).toLocaleString('nl-NL')+'</div><div class="mjop-stat-lbl">Jaarlijkse voorziening</div></div>'+
+    '<div class="mjop-stat"><div class="mjop-stat-val" id="pl-st-cnt">'+m.length+'</div><div class="mjop-stat-lbl">Elementen</div></div>'+
+  '</div>';
+  html+='<table class="mjop-table"><thead><tr><th>Element</th><th style="width:9%;">Cyclus (jr)</th><th style="width:12%;">Jaar 1–3</th><th style="width:12%;">Jaar 4–7</th><th style="width:12%;">Jaar 8–10</th><th style="width:12%;">Totaal</th><th style="width:28px;"></th></tr></thead><tbody>';
+  m.forEach((e,i)=>{
+    html+='<tr>'+
+      '<td><input type="text" class="mjop-inp" value="'+escHtml(e.element||'')+'" style="font-weight:600;margin-bottom:2px;" onchange="plEdit('+i+',\'element\',this.value)"/>'+
+      '<div style="font-size:10.5px;color:var(--text3);">'+escHtml(e.bron||'')+'</div></td>'+
+      '<td><input type="number" min="0" class="mjop-inp" value="'+(e.cyclus||'')+'" onchange="plEdit('+i+',\'cyclus\',this.value)"/></td>'+
+      '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar1_3||0)+'" onchange="plEdit('+i+',\'jaar1_3\',this.value)"/></td>'+
+      '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar4_7||0)+'" onchange="plEdit('+i+',\'jaar4_7\',this.value)"/></td>'+
+      '<td><input type="number" min="0" class="mjop-inp" value="'+(e.jaar8_10||0)+'" onchange="plEdit('+i+',\'jaar8_10\',this.value)"/></td>'+
+      '<td id="pl-rt-'+i+'"><strong>€ '+Math.round((parseFloat(e.jaar1_3)||0)+(parseFloat(e.jaar4_7)||0)+(parseFloat(e.jaar8_10)||0)).toLocaleString('nl-NL')+'</strong></td>'+
+      '<td style="text-align:center;"><button onclick="plVerwijder('+i+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;" title="Rij verwijderen">×</button></td></tr>';
+  });
+  html+='<tr><td><strong>Totaal</strong></td><td></td>'+
+    '<td id="pl-ft-1"><strong>€ '+Math.round(t1).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="pl-ft-2"><strong>€ '+Math.round(t2).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="pl-ft-3"><strong>€ '+Math.round(t3).toLocaleString('nl-NL')+'</strong></td>'+
+    '<td id="pl-ft-tot"><strong>€ '+Math.round(tot).toLocaleString('nl-NL')+'</strong></td><td></td></tr>';
+  html+='</tbody></table>';
+  html+='<div class="btn-row"><button class="btn btn-light btn-sm" onclick="plToevoegen()">+ Element toevoegen</button>'+
+    '<button class="btn btn-blue btn-sm" onclick="plHerbereken()">↺ Herbereken uit bevindingen</button></div>'+
+    '<div style="font-size:11px;color:var(--text3);margin-top:6px;">Termijn direct of 1–2 jaar → herstelkosten in jaar 1–3 · termijn 3–5 → vervanging in jaar 4–7 · termijn 6–10 → vervanging in jaar 8–10 · cyclus ≤ 8 jaar herhaalt in jaar 8–10.</div>';
+  container.innerHTML=html;
+}
+function plBouwMjop(si,handhaafMelding){
+  const rijen=si.rijen||[];
+  const m=[];
+  rijen.forEach(r=>{
+    const herstel=parseFloat(r.herstel)||0;
+    const verv=parseFloat(r.vervanging)||0;
+    if(!herstel&&!verv)return;
+    const cyclus=PLAN_CYCLUS[r.element]||15;
+    const rij={element:(r.element||'Element')+(r.omschrijving?' — '+String(r.omschrijving).substring(0,40):''),cyclus,jaar1_3:0,jaar4_7:0,jaar8_10:0,bron:'uit bevinding · '+(PLAN_TERMIJN[r.termijn]||'1–2 jaar')};
+    const t=r.termijn||'1-2';
+    if(t==='direct'||t==='1-2'){rij.jaar1_3=herstel||verv;if(cyclus<=8)rij.jaar8_10=herstel||verv;}
+    else if(t==='3-5'){rij.jaar4_7=verv||herstel;}
+    else{rij.jaar8_10=verv||herstel;}
+    m.push(rij);
+  });
+  si.mjop=m;
+}
+window.plKies=id=>{window._planInspId=id;renderChapter('planning');};
+window.plHerbereken=async()=>{
+  const si=plGetSI();if(!si)return;
+  if(si.mjop&&si.mjop.length&&!confirm('Herberekenen overschrijft de MJOP-tabel, inclusief handmatige wijzigingen. Doorgaan?'))return;
+  plBouwMjop(si);
+  await saveSnelInspectie();
+  renderChapter('planning');
+  showToast('MJOP herberekend uit bevindingen');
+};
+window.plEdit=async(i,veld,val)=>{
+  const si=plGetSI();if(!si||!si.mjop[i])return;
+  const e=si.mjop[i];
+  if(veld==='element')e.element=val;
+  else e[veld]=parseFloat(val)||0;
+  const rt=document.getElementById('pl-rt-'+i);
+  if(rt)rt.innerHTML='<strong>€ '+Math.round((parseFloat(e.jaar1_3)||0)+(parseFloat(e.jaar4_7)||0)+(parseFloat(e.jaar8_10)||0)).toLocaleString('nl-NL')+'</strong>';
+  plTotalen(si);
+  await saveSnelInspectie();
+};
+function plTotalen(si){
+  const m=si.mjop||[];
+  const t1=m.reduce((s,e)=>s+(parseFloat(e.jaar1_3)||0),0);
+  const t2=m.reduce((s,e)=>s+(parseFloat(e.jaar4_7)||0),0);
+  const t3=m.reduce((s,e)=>s+(parseFloat(e.jaar8_10)||0),0);
+  const tot=t1+t2+t3;
+  const zet=(id,v,strong)=>{const el=document.getElementById(id);if(el)el.innerHTML=(strong?'<strong>':'')+'€ '+Math.round(v).toLocaleString('nl-NL')+(strong?'</strong>':'');};
+  zet('pl-ft-1',t1,1);zet('pl-ft-2',t2,1);zet('pl-ft-3',t3,1);zet('pl-ft-tot',tot,1);
+  const st=document.getElementById('pl-st-tot');if(st)st.textContent='€ '+Math.round(tot).toLocaleString('nl-NL');
+  const sj=document.getElementById('pl-st-jr');if(sj)sj.textContent='€ '+Math.round(tot/10).toLocaleString('nl-NL');
+  const sc=document.getElementById('pl-st-cnt');if(sc)sc.textContent=m.length;
+}
+window.plVerwijder=async i=>{
+  const si=plGetSI();if(!si)return;
+  const e=si.mjop[i];
+  if(!confirm('Element "'+(e?.element||'')+'" uit het MJOP verwijderen?'))return;
+  si.mjop.splice(i,1);
+  await saveSnelInspectie();
+  renderChapter('planning');
+};
+window.plToevoegen=async()=>{
+  const si=plGetSI();if(!si)return;
+  if(!si.mjop)si.mjop=[];
+  si.mjop.push({element:'',cyclus:15,jaar1_3:0,jaar4_7:0,jaar8_10:0,bron:'handmatig toegevoegd'});
+  await saveSnelInspectie();
+  renderChapter('planning');
+};
 
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
@@ -2915,12 +3065,13 @@ function siAiInstructie(){
   '7. hoeveelheid: geschatte hoeveelheid als getal (schat uit de foto)\n'+
   '8. eenheid: EXACT een uit: m², m¹, stuks, uur, post\n'+
   '9. prijs_herstel: realistische herstelprijs in euro per eenheid (Nederlands prijspeil incl. arbeid, excl. btw). 0 als geen herstel nodig\n'+
-  '10. prijs_vervanging: realistische vervangingsprijs in euro per eenheid\n';
+  '10. prijs_vervanging: realistische vervangingsprijs in euro per eenheid\n'+
+  '\nVERPLICHT: vul ALLE velden bij ELKE foto in, ook hoeveelheid, eenheid, prijs_herstel en prijs_vervanging. Gebruik altijd je beste schatting als getal; laat nooit een veld weg en gebruik nooit null of lege waarden.\n';
 }
 function siRijUitAI(item,fotoNr){
-  const h=parseFloat(item.hoeveelheid)||0;
-  const ph=parseFloat(item.prijs_herstel)||0;
-  const pv=parseFloat(item.prijs_vervanging)||0;
+  const h=parseFloat(item.hoeveelheid??item.aantal??item.quantity)||0;
+  const ph=parseFloat(item.prijs_herstel??item.prijsHerstel??item.prijs)||0;
+  const pv=parseFloat(item.prijs_vervanging??item.prijsVervanging)||0;
   const cond=parseInt(item.conditie)||3;
   const prio=cond>=4?'hoog':(cond<=2?'laag':'gemiddeld');
   const term=['direct','1-2','3-5','6-10'].includes(item.termijn)?item.termijn:(cond>=5?'direct':cond===4?'1-2':cond===3?'3-5':'6-10');
@@ -2933,8 +3084,8 @@ function siRijUitAI(item,fotoNr){
     fotos:fotoNr,
     hoeveelheid:h||'',eenheid:['m²','m¹','stuks','uur','post'].includes(item.eenheid)?item.eenheid:'m²',
     prijsHerstel:ph||'',prijsVervanging:pv||'',
-    herstel:(h&&ph)?Math.round(h*ph):0,
-    vervanging:(h&&pv)?Math.round(h*pv):0
+    herstel:(h&&ph)?Math.round(h*ph):(parseFloat(item.herstel)||0),
+    vervanging:(h&&pv)?Math.round(h*pv):(parseFloat(item.vervanging)||0)
   };
 }
 
