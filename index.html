@@ -321,6 +321,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .si-sel{-webkit-appearance:none;}
 .si-ta{resize:none;height:52px;line-height:1.4;overflow-y:auto;display:block;}
 .si-ta-wrap{position:relative;}
+.obj-sub>.section-title{display:none;}
+.obj-sub .btn-row{display:none;}
 .si-count{position:absolute;bottom:3px;right:6px;font-size:9px;color:var(--text3);background:var(--bg);padding:0 3px;border-radius:3px;display:none;pointer-events:none;}
 .si-ta-wrap:focus-within .si-count{display:block;}
 .si-c1{background:var(--green-bg);color:var(--green-text);font-weight:500;}
@@ -1066,7 +1068,7 @@ window.selectObject=async id=>{
   updateSidebar(lijst);
   currentOpnameId=lijst[0].id;
   await loadOpnameData(id,currentOpnameId);
-  navToChapter('objectgegevens');
+  navToChapter('object');
 };
 
 function updateSidebar(opnameList){
@@ -1106,82 +1108,27 @@ function renderSidebarNav(){
   };
 
   html+='<div class="sb-section-label">Object</div>'+
-    '<div class="sb-item '+isChapter('objectgegevens')+'" onclick="navToChapter(\'objectgegevens\')" data-chapter="objectgegevens"><div class="sb-num">🏢</div>Objectgegevens<div class="sb-dot '+(currentObj?.naam?'done':'')+'" style="margin-left:auto;"></div></div>'+
-    '<div class="sb-item '+isChapter('gebouwpaspoort')+'" onclick="navToChapter(\'gebouwpaspoort\')" data-chapter="gebouwpaspoort"><div class="sb-num">📋</div>Gebouwpaspoort<div class="sb-dot '+(currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>'+
-    '<div class="sb-item '+isChapter('huurtaxatie')+'" onclick="navToChapter(\'huurtaxatie\')" data-chapter="huurtaxatie"><div class="sb-num">€</div>Huur &amp; taxatie<div class="sb-dot '+(currentObj?.tax?.marktwaarde||(currentObj?.huurcontracten||[]).length?'done':'')+'" style="margin-left:auto;"></div></div>';
+    '<div class="sb-item '+isChapter('object')+'" onclick="navToChapter(\'object\')" data-chapter="object"><div class="sb-num">🏢</div>Object<div class="sb-dot '+(currentObj?.naam&&currentObj?.gp?'done':'')+'" style="margin-left:auto;"></div></div>';
 
   html+='<div class="sb-section-label">Inspecties</div>';
+  snelInspectiesLijst.forEach(si=>{
+    const isActive=si.id===currentSnelInspectieId&&activeSection==='snel';
+    const menuOpen=openSnelMenu===si.id;
+    html+='<div class="opname-block'+(isActive?' active':'')+'">'+
+      '<div class="opname-head" onclick="switchSnelInspectie(\''+si.id+'\')">'+
+        '📋 '+escHtml(si.naam)+' — '+escHtml(si.datum)+
+        '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleSnelMenu(\''+si.id+'\')">⋯</span>'+
+      '</div>';
+    if(menuOpen){
+      html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderSnelInspectie(\''+si.id+'\')">🗑 Inspectie verwijderen</div></div>';
+    }
+    html+='</div>';
+  });
+  html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe inspectie</button>';
 
-  // SNELLE INSPECTIES
-  html+='<div class="insp-toggle'+(snelInspOpen?' open':'')+'" onclick="toggleSnelInsp()"><div class="sb-num">📋</div>Snelle inspecties<span class="sb-chev">›</span></div>';
-  if(snelInspOpen){
-    snelInspectiesLijst.forEach(si=>{
-      const isActive=si.id===currentSnelInspectieId&&activeSection==='snel';
-      const menuOpen=openSnelMenu===si.id;
-      html+='<div class="opname-block'+(isActive?' active':'')+'">'+
-        '<div class="opname-head" onclick="switchSnelInspectie(\''+si.id+'\')">'+
-          '📋 '+escHtml(si.naam)+' — '+escHtml(si.datum)+
-          '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleSnelMenu(\''+si.id+'\')">⋯</span>'+
-        '</div>';
-      if(menuOpen){
-        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderSnelInspectie(\''+si.id+'\')">🗑 Inspectie verwijderen</div></div>';
-      }
-      html+='</div>';
-    });
-  }
-  html+='<button class="sb-new-opname" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie</button>';
-
-  // A.I. INSPECTIES
-  html+='<div class="insp-toggle'+(aiInspOpen?' open':'')+'" onclick="toggleAiInsp()"><div class="sb-num">🗂</div>A.I. inspecties<span class="sb-chev">›</span></div>'+
-    '<button class="sb-new-opname" onclick="switchOpname(\'__nieuw\')">+ Nieuwe A.I. inspectie</button>';
-
-  if(aiInspOpen){
-    opnamesLijst.forEach(o=>{
-      const isActive=o.id===currentOpnameId&&activeSection==='ai'&&(currentChapter==='inspectieoverzicht'||INSP_PARAGRAFEN.some(p=>p.id===currentChapter)||['onderhoud','mjop','kosten','rapportage','snellinvoer'].includes(currentChapter));
-      const menuOpen=openOpnameMenu===o.id;
-      const ingeklapt=ingeklapteOpnames.has(o.id);
-      html+='<div class="opname-block'+(isActive?' active':'')+'">'+
-        '<div class="opname-head" onclick="switchOpname(\''+o.id+'\')">'+
-          '<span onclick="event.stopPropagation();toggleOpnameKlap(\''+o.id+'\')" style="cursor:pointer;font-size:11px;margin-right:3px;color:var(--text3);">'+(ingeklapt?'›':'∨')+'</span>'+
-          '📅 '+escHtml(o.naam)+' — '+escHtml(o.datum)+
-          '<span class="gear" style="font-size:16px;font-weight:700;letter-spacing:1px;" onclick="event.stopPropagation();toggleOpnameMenu(\''+o.id+'\')">⋯</span>'+
-        '</div>';
-      if(menuOpen){
-        html+='<div class="opname-menu"><div class="opname-menu-item" onclick="event.stopPropagation();verwijderOpname(\''+o.id+'\')">🗑 Hele inspectie verwijderen</div></div>';
-      }
-      html+='</div>';
-      if(!ingeklapt&&isActive&&activeSection==='ai'){
-        const verborgen=opn.verborgenParagrafen||[];
-        INSP_PARAGRAFEN.forEach(p=>{
-          if(verborgen.includes(p.id))return;
-          const gevuld=inGevuld(o.id,p.id);
-          html+='<div class="sb-item sub '+(currentChapter===p.id&&activeSection==='ai'?'active':'')+'" onclick="activeSection=\'ai\';navToChapter(\''+p.id+'\')" data-chapter="'+p.id+'"><div class="sb-dot '+(gevuld?'done':'')+'"></div>'+p.naam;
-          if(!gevuld){
-            html+='<span class="para-x" onclick="event.stopPropagation();toggleParagraafConfirm(\''+o.id+'\',\''+p.id+'\')" title="Niet-geinspecteerd onderdeel verbergen">×</span>';
-          }
-          html+='</div>';
-          if(confirmVerwijderParagraaf&&confirmVerwijderParagraaf.opnId===o.id&&confirmVerwijderParagraaf.chId===p.id){
-            html+='<div class="confirm-box">"'+p.naam+'" verbergen uit deze opname? Dit onderdeel is niet geïnspecteerd en verdwijnt uit de lijst. Je kunt het later weer terugzetten.'+
-              '<div class="confirm-row">'+
-                '<button class="confirm-btn danger" onclick="verbergParagraaf(\''+o.id+'\',\''+p.id+'\')">Verbergen</button>'+
-                '<button class="confirm-btn" onclick="toggleParagraafConfirm(null,null)">Annuleren</button>'+
-              '</div></div>';
-          }
-        });
-        if(verborgen.length){
-          html+='<button class="sb-show-hidden" onclick="toonVerborgenParagrafen(\''+o.id+'\')">↺ Toon '+verborgen.length+' verborgen onderdeel'+(verborgen.length>1?'en':'')+'</button>';
-        }
-      }
-    });
-  }
-
-  html+='<div class="sb-section-label">Onderhoud &amp; herstel</div>'+
-    '<div class="sb-item sub '+isChapter('onderhoud')+'" onclick="navToChapter(\'onderhoud\')" data-chapter="onderhoud"><div class="sb-dot '+(opn.elementen.some(e=>e.kosten>0)?'done':'')+'"></div>Bevindingen &amp; kosten</div>'+
-    '<div class="sb-section-label">MJOP</div>'+
-    '<div class="sb-item sub '+isChapter('mjop')+'" onclick="navToChapter(\'mjop\')" data-chapter="mjop"><div class="sb-dot '+(opn.mjop&&opn.mjop.length?'done':'')+'"></div>Meerjaren plan</div>'+
-    '<div class="sb-section-label">Samenvatting</div>'+
-    '<div class="sb-item '+isChapter('snellinvoer')+'" onclick="navToChapter(\'snellinvoer\')" data-chapter="snellinvoer"><div class="sb-num">⚡</div>Snelle invoer</div>'+
-    '<div class="sb-item '+isChapter('kosten')+'" onclick="navToChapter(\'kosten\')" data-chapter="kosten"><div class="sb-num">€</div>Kostenraming</div>'+
+  html+='<div class="sb-section-label">Planning</div>'+
+    '<div class="sb-item '+isChapter('planning')+'" onclick="navToChapter(\'planning\')" data-chapter="planning"><div class="sb-num">📅</div>Planning &amp; MJOP</div>'+
+    '<div class="sb-section-label">Rapport</div>'+
     '<div class="sb-item '+isChapter('rapportage')+'" onclick="navToChapter(\'rapportage\')" data-chapter="rapportage"><div class="sb-num">📄</div>Rapportage</div>';
 
   nav.innerHTML=html;
@@ -1197,7 +1144,7 @@ window.switchSnelInspectie=id=>{
 };
 window.nieuweSnelInspectie=async()=>{
   const nr=snelInspectiesLijst.length+1;
-  const naam=prompt('Naam voor de nieuwe snelle inspectie:','Snelle inspectie '+nr);
+  const naam=prompt('Naam voor de nieuwe inspectie:','Inspectie '+nr);
   if(!naam)return;
   const id='si_'+Date.now();
   snelInspectiesLijst.push({id,naam,datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()});
@@ -1207,7 +1154,7 @@ window.nieuweSnelInspectie=async()=>{
   opn.snelInspectieData[id]={fotos:[],rijen:[]};
   await saveSnelInspectie();
   renderSidebarNav();const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');
-  showToast('Nieuwe snelle inspectie aangemaakt');
+  showToast('Nieuwe inspectie aangemaakt');
 };
 window.verwijderSnelInspectie=async id=>{
   const si=snelInspectiesLijst.find(x=>x.id===id);
@@ -1339,7 +1286,7 @@ async function loadOpnameData(objId,opnId){
         const legacyData=sisData.data||{fotos:[],rijen:[]};
         if(legacyData.rijen?.length||legacyData.fotos?.length){
           const id='si_'+Date.now();
-          snelInspectiesLijst=[{id,naam:'Snelle inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
+          snelInspectiesLijst=[{id,naam:'Inspectie 1',datum:new Date().toLocaleDateString('nl-NL'),aangemaakt:Date.now()}];
           currentSnelInspectieId=id;
           opnames[opnId].snelInspectieData={[id]:legacyData};
         } else {
@@ -1390,7 +1337,7 @@ window.navTo=page=>{
 window.navToChapter=ch=>{
   if(ch!=='mjop')mjopEditMode=false;
   currentChapter=ch;
-  const objectChapters=['objectgegevens','gebouwpaspoort','huurtaxatie','kosten','rapportage','snellinvoer','onderhoud','mjop'];
+  const objectChapters=['object','planning','objectgegevens','gebouwpaspoort','huurtaxatie','kosten','rapportage','snellinvoer','onderhoud','mjop'];
   if(objectChapters.includes(ch))activeSection=null;
   navTo('chapter');
   document.querySelectorAll('[data-chapter]').forEach(el=>el.classList.toggle('active',el.dataset.chapter===ch));
@@ -1400,7 +1347,7 @@ window.navToChapter=ch=>{
 
 function updateTopbar(page){
   if(page==='chapter'){
-    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Snelle inspectie',i:'📋'},inspectieoverzicht:{n:'Inspectie overzicht',i:'🗂'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
+    const special={kosten:{n:'Kostenraming',i:'€'},rapportage:{n:'Rapportage',i:'📄'},snellinvoer:{n:'Snelle invoer',i:'⚡'},snelinspectie:{n:'Inspectie',i:'📋'},object:{n:'Object',i:'🏢'},planning:{n:'Planning & MJOP',i:'📅'},inspectieoverzicht:{n:'Inspectie overzicht',i:'🗂'},objectgegevens:{n:'Objectgegevens',i:'🏢'},gebouwpaspoort:{n:'Gebouwpaspoort',i:'📋'},huurtaxatie:{n:'Huur & taxatie',i:'€'},onderhoud:{n:'Onderhoud & herstel',i:'🔧'},mjop:{n:'MJOP',i:'📅'}};
     const para=INSP_PARAGRAFEN.find(p=>p.id===currentChapter);
     const sp=special[currentChapter];
     document.getElementById('topbar-title').textContent=(sp?sp.i:para?.icon||'')+(sp?' '+sp.n:para?' '+para.naam:'');
@@ -1799,8 +1746,44 @@ window.updateTaxObj=async(key,val)=>{
 };
 
 // INSPECTIE
+
+// SAMENGEVOEGDE OBJECTPAGINA (gegevens + paspoort + huur & taxatie)
+const OBJ_SECTIES=[
+  {id:'gegevens',naam:'Objectgegevens & foto\'s',icon:'🏢',render:c=>renderObjectgegevens(c)},
+  {id:'paspoort',naam:'Gebouwpaspoort',icon:'📋',render:c=>renderGebouwpaspoort(c)},
+  {id:'huurtax',naam:'Huur & taxatie',icon:'€',render:c=>renderHuurTaxatie(c)},
+];
+function renderObjectPagina(container){
+  if(!window._objKlap)window._objKlap=new Set();
+  let html='<div class="section-title">🏢 Object</div>';
+  OBJ_SECTIES.forEach(s=>{
+    const dicht=window._objKlap.has(s.id);
+    html+='<div style="margin-bottom:6px;padding:8px 12px;background:var(--bg1);border:0.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleObjSectie(\''+s.id+'\')">'+
+      '<span style="font-size:13px;">'+(dicht?'›':'∨')+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--text2);">'+s.icon+' '+s.naam+'</span></div>';
+    html+='<div class="obj-sub" id="obj-sub-'+s.id+'" style="'+(dicht?'display:none;':'')+'margin-bottom:14px;"></div>';
+  });
+  container.innerHTML=html;
+  OBJ_SECTIES.forEach(s=>{
+    if(!window._objKlap.has(s.id))s.render(document.getElementById('obj-sub-'+s.id));
+  });
+}
+window.toggleObjSectie=id=>{
+  window._objKlap.has(id)?window._objKlap.delete(id):window._objKlap.add(id);
+  renderChapter('object');
+};
+
+// PLANNINGPAGINA (stap 3 vult deze met actielijst + MJOP-tabel)
+function renderPlanningPagina(container){
+  container.innerHTML='<div class="section-title">📅 Planning & MJOP</div>'+
+    '<div class="empty"><div class="empty-icon">📅</div>'+
+    '<p>Hier komen in de volgende bouwstap de actielijst voor direct onderhoud (≤ 2 jaar)<br>en de meerjarenplanning, automatisch berekend uit de termijnen in je inspecties.</p></div>';
+}
+
 function renderChapter(chId){
   const container=document.getElementById('page-chapter');
+  if(chId==='object'){renderObjectPagina(container);return;}
+  if(chId==='planning'){renderPlanningPagina(container);return;}
   if(chId==='objectgegevens'){renderObjectgegevens(container);return;}
   if(chId==='gebouwpaspoort'){renderGebouwpaspoort(container);return;}
   if(chId==='huurtaxatie'){renderHuurTaxatie(container);return;}
@@ -2203,9 +2186,9 @@ const SI_ELEMENTEN=['Gevel','Kozijn','Dak','Boeibord','Hemelwaterafvoer','Terrei
 function renderSnelInspectie(container){
   const activeSI=snelInspectiesLijst.find(x=>x.id===currentSnelInspectieId);
   if(!currentSnelInspectieId||!activeSI){
-    container.innerHTML='<div class="section-title">📋 Snelle inspectie</div>'+
-      '<div class="empty"><div class="empty-icon">📋</div><p>Nog geen snelle inspectie aangemaakt.<br>Maak er een aan via de zijbalk.</p></div>'+
-      '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe snelle inspectie aanmaken</button>';
+    container.innerHTML='<div class="section-title">📋 Inspectie</div>'+
+      '<div class="empty"><div class="empty-icon">📋</div><p>Nog geen inspectie aangemaakt.<br>Maak er een aan via de zijbalk.</p></div>'+
+      '<button class="btn btn-dark" onclick="nieuweSnelInspectie()">+ Nieuwe inspectie aanmaken</button>';
     return;
   }
   const si=getSI();
@@ -2254,10 +2237,10 @@ function renderSnelInspectie(container){
   }
 
   // KOLOMKOPPEN
-  const cols='11% 1fr 9% 1fr 8% 9% 7% 8% 8% 28px';
+  const cols='10% 1fr 8% 1fr 7.5% 7.5% 8% 6% 7% 7% 28px';
   html+='<div class="si-header" style="grid-template-columns:'+cols+';">'+
     '<span>Element</span><span>Omschrijving</span><span>Conditie</span><span>Voorgestelde actie</span>'+
-    '<span>Prioriteit</span><span>Voor rekening</span><span>Foto\'s</span><span>Herstel €</span><span>Vervang. €</span><span></span>'+
+    '<span>Termijn</span><span>Prioriteit</span><span>Voor rekening</span><span>Foto\'s</span><span>Herstel €</span><span>Vervang. €</span><span></span>'+
   '</div>';
 
   // RIJEN
@@ -2274,6 +2257,9 @@ function renderSnelInspectie(container){
         [1,2,3,4,5].map(n=>'<option value="'+n+'" '+(r.conditie===n?'selected':'')+'>'+n+' '+['Goed','Redelijk','Matig','Slecht','Z.slecht'][n-1]+'</option>').join('')+
       '</select>'+
       '<div class="si-ta-wrap"><textarea class="si-inp si-ta" maxlength="130" placeholder="Voorgestelde actie..." onfocus="siCount(this)" oninput="siUpdate('+i+',\'actie\',this.value);siCount(this)">'+escHtml(r.actie||'')+'</textarea><span class="si-count"></span></div>'+
+      '<select class="si-sel" onchange="siUpdate('+i+',\'termijn\',this.value)">'+
+        [['direct','Direct'],['1-2','1–2 jaar'],['3-5','3–5 jaar'],['6-10','6–10 jaar']].map(([v,l])=>'<option value="'+v+'" '+((r.termijn||'1-2')===v?'selected':'')+'>'+l+'</option>').join('')+
+      '</select>'+
       '<select class="si-sel '+pc+'" onchange="siUpdate('+i+',\'prioriteit\',this.value);siUpdatePrioClass(this,this.value)">'+
         '<option value="hoog" '+(r.prioriteit==='hoog'?'selected':'')+'>🔴 Hoog</option>'+
         '<option value="gemiddeld" '+(r.prioriteit==='gemiddeld'||!r.prioriteit?'selected':'')+'>🟠 Gemiddeld</option>'+
@@ -2405,7 +2391,7 @@ function getSI(){
   return opn.snelInspectieData[currentSnelInspectieId];
 }
 window.siVoegRijToe=()=>{
-  getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
+  getSI().rijen.unshift({element:'Gevel',omschrijving:'',conditie:2,actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',fotos:'',herstel:0,vervanging:0});
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');saveSnelInspectie();
 };
 window.siUpdate=async(idx,key,val)=>{
@@ -2902,7 +2888,7 @@ window.siGenereerBeschrijvingen=async()=>{
           element:item.element||'Overige',
           omschrijving:item.omschrijving||'',
           conditie:item.conditie||3,
-          actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',
+          actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',
           fotos:fotoNr,herstel:0,vervanging:0
         });
       }
@@ -2937,7 +2923,7 @@ window.siGenereerEenFoto=async idx=>{
         element:item.element||'Overige',
         omschrijving:item.omschrijving||'',
         conditie:item.conditie||3,
-        actie:'',prioriteit:'gemiddeld',voorrekening:'eigenaar',
+        actie:'',termijn:'1-2',prioriteit:'gemiddeld',voorrekening:'eigenaar',
         fotos:fotoNr,herstel:0,vervanging:0
       });
     }
