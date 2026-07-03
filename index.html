@@ -2371,13 +2371,20 @@ window.genereerMJOP=async()=>{
   const bevStr=(siData.rijen||[]).filter(r=>r.voorrekening!=='huurder').map(r=>'- '+(r.element||'Element')+': conditie '+(r.conditie||3)+' ('+(['Goed','Redelijk','Matig','Slecht','Zeer slecht'][(r.conditie||3)-1])+'), termijn '+(r.termijn||'1-2')+' jaar'+(r.omschrijving?': '+r.omschrijving:'')+(parseFloat(r.vervanging)?', vervangingsindicatie € '+r.vervanging:'')).join('\n');
   try{
     if(pbar)pbar.style.width='50%';
-    const raw=await callClaude([{type:'text',text:'Maak een meerjaren onderhoudsplan (MJOP) voor de komende 10 jaar voor dit gebouw. Het MJOP is UITSLUITEND bedoeld voor GROOT onderhoud en vervangingen op gebouwniveau (dakvervanging, gevelrenovatie, integraal schilderwerk, vervanging kozijnen, installaties, herbestrating). GEEN kleine herstellingen zoals het schilderen van een enkel kozijn — die staan al in de onderhoudsplanning.\n\n'+
+    const raw=await callClaude([{type:'text',text:'Maak een meerjaren onderhoudsplan (MJOP) voor de komende 10 jaar voor dit gebouw. Het MJOP bevat groot onderhoud, vervangingen én periodiek cyclisch onderhoud per deelelement (zoals kitvoegen bijwerken, schilderbeurten, reinigen en inspecteren dakbedekking). GEEN incidentele kleine reparaties zoals het herstellen van één kozijn — die staan al in de onderhoudsplanning.\n\n'+
       'OBJECT: '+(obj.naam||'')+', bouwjaar '+(obj.jaar||'onbekend')+' (BAG), type '+(obj.type||'onbekend')+'\n'+
       (gp.renovatiejaar||gp.renovatie_omschrijving?'RENOVATIE: '+(gp.renovatiejaar?'laatste renovatie/groot onderhoud in '+gp.renovatiejaar:'')+(gp.renovatie_omschrijving?' — '+gp.renovatie_omschrijving:'')+'. BELANGRIJK: gebruik voor gerenoveerde/vervangen elementen het renovatiejaar als vertrekpunt voor de resterende levensduur, NIET het BAG-bouwjaar. Vermeld dit in de toelichting.\n\n':'Geen renovatiegegevens bekend; ga uit van het BAG-bouwjaar, maar weeg de geconstateerde conditie zwaar mee (een goede conditie bij een oud pand duidt vaak op tussentijdse renovatie).\n\n')+
       'GEBOUWPASPOORT (gebruik dit voor hoeveelheden, oppervlakten en aantallen — bijv. dakoppervlak, aantal kozijnen, gevelmateriaal):\n'+(gpStr||'Niet ingevuld')+'\n\n'+
       'BEVINDINGEN UIT INSPECTIE (gebruik conditie en bouwjaar om de resterende levensduur per element te schatten):\n'+(bevStr||'Geen bevindingen')+'\n\n'+
       'WERKWIJZE:\n'+
-      '- Behandel deze hoofdelementen voor zover van toepassing: Dak, Gevels, Kozijnen & beglazing, Schilderwerk (integraal), Installaties (cv/verwarming/luchtbehandeling), Terrein & verharding, Hekwerk/poorten.\n'+
+      '- Splits elk hoofdelement uit in DEELELEMENTEN, elk als eigen regel met eigen cyclus en dotatie. Richtlijn per hoofdgroep:\n'+
+      '  · Dak: dakbedekking, dakranden/boeiborden, hemelwaterafvoer en goten, dakdoorvoeren/lichtkoepels\n'+
+      '  · Kozijnen & gevel: kozijnen, beglazing, kitvoegen/kitnaden bijwerken, vensterbanken, gevelbekleding, voegwerk\n'+
+      '  · Schilderwerk: per ondergrond (kozijnen, staalwerk, boeiborden)\n'+
+      '  · Installaties: verwarming/cv, luchtbehandeling, buitenverlichting\n'+
+      '  · Terrein: verharding, hekwerk/poorten, markeringen\n'+
+      '  Streef naar 10–15 regels voor een gemiddeld gebouw; maak van elke relevante inspectiebevinding waar zinvol een eigen MJOP-regel.\n'+
+      '- DAKOPPERVLAK: bij een plat dak is het dakoppervlak ≈ de footprint van het gebouw = totale vloeroppervlakte ÷ aantal verdiepingen (bij 1 bouwlaag dus gelijk aan de vloeroppervlakte). Gebruik deze berekening expliciet en vermeld het gehanteerde dakoppervlak in de omschrijving.\n'+
       '- Bepaal per element de verwachte cyclus en, op basis van bouwjaar '+(obj.jaar||'?')+' en de geconstateerde conditie, in welke periode groot onderhoud of vervanging valt.\n'+
       '- Bereken bedragen met hoeveelheden uit het gebouwpaspoort (bijv. dakoppervlak × prijs/m²) tegen realistisch Nederlands prijspeil.\n'+
       '- Zet in de omschrijving de gebruikte hoeveelheid (bijv. "Platdak bitumen 2.620 m²") en in de toelichting de onderbouwing van de timing.\n'+
