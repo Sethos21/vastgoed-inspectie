@@ -254,6 +254,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sync-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 .sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red-text,#b3402a);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .si-header{display:grid;grid-template-columns:1fr 2fr 90px 90px 80px 80px 34px;gap:5px;padding:4px 10px;margin-bottom:4px;}
 .si-header span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
@@ -1334,10 +1335,40 @@ async function saveOpnameData(){
   await dataDoc(currentObjId,currentOpnameId,'elementen').set({lijst:d.elementen||[],bijgewerktOp:serverTimestamp()});
 }
 
+// v04: samenvattingsvelden per object (voedt het eigenaar-overzicht) — alleen schrijven bij echte wijziging
+let _statsTimer=null;
+function planStatsUpdate(){clearTimeout(_statsTimer);_statsTimer=setTimeout(updateObjectStats,1500);}
+async function updateObjectStats(){
+  try{
+    if(!currentObjId||!currentObj)return;
+    const opn=getOpname();
+    const data=(opn&&opn.snelInspectieData)||{};
+    const siId=currentSnelInspectieId||(snelInspectiesLijst[0]&&snelInspectiesLijst[0].id);
+    const rijen=(siId&&data[siId]&&data[siId].rijen)||[];
+    const openstaand=Math.round(rijen.filter(r=>(r.termijn==='direct'||r.termijn==='1-2'||!r.termijn)&&!r.uitgevoerd&&r.voorrekening!=='huurder').reduce((s,r)=>s+(parseFloat(r.herstel)||0),0));
+    const condities=rijen.map(r=>parseInt(r.conditie)||0).filter(Boolean);
+    const condGem=condities.length?Math.round(condities.reduce((a,b)=>a+b,0)/condities.length*10)/10:null;
+    const urgente=rijen.filter(r=>(parseInt(r.conditie)||0)>=4&&!r.uitgevoerd).length;
+    const voorzieningJr=Math.round((opn.mjop||[]).reduce((s,e)=>s+mjopDotatie(e),0));
+    const stats={openstaand,condGem,urgente,voorzieningJr,inspectieId:siId||null,bijgewerkt:Date.now()};
+    const vorige=currentObj.stats||{};
+    if(['openstaand','condGem','urgente','voorzieningJr'].every(k=>vorige[k]===stats[k]))return;
+    currentObj.stats=stats;
+    await objDoc(currentObjId).set({stats},{merge:true});
+  }catch(e){/* afgeleide data — nooit blokkerend */}
+}
 async function saveMjopData(){
   if(!currentObjId||!currentOpnameId)return;
   const d=opnames[currentOpnameId]||{};
-  await dataDoc(currentObjId,currentOpnameId,'mjop').set({lijst:d.mjop||[],bijgewerktOp:serverTimestamp()});
+  setSyncStatus('syncing','Wijzigingen opslaan…');
+  try{
+    await dataDoc(currentObjId,currentOpnameId,'mjop').set({lijst:d.mjop||[],bijgewerktOp:serverTimestamp()});
+    setSyncStatus('ok','✓ Opgeslagen '+new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}));
+    planStatsUpdate();
+  }catch(err){
+    setSyncStatus('error','⚠ Opslaan mislukt');
+    showToast('Opslaan mislukt: '+err.message);
+  }
 }
 
 function getOpname(){return opnames[currentOpnameId]||{fotos:{},elementen:[],mjop:[]};}
@@ -2537,12 +2568,20 @@ async function saveSnelInspectie(){
   Object.entries(data).forEach(([sid,si])=>{
     slank[sid]=Object.assign({},si,{fotos:(si.fotos||[]).map(f=>({fid:f.fid||null,label:f.label||'',geanalyseerd:!!f.geanalyseerd}))});
   });
-  await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({
-    lijst:snelInspectiesLijst,
-    data:slank,
-    fotosApart:true,
-    bijgewerktOp:serverTimestamp()
-  });
+  setSyncStatus('syncing','Wijzigingen opslaan…');
+  try{
+    await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({
+      lijst:snelInspectiesLijst,
+      data:slank,
+      fotosApart:true,
+      bijgewerktOp:serverTimestamp()
+    });
+    setSyncStatus('ok','✓ Opgeslagen '+new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}));
+    planStatsUpdate();
+  }catch(err){
+    setSyncStatus('error','⚠ Opslaan mislukt');
+    showToast('Opslaan mislukt: '+err.message);
+  }
 }
 function getSI(){
   const opn=getOpname();
@@ -3371,7 +3410,7 @@ async function callClaude(content){
 // UTILS
 function setSyncStatus(status,text){
   const dot=document.getElementById('sync-dot');const txt=document.getElementById('sync-text');
-  if(dot)dot.className='sync-dot'+(status==='syncing'?' syncing':'');
+  if(dot)dot.className='sync-dot'+(status==='syncing'?' syncing':status==='error'?' error':'');
   if(txt)txt.textContent=text;
 }
 let bagTimer=null;
