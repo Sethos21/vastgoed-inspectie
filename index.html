@@ -3177,7 +3177,14 @@ function siAiInstructie(){
   '8. eenheid: EXACT een uit: m², m¹, stuks, uur, post\n'+
   '9. prijs_herstel: realistische herstelprijs in euro per eenheid (Nederlands prijspeil incl. arbeid, excl. btw). 0 als geen herstel nodig\n'+
   '10. prijs_vervanging: realistische vervangingsprijs in euro per eenheid\n'+
+  '11. voor_rekening: "eigenaar" of "huurder". Regel: klein en periodiek onderhoud is voor de HUURDER — zoals (periodiek) schoonmaken, reinigen (gevel/verharding/beglazing), onkruid verwijderen, opnieuw invoegen van bestrating, markeringen vernieuwen. Bouwkundig herstel en vervangingen zijn voor de eigenaar.\n'+
   '\nVERPLICHT: vul ALLE velden bij ELKE foto in, ook hoeveelheid, eenheid, prijs_herstel en prijs_vervanging. Gebruik altijd je beste schatting als getal; laat nooit een veld weg en gebruik nooit null of lege waarden. prijs_vervanging is ALTIJD groter dan 0: elk element heeft een vervangingswaarde, ook in goede staat — de vervangingskosten voeden het meerjarenonderhoudsplan.\n';
+}
+const SI_HUURDER_WOORDEN=['schoonmaken','schoonmaak','reinigen','reiniging','onkruid','opnieuw invoegen','invoegen','markering'];
+function siVoorRekening(item){
+  const tekst=(String(item.actie||'')+' '+String(item.omschrijving||'')).toLowerCase();
+  if(SI_HUURDER_WOORDEN.some(w=>tekst.includes(w)))return 'huurder';
+  return item.voor_rekening==='huurder'?'huurder':'eigenaar';
 }
 function siRijUitAI(item,fotoNr){
   let h=parseFloat(item.hoeveelheid??item.aantal??item.quantity)||0;
@@ -3194,7 +3201,7 @@ function siRijUitAI(item,fotoNr){
     omschrijving:String(item.omschrijving||'').substring(0,130),
     conditie:cond,
     actie:String(item.actie||'').substring(0,130),
-    termijn:term,prioriteit:prio,voorrekening:'eigenaar',
+    termijn:term,prioriteit:prio,voorrekening:siVoorRekening(item),
     fotos:fotoNr,
     hoeveelheid:h||'',eenheid:eenheidFallback||(['m²','m¹','stuks','uur','post'].includes(item.eenheid)?item.eenheid:'m²'),
     prijsHerstel:ph||'',prijsVervanging:pv||'',
@@ -3229,7 +3236,7 @@ window.siGenereerBeschrijvingen=async()=>{
         'Dit zijn '+chunk.length+' foto\'s van een bouwkundige inspectie van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+
         siAiInstructie()+
         '\nReageer ALLEEN als JSON array, één object per foto in volgorde:\n'+
-        '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}]\n'+
+        '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180,"voor_rekening":"eigenaar"}]\n'+
         'Alleen JSON, niets anders.'
       });
       if(c>0)await new Promise(r=>setTimeout(r,2500)); // adempauze tegen snelheidslimiet
@@ -3283,7 +3290,7 @@ window.siGenereerEenFoto=async idx=>{
   try{
     const raw=await callClaude([
       {type:'image',source:{type:'base64',media_type:'image/jpeg',data:(await compressVoorAI(foto.dataUrl)).split(',')[1]}},
-      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+siAiInstructie()+'\nReageer ALLEEN als JSON (één object):\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen","termijn":"1-2","hoeveelheid":12,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}\nAlleen JSON.'}
+      {type:'text',text:'Analyseer deze bouwkundige inspectiefoto van een gebouw (bouwjaar '+(currentObj?.jaar||'onbekend')+').\n\n'+siAiInstructie()+'\nReageer ALLEEN als JSON (één object):\n{"bijschrift":"Voorgevel kozijnen","element":"Gevel","omschrijving":"Voegwerk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen","termijn":"1-2","hoeveelheid":12,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180,"voor_rekening":"eigenaar"}\nAlleen JSON.'}
     ]);
     const clean=raw.replace(/```json|```/g,'').trim();
     let item;
