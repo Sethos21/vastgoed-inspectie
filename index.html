@@ -3180,17 +3180,25 @@ window.siGenereerBeschrijvingen=async()=>{
         '[{"bijschrift":"Voorgevel overzicht","element":"Gevel","omschrijving":"Voegwerk plaatselijk losliggend","conditie":3,"actie":"Hervoegen beschadigde delen en reinigen gevel","termijn":"1-2","hoeveelheid":45,"eenheid":"m²","prijs_herstel":38,"prijs_vervanging":180}]\n'+
         'Alleen JSON, niets anders.'
       });
-      let items;
-      try{
-        const raw=await callClaude(content);
-        const clean=raw.replace(/```json|```/g,'').trim();
-        const s=clean.indexOf('['),e=clean.lastIndexOf(']');
-        if(s>=0&&e>s)items=JSON.parse(clean.substring(s,e+1));
-        else{const s2=clean.indexOf('{'),e2=clean.lastIndexOf('}');if(s2>=0&&e2>s2)items=[JSON.parse(clean.substring(s2,e2+1))];else throw new Error('geen JSON in antwoord');}
-      }catch(chunkErr){
-        mislukt.push('foto '+(c+1)+'–'+Math.min(c+CHUNK,nieuweFotos.length)+': '+chunkErr.message);
-        continue;
+      if(c>0)await new Promise(r=>setTimeout(r,2500)); // adempauze tegen snelheidslimiet
+      let items=null;
+      for(let poging=1;poging<=2&&!items;poging++){
+        try{
+          const raw=await callClaude(content);
+          const clean=raw.replace(/```json|```/g,'').trim();
+          const s=clean.indexOf('['),e=clean.lastIndexOf(']');
+          if(s>=0&&e>s)items=JSON.parse(clean.substring(s,e+1));
+          else{const s2=clean.indexOf('{'),e2=clean.lastIndexOf('}');if(s2>=0&&e2>s2)items=[JSON.parse(clean.substring(s2,e2+1))];else throw new Error('geen JSON in antwoord');}
+        }catch(chunkErr){
+          if(poging===1){
+            if(btn)btn.textContent='⏳ Even wachten, nieuwe poging…';
+            await new Promise(r=>setTimeout(r,6000)); // wachten en één keer opnieuw proberen
+          }else{
+            mislukt.push('foto '+(c+1)+'–'+Math.min(c+CHUNK,nieuweFotos.length)+': '+chunkErr.message);
+          }
+        }
       }
+      if(!items)continue;
       items.forEach((item,j)=>{
         const {f,i}=chunk[j]||{};
         if(i===undefined)return;
