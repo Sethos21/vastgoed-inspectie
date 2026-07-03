@@ -1291,6 +1291,9 @@ window.nieuweSnelInspectie=async()=>{
   showToast('Nieuwe inspectie aangemaakt');
 };
 window.verwijderSnelInspectie=async id=>{
+  const opnV=getOpname();
+  const siV=opnV.snelInspectieData&&opnV.snelInspectieData[id];
+  if(siV)(siV.fotos||[]).forEach(f=>{if(f.fid)verwijderSiFotoDoc(id,f.fid);});
   const si=snelInspectiesLijst.find(x=>x.id===id);
   if(!confirm('Weet je zeker dat je "'+(si?.naam||'deze inspectie')+'" wilt verwijderen? Dit kan niet ongedaan gemaakt worden.'))return;
   snelInspectiesLijst=snelInspectiesLijst.filter(x=>x.id!==id);
@@ -2421,10 +2424,19 @@ function renderSnelInspectie(container){
   if(fotos.length){
     const heeftNieuwe=fotos.some(f=>!f.label||/^Foto \d+$/.test(f.label));
     html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:10px;">';
+    const teLaden=fotos.some(f=>f.fid&&!f.dataUrl);
+    if(teLaden&&!window._siFotoBusy){
+      window._siFotoBusy=true;
+      laadSiFotos(currentSnelInspectieId).then(()=>{
+        window._siFotoBusy=false;
+        const _sic=document.getElementById('page-chapter');
+        if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);
+      });
+    }
     fotos.forEach((f,i)=>{
       const isNieuw=!f.label||/^Foto \d+$/.test(f.label);
       html+='<div style="position:relative;border-radius:9px;overflow:hidden;border:0.5px solid var(--'+(isNieuw?'border2':'blue')+');">'+
-        '<img src="'+f.dataUrl+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;" ondblclick="openFotoVolledig(this.src)" title="Dubbelklik voor volledig formaat"/>'+
+        (f.dataUrl?'<img src="'+f.dataUrl+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;" ondblclick="openFotoVolledig(this.src)" title="Dubbelklik voor volledig formaat"/>':'<div style="width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:var(--bg1);color:var(--text3);font-size:11px;">⏳ laden…</div>')+
         '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">'+(i+1)+'</div>'+
         '<div style="position:absolute;top:4px;right:26px;">'+
           (isNieuw?'<button onclick="siGenereerEenFoto('+i+')" style="background:rgba(30,100,200,.8);border:none;cursor:pointer;color:#fff;font-size:10px;padding:2px 5px;border-radius:4px;" title="AI beschrijving voor deze foto">✦</button>':'')+
@@ -2605,12 +2617,48 @@ window.exportSnelInspectieWord=async()=>{
 };
 
 // SNELLE INSPECTIE HELPERS
+async function saveSiFotoDoc(siId,f){
+  if(!currentObjId||!currentOpnameId||!f.fid)return;
+  await dataDoc(currentObjId,currentOpnameId,'sifoto_'+siId+'_'+f.fid).set({dataUrl:f.dataUrl||''});
+}
+async function verwijderSiFotoDoc(siId,fid){
+  if(!currentObjId||!currentOpnameId||!fid)return;
+  try{await dataDoc(currentObjId,currentOpnameId,'sifoto_'+siId+'_'+fid).delete();}catch(e){}
+}
+window.laadSiFotos=async siId=>{
+  const opn=getOpname();
+  const si=opn.snelInspectieData&&opn.snelInspectieData[siId];if(!si)return;
+  const missend=(si.fotos||[]).filter(f=>f.fid&&!f.dataUrl);
+  if(!missend.length)return;
+  await Promise.all(missend.map(async f=>{
+    try{
+      const s=await dataDoc(currentObjId,currentOpnameId,'sifoto_'+siId+'_'+f.fid).get();
+      if(s.exists)f.dataUrl=(s.data()||{}).dataUrl||'';
+    }catch(e){}
+  }));
+};
 async function saveSnelInspectie(){
   if(!currentObjId||!currentOpnameId)return;
   const d=opnames[currentOpnameId]||{};
+  const data=d.snelInspectieData||{};
+  // Migratie: foto's zonder eigen document krijgen er een (eenmalig per foto)
+  for(const [sid,si] of Object.entries(data)){
+    for(const f of (si.fotos||[])){
+      if(!f.fid&&f.dataUrl){
+        f.fid='f'+Date.now()+'_'+Math.floor(Math.random()*1e6);
+        await saveSiFotoDoc(sid,f);
+      }
+    }
+  }
+  // Slank hoofddocument: alles behalve de foto-data zelf (1MB-limiet Firestore)
+  const slank={};
+  Object.entries(data).forEach(([sid,si])=>{
+    slank[sid]=Object.assign({},si,{fotos:(si.fotos||[]).map(f=>({fid:f.fid||null,label:f.label||'',geanalyseerd:!!f.geanalyseerd}))});
+  });
   await dataDoc(currentObjId,currentOpnameId,'snelinspectie').set({
     lijst:snelInspectiesLijst,
-    data:d.snelInspectieData||{},
+    data:slank,
+    fotosApart:true,
     bijgewerktOp:serverTimestamp()
   });
 }
@@ -2685,7 +2733,9 @@ window.siUploadFotos=async event=>{
   for(const f of files){
     const url=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f);});
     const compressed=await compressPhoto(url);
-    si.fotos.push({dataUrl:compressed,label:'Foto '+(si.fotos.length+1)});
+    const foto={fid:'f'+Date.now()+'_'+Math.floor(Math.random()*1e6),dataUrl:compressed,label:'Foto '+(si.fotos.length+1)};
+    si.fotos.push(foto);
+    await saveSiFotoDoc(currentSnelInspectieId,foto);
   }
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();showToast('Foto\'s opgeslagen');
   event.target.value='';
@@ -2696,6 +2746,8 @@ window.siHandleDrop=async event=>{
   if(files.length){const fakeEvt={target:{files,value:''}};await siUploadFotos(fakeEvt);}
 };
 window.siVerwijderFoto=async idx=>{
+  const f=getSI().fotos[idx];
+  if(f&&f.fid)verwijderSiFotoDoc(currentSnelInspectieId,f.fid);
   getSI().fotos.splice(idx,1);
   const _sic=document.getElementById('page-chapter');if(_sic&&_sic.classList.contains('active'))renderSnelInspectie(_sic);else renderChapter('snelinspectie');await saveSnelInspectie();
 };
@@ -3155,7 +3207,7 @@ window.siGenereerBeschrijvingen=async()=>{
   const si=getSI();
   const fotos=si.fotos||[];
   // Alleen foto's zonder beschrijving (nog "Foto N" label)
-  const nieuweFotos=fotos.map((f,i)=>({f,i})).filter(({f})=>!f.label||/^Foto \d+$/.test(f.label));
+  const nieuweFotos=fotos.map((f,i)=>({f,i})).filter(({f})=>f.dataUrl&&(!f.label||/^Foto \d+$/.test(f.label)));
   if(!nieuweFotos.length){showToast('Alle foto\'s hebben al een beschrijving');return;}
   if(!getApiKey()){showToast('Stel eerst je API-sleutel in');navToChapter('settings');return;}
   const btn=document.getElementById('si-gen-btn');
