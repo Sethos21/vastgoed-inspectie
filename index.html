@@ -676,6 +676,22 @@ function planBadge(iso){
   if(dagen<=7)return{label:lbl+' · deze wk',stijl:'background:var(--amber-bg);color:var(--amber-text);',w:1};
   return{label:lbl,stijl:'background:var(--bg1);color:var(--text2);',w:2};
 }
+function planDatumParse(item){
+  if(item.aangemaakt)return item.aangemaakt;
+  const m=String(item.datum||'').match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(m)return new Date(+m[3],+m[2]-1,+m[1]).getTime();
+  return null;
+}
+function backfillLaatsteMeting(){
+  try{
+    if(!currentObj||currentObj.laatsteMeting||!snelInspectiesLijst.length)return;
+    const tijden=snelInspectiesLijst.map(planDatumParse).filter(Boolean);
+    if(!tijden.length)return;
+    const nieuwste=Math.max(...tijden);
+    currentObj.laatsteMeting=nieuwste;
+    objDoc(currentObjId).set({laatsteMeting:nieuwste},{merge:true});
+  }catch(e){}
+}
 function planTellers(){
   const nu=new Date();nu.setHours(0,0,0,0);
   let telaat=0,week=0,maand=0;
@@ -696,9 +712,11 @@ window.planMeting=async()=>{
   const id=document.getElementById('plan-obj')?.value;
   const datum=document.getElementById('plan-datum')?.value;
   const herhaling=document.getElementById('plan-herhaling')?.value||'eenmalig';
+  const inspecteur=(document.getElementById('plan-inspecteur')?.value||'').trim();
   if(!id||!datum){showToast('Kies een object en een datum');return;}
   const o=objects.find(x=>x.id===id);if(!o)return;
-  o.geplandeMeting={datum,herhaling};
+  if(inspecteur)localStorage.setItem('vi-inspecteur',inspecteur);
+  o.geplandeMeting={datum,herhaling,inspecteur:inspecteur||null};
   await objDoc(id).set({geplandeMeting:o.geplandeMeting},{merge:true});
   refreshPlanViews();showToast('Meting ingepland voor '+(o.naam||''));
 };
@@ -728,7 +746,8 @@ window.planStartMeting=async id=>{
   await selectObject(id);
   const siId='si_'+Date.now();
   const vandaag=new Date().toLocaleDateString('nl-NL');
-  snelInspectiesLijst.push({id:siId,naam:'Inspectie '+vandaag,datum:vandaag,aangemaakt:Date.now()});
+  const inspecteurNaam=(o&&o.geplandeMeting&&o.geplandeMeting.inspecteur)||null;
+  snelInspectiesLijst.push({id:siId,naam:'Inspectie '+vandaag,datum:vandaag,aangemaakt:Date.now(),inspecteur:inspecteurNaam});
   currentSnelInspectieId=siId;
   const opn=getOpname();
   if(!opn.snelInspectieData)opn.snelInspectieData={};
@@ -737,7 +756,7 @@ window.planStartMeting=async id=>{
   const upd={laatsteMeting:Date.now()};
   if(o&&o.geplandeMeting){
     const mnd={'halfjaar':6,'jaar':12,'2jaar':24}[o.geplandeMeting.herhaling];
-    if(mnd){const d=new Date(o.geplandeMeting.datum||Date.now());d.setMonth(d.getMonth()+mnd);o.geplandeMeting={datum:d.toISOString().slice(0,10),herhaling:o.geplandeMeting.herhaling};upd.geplandeMeting=o.geplandeMeting;}
+    if(mnd){const d=new Date(o.geplandeMeting.datum||Date.now());d.setMonth(d.getMonth()+mnd);o.geplandeMeting={datum:d.toISOString().slice(0,10),herhaling:o.geplandeMeting.herhaling,inspecteur:o.geplandeMeting.inspecteur||null};upd.geplandeMeting=o.geplandeMeting;}
     else{o.geplandeMeting=null;upd.geplandeMeting=null;}
   }
   if(o)o.laatsteMeting=upd.laatsteMeting;
@@ -778,7 +797,7 @@ window.renderMijnInspecties=()=>{
       '<span style="border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:600;min-width:84px;text-align:center;'+b.stijl+'">'+b.label+'</span>'+
       '<span style="flex:1;min-width:0;cursor:pointer;" onclick="selectObject(\''+o.id+'\')">'+
         '<span style="font-size:12.5px;font-weight:600;display:block;">'+escHtml(o.naam||'Naamloos')+'</span>'+
-        '<span style="font-size:10.5px;color:var(--text3);">'+escHtml(eigNaam(o))+(eigNaam(o)?' · ':'')+(PLAN_HERH[o.geplandeMeting.herhaling]||'eenmalig')+(o.laatsteMeting?' · vorige: '+new Date(o.laatsteMeting).toLocaleDateString('nl-NL'):'')+'</span>'+
+        '<span style="font-size:10.5px;color:var(--text3);">'+escHtml(eigNaam(o))+(eigNaam(o)?' · ':'')+(PLAN_HERH[o.geplandeMeting.herhaling]||'eenmalig')+(o.geplandeMeting.inspecteur?' · 👤 '+escHtml(o.geplandeMeting.inspecteur):'')+(o.laatsteMeting?' · vorige: '+new Date(o.laatsteMeting).toLocaleDateString('nl-NL'):'')+'</span>'+
       '</span>'+
       '<button class="btn btn-light btn-sm" onclick="planStartMeting(\''+o.id+'\')">Start meting</button>'+
       '<button onclick="planWijzigDatum(\''+o.id+'\')" title="Datum wijzigen" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px;">✎</button>'+
@@ -786,10 +805,14 @@ window.renderMijnInspecties=()=>{
     '</div>';
   });
   const planbaar=objects.filter(o=>!(o.geplandeMeting&&o.geplandeMeting.datum));
-  html+='<div style="display:grid;grid-template-columns:1.4fr 1fr .9fr auto;gap:8px;padding:9px 12px;border-top:1px dashed var(--border2);background:var(--bg1);align-items:center;">'+
+  const bekendeInspecteurs=[...new Set(objects.map(o=>o.geplandeMeting&&o.geplandeMeting.inspecteur).filter(Boolean))];
+  const laatsteInspecteur=localStorage.getItem('vi-inspecteur')||'';
+  html+='<div style="display:grid;grid-template-columns:1.3fr .9fr .8fr 1fr auto;gap:8px;padding:9px 12px;border-top:1px dashed var(--border2);background:var(--bg1);align-items:center;">'+
     '<select id="plan-obj" style="border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11.5px;background:var(--bg);color:var(--text);"><option value="">Kies object…</option>'+planbaar.map(o=>'<option value="'+o.id+'">'+escHtml(o.naam||'Naamloos')+'</option>').join('')+'</select>'+
     '<input type="date" id="plan-datum" value="'+new Date().toISOString().slice(0,10)+'" style="border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11.5px;background:var(--bg);color:var(--text);"/>'+
     '<select id="plan-herhaling" style="border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11.5px;background:var(--bg);color:var(--text);"><option value="eenmalig">Eenmalig</option><option value="halfjaar">Halfjaarlijks</option><option value="jaar">Jaarlijks</option><option value="2jaar">2-jaarlijks</option></select>'+
+    '<span><input type="text" id="plan-inspecteur" list="inspecteurs-lijst" placeholder="Inspecteur" value="'+escHtml(laatsteInspecteur)+'" style="border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11.5px;background:var(--bg);color:var(--text);width:100%;box-sizing:border-box;"/>'+
+    '<datalist id="inspecteurs-lijst">'+bekendeInspecteurs.map(n=>'<option value="'+escHtml(n)+'">').join('')+'</datalist></span>'+
     '<button class="btn btn-blue btn-sm" onclick="planMeting()">Inplannen</button></div>';
   html+='</div>';
   // Voorstellen
@@ -1484,6 +1507,7 @@ async function loadOpnameData(objId,opnId){
         snelInspectiesLijst=sisData.lijst;
         currentSnelInspectieId=snelInspectiesLijst[0]?.id||null;
         opnames[opnId].snelInspectieData=sisData.data||{};
+        backfillLaatsteMeting();
       } else {
         const legacyData=sisData.data||{fotos:[],rijen:[]};
         if(legacyData.rijen?.length||legacyData.fotos?.length){
