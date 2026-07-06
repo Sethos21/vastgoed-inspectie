@@ -1011,9 +1011,9 @@ function setEigenarenSidebar(){
 }
 
 // EIGENAAR DASHBOARD
-let eigDashTab='panden';
+let eigDashTab='overzicht';
 window.openEigenaarDash=id=>{
-  currentEigenaarId=id;eigDashTab='panden';
+  currentEigenaarId=id;eigDashTab='overzicht';
   setEigenarenSidebar();
   navTo('eigenaar-dash');
   renderEigenaarDash();
@@ -1043,6 +1043,7 @@ function renderEigenaarDash(){
       '<div class="eig-stat"><div class="eig-stat-val">€ '+formatM(totWoz)+'</div><div class="eig-stat-lbl">WOZ totaal</div></div>'+
     '</div></div></div>'+
     '<div class="eig-tabs">'+
+      '<button class="eig-tab '+(eigDashTab==='overzicht'?'active':'')+'" onclick="switchEigDashTab(\'overzicht\')">📊 Overzicht</button>'+
       '<button class="eig-tab '+(eigDashTab==='panden'?'active':'')+'" onclick="switchEigDashTab(\'panden\')">Panden overzicht</button>'+
       '<button class="eig-tab '+(eigDashTab==='huur'?'active':'')+'" onclick="switchEigDashTab(\'huur\')">Huurcontracten</button>'+
       '<button class="eig-tab '+(eigDashTab==='taxatie'?'active':'')+'" onclick="switchEigDashTab(\'taxatie\')">Taxatiewaarden</button>'+
@@ -1053,10 +1054,93 @@ function renderEigenaarDash(){
 }
 function formatM(v){return v>=1000000?(v/1000000).toFixed(1).replace('.0','')+'M':Math.round(v).toLocaleString('nl-NL');}
 function sumHuurcontracten(pand){return(pand.huurcontracten||[]).reduce((s,h)=>s+((parseFloat(h.huurprijs)||0)*12),0);}
-window.switchEigDashTab=tab=>{eigDashTab=tab;document.querySelectorAll('.eig-tab').forEach((t,i)=>t.classList.toggle('active',['panden','huur','taxatie'][i]===tab));renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));};
+window.switchEigDashTab=tab=>{eigDashTab=tab;document.querySelectorAll('.eig-tab').forEach((t,i)=>t.classList.toggle('active',['overzicht','panden','huur','taxatie'][i]===tab));renderEigDashContent(objects.filter(o=>o.eigenaarId===currentEigenaarId));};
+
+
+// v08: OVERZICHT-TAB — onderhoud, huur & waarde per eigenaar (gevoed door obj.stats)
+function renderEigOverzicht(panden,el){
+  const JAAR=365*86400000;
+  const st=p=>p.stats||{};
+  const openstaand=panden.reduce((s,p)=>s+(st(p).openstaand||0),0);
+  const voorziening=panden.reduce((s,p)=>s+(st(p).voorzieningJr||0),0);
+  const urgente=panden.reduce((s,p)=>s+(st(p).urgente||0),0);
+  const oud=panden.filter(p=>!p.laatsteMeting||Date.now()-p.laatsteMeting>JAAR).length;
+  const huurVan=p=>parseFloat(p.huurJaar)||sumHuurcontracten(p);
+  const totHuur=panden.reduce((s,p)=>s+huurVan(p),0);
+  const totMarkt=panden.reduce((s,p)=>s+(parseFloat(p.tax?.marktwaarde)||0),0);
+  const mPanden=panden.filter(p=>huurVan(p)&&parseFloat(p.opp));
+  const gemM2=mPanden.length?mPanden.reduce((s,p)=>s+huurVan(p),0)/mPanden.reduce((s,p)=>s+parseFloat(p.opp),0):0;
+  const tegel=(val,lbl,kleur)=>'<div style="border:0.5px solid var(--border);border-radius:10px;padding:11px;background:var(--bg);"><div style="font-size:18px;font-weight:600;'+(kleur?'color:'+kleur+';':'')+'">'+val+'</div><div style="font-size:10.5px;color:var(--text3);">'+lbl+'</div></div>';
+  let html='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">Onderhoud</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px;">'+
+    tegel('€ '+Math.round(openstaand).toLocaleString('nl-NL'),'Openstaand direct onderhoud','var(--red-text)')+
+    tegel('€ '+Math.round(voorziening).toLocaleString('nl-NL')+'/jr','MJOP-voorziening','var(--blue-text)')+
+    tegel(urgente,'Urgente bevindingen (cond. 4–5)','var(--amber-text)')+
+    tegel(oud,'Metingen > 1 jaar oud','')+
+  '</div>';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">Huur & waarde</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px;">'+
+    tegel('€ '+Math.round(totHuur).toLocaleString('nl-NL'),'Totale jaarhuur','var(--green-text)')+
+    tegel(gemM2?'€ '+Math.round(gemM2)+' /m²':'—','Gem. huur per m²','')+
+    tegel('€ '+formatM(totMarkt),'Totale marktwaarde','var(--blue-text)')+
+  '</div>';
+  // Conditieverdeling
+  const cats={goed:0,matig:0,slecht:0,onbekend:0};
+  panden.forEach(p=>{
+    const c=st(p).condGem;
+    if(c==null)cats.onbekend++;
+    else if(c<=2.4)cats.goed++;
+    else if(c<=3.4)cats.matig++;
+    else cats.slecht++;
+  });
+  const seg=(n,kleur)=>n?'<span style="flex:'+n+';background:'+kleur+';"></span>':'';
+  html+='<div style="border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg);margin-bottom:12px;">'+
+    '<div style="font-size:10.5px;color:var(--text3);margin-bottom:5px;">Conditieverdeling (gemiddelde per pand)</div>'+
+    '<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--bg1);">'+seg(cats.goed,'var(--green)')+seg(cats.matig,'var(--amber)')+seg(cats.slecht,'var(--red-text)')+seg(cats.onbekend,'var(--border2)')+'</div>'+
+    '<div style="display:flex;gap:14px;font-size:10.5px;color:var(--text2);margin-top:5px;flex-wrap:wrap;">'+
+      '<span>● '+cats.goed+' goed/redelijk</span><span>● '+cats.matig+' matig</span><span>● '+cats.slecht+' slecht</span>'+(cats.onbekend?'<span>● '+cats.onbekend+' nog geen meting</span>':'')+
+    '</div></div>';
+  // Pandenlijst
+  const kol='18px 1.5fr .8fr .8fr .6fr .9fr .9fr';
+  const stip=p=>{
+    const s=st(p);
+    if(s.condGem==null)return 'var(--border2)';
+    if((s.urgente||0)>0||s.condGem>3.4)return 'var(--red-text)';
+    if(s.condGem>2.4)return 'var(--amber)';
+    return 'var(--green)';
+  };
+  html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);">';
+  html+='<div style="display:grid;grid-template-columns:'+kol+';gap:7px;padding:6px 12px;background:var(--bg1);font-size:10px;color:var(--text3);"><span></span><span>Pand</span><span style="text-align:right;">Openstaand</span><span style="text-align:right;">Jaarhuur</span><span style="text-align:right;">€/m²</span><span style="text-align:right;">Marktwaarde</span><span>Laatste meting</span></div>';
+  panden.forEach(p=>{
+    const s=st(p);
+    const huurJ=huurVan(p);
+    const m2=huurJ&&parseFloat(p.opp)?Math.round(huurJ/parseFloat(p.opp)):null;
+    const oudP=!p.laatsteMeting||Date.now()-p.laatsteMeting>JAAR;
+    html+='<div style="display:grid;grid-template-columns:'+kol+';gap:7px;padding:8px 12px;border-top:0.5px solid var(--border);align-items:center;font-size:11.5px;cursor:pointer;" onclick="selectObject(\''+p.id+'\')">'+
+      '<span style="width:9px;height:9px;border-radius:50%;background:'+stip(p)+';"></span>'+
+      '<span style="font-weight:600;">'+escHtml(p.naam||'Naamloos')+'</span>'+
+      '<span style="text-align:right;'+((s.openstaand||0)>0?'color:var(--red-text);':'color:var(--text3);')+'">'+((s.openstaand||0)?'€ '+Math.round(s.openstaand).toLocaleString('nl-NL'):'—')+'</span>'+
+      '<span style="text-align:right;">'+(huurJ?'€ '+Math.round(huurJ).toLocaleString('nl-NL'):'—')+'</span>'+
+      '<span style="text-align:right;">'+(m2?'€ '+m2:'—')+'</span>'+
+      '<span style="text-align:right;">'+(p.tax?.marktwaarde?'€ '+formatM(parseFloat(p.tax.marktwaarde)):'—')+'</span>'+
+      '<span style="'+(oudP?'color:var(--red-text);':'color:var(--text2);')+'">'+(p.laatsteMeting?new Date(p.laatsteMeting).toLocaleDateString('nl-NL')+(oudP?' · verouderd':''):'geen meting')+'</span>'+
+    '</div>';
+  });
+  html+='<div style="display:grid;grid-template-columns:'+kol+';gap:7px;padding:8px 12px;border-top:0.5px solid var(--border2);align-items:center;font-size:11.5px;font-weight:600;background:var(--bg1);">'+
+    '<span></span><span>Totaal ('+panden.length+' panden)</span>'+
+    '<span style="text-align:right;">€ '+Math.round(openstaand).toLocaleString('nl-NL')+'</span>'+
+    '<span style="text-align:right;">€ '+Math.round(totHuur).toLocaleString('nl-NL')+'</span>'+
+    '<span style="text-align:right;">'+(gemM2?'€ '+Math.round(gemM2):'—')+'</span>'+
+    '<span style="text-align:right;">€ '+formatM(totMarkt)+'</span>'+
+    '<span></span></div>';
+  html+='</div>';
+  html+='<div style="font-size:10.5px;color:var(--text3);margin-top:8px;">De onderhoudscijfers worden per pand automatisch bijgewerkt bij het opslaan van een meting of MJOP. Panden zonder cijfers zijn nog niet geopend sinds deze functie bestaat.</div>';
+  el.innerHTML=html;
+}
 
 function renderEigDashContent(panden){
   const el=document.getElementById('eig-dash-content');if(!el)return;
+  if(eigDashTab==='overzicht'){renderEigOverzicht(panden,el);return;}
   if(eigDashTab==='panden'){
     const ongekoppeld=objects.filter(o=>!o.eigenaarId||o.eigenaarId!==currentEigenaarId);
     let koppelHtml='<div class="card" style="margin-bottom:10px;"><div class="card-body">'+
