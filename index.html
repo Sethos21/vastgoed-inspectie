@@ -764,6 +764,35 @@ window.planStartMeting=async id=>{
   activeSection='snel';renderSidebarNav();navToChapter('snelinspectie');
   showToast('Nieuwe meting gestart voor '+(o?.naam||''));
 };
+window.planHistorieOphalen=async()=>{
+  const teDoen=objects.filter(o=>!(o.inspecties&&o.inspecties.length));
+  if(!teDoen.length){showToast('Historie is al compleet');return;}
+  showToast('Historie ophalen voor '+teDoen.length+' object(en)…');
+  let gevuld=0;
+  for(const o of teDoen){
+    try{
+      const metaSnap=await db.collection('objects').doc(o.id).collection('meta').doc('opnames').get();
+      const opnId=(metaSnap.exists&&(metaSnap.data().lijst||[])[0]?.id)||'opname_1';
+      const sis=await dataDoc(o.id,opnId,'snelinspectie').get();
+      if(!sis.exists)continue;
+      const d=sis.data()||{};
+      const lijst=d.lijst||[];
+      if(!lijst.length)continue;
+      const data=d.data||{};
+      const register=lijst.map(s=>({id:s.id,naam:s.naam||'',datum:s.datum||'',inspecteur:s.inspecteur||null,aangemaakt:s.aangemaakt||null,bevindingen:((data[s.id]||{}).rijen||[]).length}));
+      const upd={inspecties:register};
+      if(!o.laatsteMeting){
+        const tijden=lijst.map(planDatumParse).filter(Boolean);
+        if(tijden.length)upd.laatsteMeting=Math.max(...tijden);
+      }
+      Object.assign(o,upd);
+      await objDoc(o.id).set(upd,{merge:true});
+      gevuld++;
+    }catch(e){}
+  }
+  renderMijnInspecties();renderHome();
+  showToast('Historie opgehaald voor '+gevuld+' object(en)');
+};
 window.planOpenInspectie=async(objId,inspId)=>{
   await selectObject(objId);
   if(snelInspectiesLijst.some(x=>x.id===inspId))currentSnelInspectieId=inspId;
@@ -826,14 +855,19 @@ window.renderMijnInspecties=()=>{
   if(window._uitgFilter)uitgevoerd=uitgevoerd.filter(x=>x.o.id===window._uitgFilter);
   uitgevoerd.sort((a,b)=>b.t-a.t);
   const uitgObjecten=[...new Map(objects.filter(o=>(o.inspecties||[]).length).map(o=>[o.id,o])).values()];
-  if(uitgObjecten.length){
+  {
     const MAX=window._uitgAlles?uitgevoerd.length:10;
     html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'+
       '<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">✓ Uitgevoerd</span>'+
       '<select onchange="window._uitgFilter=this.value;renderMijnInspecties()" style="margin-left:auto;border:0.5px solid var(--border2);border-radius:6px;padding:3px 7px;font-size:10.5px;background:var(--bg);color:var(--text);">'+
         '<option value="">Alle objecten</option>'+uitgObjecten.map(o=>'<option value="'+o.id+'" '+(window._uitgFilter===o.id?'selected':'')+'>'+escHtml(o.naam||'Naamloos')+'</option>').join('')+'</select></div>';
     html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);margin-bottom:14px;">';
-    if(!uitgevoerd.length)html+='<div style="padding:11px;font-size:12px;color:var(--text3);">Geen uitgevoerde inspecties gevonden.</div>';
+    if(!uitgevoerd.length){
+      html+='<div style="padding:12px;display:flex;align-items:center;gap:10px;">'+
+        '<span style="flex:1;font-size:12px;color:var(--text3);">'+(uitgObjecten.length?'Geen uitgevoerde inspecties binnen dit filter.':'De inspectiehistorie is nog niet opgehaald — klik hiernaast om de uitgevoerde inspecties van al je objecten eenmalig in te laden.')+'</span>'+
+        (uitgObjecten.length?'':'<button class="btn btn-blue btn-sm" onclick="planHistorieOphalen()">🔄 Historie ophalen</button>')+
+      '</div>';
+    }
     uitgevoerd.slice(0,MAX).forEach(({o,insp},j)=>{
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
         '<span style="background:var(--bg1);color:var(--text2);border-radius:6px;padding:3px 9px;font-size:10.5px;min-width:80px;text-align:center;">'+escHtml(insp.datum||'—')+'</span>'+
@@ -1626,6 +1660,7 @@ async function loadOpnameData(objId,opnId){
         currentSnelInspectieId=snelInspectiesLijst[0]?.id||null;
         opnames[opnId].snelInspectieData=sisData.data||{};
         backfillLaatsteMeting();
+        planStatsUpdate();
       } else {
         const legacyData=sisData.data||{fotos:[],rijen:[]};
         if(legacyData.rijen?.length||legacyData.fotos?.length){
@@ -3317,6 +3352,118 @@ function rapInvoegpunt(na){
   return '<div style="padding:3px 13px;text-align:center;border-top:0.5px solid var(--border);">'+
     '<span onclick="rapBlokToevoegen(\''+na+'\')" style="font-size:10.5px;color:var(--blue-text);cursor:pointer;">＋ Eigen tekstblok invoegen</span></div>';
 }
+
+// v13: EXPORTS — nemen exact de rapportinhoud over, incl. bewerkingen en eigen blokken
+function rapExportHtml(deel){
+  const si=rapGetSI();if(!si)return null;
+  const r=rapData(si);
+  const opn=getOpname();
+  const obj=currentObj||{};
+  const inspItem=snelInspectiesLijst.find(x=>x.id===window._rapInspId)||{};
+  const condK=['','Goed','Redelijk','Matig','Slecht','Zeer slecht'];
+  const esc=escHtml;
+  const st='font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a1a1a;line-height:1.5;';
+  const h2='font-size:14pt;color:#0f3c68;border-bottom:2px solid #0f3c68;padding-bottom:3px;margin:22px 0 8px;';
+  const tabelSt='border-collapse:collapse;width:100%;font-size:9.5pt;';
+  const td='border:1px solid #c9c9c9;padding:4px 6px;vertical-align:top;';
+  const th=td+'background:#0f3c68;color:#fff;text-align:left;';
+  let nr=0;
+  const blokken=na=>r.blokken.filter(b=>b.na===na&&(deel!=='huurder'||na==='huurder')).map(b=>'<h3 style="font-size:11.5pt;color:#0f3c68;margin:14px 0 4px;">'+esc(b.titel||'')+'</h3><p style="white-space:pre-wrap;margin:0;">'+esc(b.tekst||'')+'</p>').join('');
+  const pand=(opn.fotos&&opn.fotos['pand_fotos']&&opn.fotos['pand_fotos'][0])?opn.fotos['pand_fotos'][0].dataUrl:null;
+  let inhoud='<div style="text-align:center;margin:30px 0 26px;">'+
+    (pand?'<img src="'+pand+'" style="max-width:420px;max-height:280px;object-fit:cover;border:1px solid #c9c9c9;"/><br/>':'')+
+    '<div style="font-size:20pt;color:#0f3c68;font-weight:bold;margin-top:14px;">'+(deel==='huurder'?'Onderhoudsoverzicht huurder':'Inspectierapport')+'</div>'+
+    '<div style="font-size:13pt;margin-top:4px;">'+esc(obj.naam||'')+'</div>'+
+    '<div style="font-size:10pt;color:#555;margin-top:8px;">'+esc(inspItem.naam||'')+' · '+esc(inspItem.datum||'')+(inspItem.inspecteur?' · Inspecteur: '+esc(inspItem.inspecteur):'')+'</div></div>';
+  const actief=RAP_SECTIES.filter(s=>deel==='huurder'?s.id==='huurder':(r.secties[s.id]&&s.id!=='huurder'||r.secties[s.id]&&s.id==='huurder'));
+  const sectieLijst=deel==='huurder'?RAP_SECTIES.filter(s=>s.id==='huurder'):RAP_SECTIES.filter(s=>r.secties[s.id]);
+  sectieLijst.forEach(s=>{
+    nr++;
+    if(s.id==='voorblad'&&deel!=='huurder'){
+      inhoud+='<h2 style="'+h2+'">'+nr+'. Object & globale omschrijving</h2>'+
+        '<p style="margin:0 0 6px;color:#555;font-size:10pt;">'+esc(obj.naam||'')+' · bouwjaar '+esc(String(obj.jaar||'—'))+' (BAG) · '+esc(String(obj.opp||'—'))+' m²'+((obj.gp||{}).renovatiejaar?' · laatste renovatie '+esc(String(obj.gp.renovatiejaar)):'')+'</p>'+
+        '<p style="white-space:pre-wrap;margin:0;">'+esc(r.globaleTekst||'')+'</p>';
+    }
+    if(s.id==='bevindingen'&&deel!=='huurder'){
+      const rijen=si.rijen||[];let totH=0;
+      inhoud+='<h2 style="'+h2+'">'+nr+'. Bevindingen conditiemeting</h2>'+
+        '<table style="'+tabelSt+'"><tr><th style="'+th+'">Element</th><th style="'+th+'">Cond.</th><th style="'+th+'">Omschrijving</th><th style="'+th+'">Voorgestelde actie</th><th style="'+th+'">Termijn</th><th style="'+th+'text-align:right;">Herstel</th></tr>'+
+        rijen.map(rij=>{totH+=parseFloat(rij.herstel)||0;
+          const onderb=(rij.hoeveelheid&&rij.prijsHerstel)?' ('+rij.hoeveelheid+' '+esc(rij.eenheid||'')+' × € '+rij.prijsHerstel+')':'';
+          return '<tr><td style="'+td+'"><strong>'+esc(rij.element||'')+'</strong>'+(rij.fotos?'<br/><span style="color:#777;font-size:8.5pt;">foto '+esc(String(rij.fotos))+'</span>':'')+'</td>'+
+            '<td style="'+td+'">'+(rij.conditie||'')+' '+esc(condK[rij.conditie]||'')+'</td>'+
+            '<td style="'+td+'">'+esc(rij.omschrijving||'')+'</td>'+
+            '<td style="'+td+'">'+esc(rij.actie||'')+'<span style="color:#777;font-size:8.5pt;">'+onderb+'</span></td>'+
+            '<td style="'+td+'">'+esc(rij.termijn||'')+'</td>'+
+            '<td style="'+td+'text-align:right;">€ '+Math.round(parseFloat(rij.herstel)||0).toLocaleString('nl-NL')+'</td></tr>';
+        }).join('')+
+        '<tr><td style="'+td+'" colspan="5"><strong>Totaal herstel</strong></td><td style="'+td+'text-align:right;"><strong>€ '+Math.round(totH).toLocaleString('nl-NL')+'</strong></td></tr></table>';
+    }
+    if(s.id==='planning'||s.id==='huurder'){
+      const isHuurder=s.id==='huurder';
+      if(isHuurder&&deel!=='huurder'&&!r.secties.huurder){}else{
+      const acties=(si.rijen||[]).filter(rij=>(rij.termijn==='direct'||rij.termijn==='1-2'||!rij.termijn)&&(isHuurder?rij.voorrekening==='huurder':rij.voorrekening!=='huurder'));
+      let tot=0;
+      inhoud+='<h2 style="'+h2+'">'+nr+'. '+(isHuurder?'Onderhoud voor rekening huurder':'Onderhoudsplanning eigenaar')+'</h2>'+
+        '<table style="'+tabelSt+'"><tr><th style="'+th+'">Element / actie</th><th style="'+th+'">Termijn</th><th style="'+th+'text-align:right;">Kosten</th><th style="'+th+'">Status</th></tr>'+
+        acties.map(a=>{const bedrag=parseFloat(a.herstel)||0;if(!a.uitgevoerd)tot+=bedrag;
+          return '<tr><td style="'+td+'"><strong>'+esc(a.element||'')+'</strong> — '+esc(a.actie||a.omschrijving||'')+'</td>'+
+            '<td style="'+td+'">'+esc(a.termijn||'1-2')+' jr</td>'+
+            '<td style="'+td+'text-align:right;">€ '+Math.round(bedrag).toLocaleString('nl-NL')+'</td>'+
+            '<td style="'+td+'">'+(a.uitgevoerd?'✓ uitgevoerd'+(a.uitgevoerdOp?' '+esc(a.uitgevoerdOp):''):'openstaand')+'</td></tr>';
+        }).join('')+
+        '<tr><td style="'+td+'" colspan="2"><strong>Openstaand totaal</strong></td><td style="'+td+'text-align:right;"><strong>€ '+Math.round(tot).toLocaleString('nl-NL')+'</strong></td><td style="'+td+'"></td></tr></table>';
+      }
+    }
+    if(s.id==='mjop'&&deel!=='huurder'){
+      const m=opn.mjop||[];
+      if(m.length){
+        const dot=m.reduce((som,e)=>som+mjopDotatie(e),0);
+        inhoud+='<h2 style="'+h2+'">'+nr+'. Meerjaren onderhoudsplan (10 jaar)</h2>'+
+          '<table style="'+tabelSt+'"><tr><th style="'+th+'">Element</th><th style="'+th+'">Cyclus</th><th style="'+th+'text-align:right;">Jaar 1–3</th><th style="'+th+'text-align:right;">Jaar 4–7</th><th style="'+th+'text-align:right;">Jaar 8–10</th><th style="'+th+'text-align:right;">Dotatie €/jr</th></tr>'+
+          m.map(e=>'<tr><td style="'+td+'"><strong>'+esc(e.element||'')+'</strong><br/><span style="color:#777;font-size:8.5pt;">'+esc(e.omschrijving||'')+(e.toelichting?' — '+esc(e.toelichting):'')+'</span></td>'+
+            '<td style="'+td+'">'+esc(String(e.cyclus||''))+'</td>'+
+            '<td style="'+td+'text-align:right;">'+(e.jaar1_3?'€ '+Math.round(e.jaar1_3).toLocaleString('nl-NL'):'—')+'</td>'+
+            '<td style="'+td+'text-align:right;">'+(e.jaar4_7?'€ '+Math.round(e.jaar4_7).toLocaleString('nl-NL'):'—')+'</td>'+
+            '<td style="'+td+'text-align:right;">'+(e.jaar8_10?'€ '+Math.round(e.jaar8_10).toLocaleString('nl-NL'):'—')+'</td>'+
+            '<td style="'+td+'text-align:right;">€ '+Math.round(mjopDotatie(e)).toLocaleString('nl-NL')+'</td></tr>').join('')+
+          '</table>'+
+          '<p style="margin:6px 0 0;font-size:10pt;">Jaarlijkse voorziening (som dotaties per onderdeel): <strong>€ '+Math.round(dot).toLocaleString('nl-NL')+'</strong></p>';
+      }
+    }
+    inhoud+=blokken(s.id);
+  });
+  return '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>'+esc(obj.naam||'Rapport')+'</title></head><body style="'+st+'max-width:19cm;margin:0 auto;padding:20px;">'+inhoud+
+    '<p style="margin-top:26px;font-size:8.5pt;color:#777;">Gegenereerd met VastgoedInspectie · '+new Date().toLocaleDateString('nl-NL')+'</p></body></html>';
+}
+function rapDownloadDoc(htmlStr,naam){
+  const blob=new Blob(['\ufeff'+htmlStr],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=naam;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+window.rapExportWord=()=>{
+  const h=rapExportHtml('alles');if(!h){showToast('Geen rapportdata');return;}
+  rapDownloadDoc(h,'Rapport_'+((currentObj?.naam||'object').replace(/[^a-z0-9]/gi,'_'))+'.doc');
+  showToast('Word-document gedownload');
+};
+window.rapExportHuurder=()=>{
+  const h=rapExportHtml('huurder');if(!h){showToast('Geen rapportdata');return;}
+  rapDownloadDoc(h,'Onderhoud_huurder_'+((currentObj?.naam||'object').replace(/[^a-z0-9]/gi,'_'))+'.doc');
+  showToast('Huurderdocument gedownload');
+};
+window.rapExportPDF=()=>{
+  const h=rapExportHtml('alles');if(!h){showToast('Geen rapportdata');return;}
+  const win=window.open('','_blank');
+  if(!win){showToast('Pop-up geblokkeerd — sta pop-ups toe');return;}
+  win.document.write(h);
+  win.document.close();
+  setTimeout(()=>{win.focus();win.print();},400);
+  showToast('Kies "Opslaan als PDF" in het afdrukvenster');
+};
+
 function renderRapportage(container){
   const si=rapGetSI();
   let html='<div class="section-title">📄 Rapportage</div>';
@@ -3416,10 +3563,11 @@ function renderRapportage(container){
   });
   html+='</div>';
   html+='<div class="btn-row" style="margin-top:12px;">'+
-    '<button class="btn btn-light btn-sm" onclick="showToast(\'Exports volgen in de volgende versie (v11)\')">⬇ Word</button>'+
-    '<button class="btn btn-light btn-sm" onclick="showToast(\'Exports volgen in de volgende versie (v11)\')">⬇ PDF</button>'+
-    '<button class="btn btn-light btn-sm" onclick="window.print()">🖨 Print</button>'+
-    '<span style="font-size:10.5px;color:var(--text3);align-self:center;">Je bewerkingen worden automatisch opgeslagen — de export (v11) neemt exact deze inhoud over.</span>'+
+    '<button class="btn btn-dark btn-sm" onclick="rapExportWord()">⬇ Word</button>'+
+    '<button class="btn btn-light btn-sm" onclick="rapExportPDF()">⬇ PDF</button>'+
+    '<button class="btn btn-light btn-sm" onclick="rapExportPDF()">🖨 Print</button>'+
+    '<button class="btn btn-light btn-sm" onclick="rapExportHuurder()">🧑 Huurderdocument</button>'+
+    '<span style="font-size:10.5px;color:var(--text3);align-self:center;">De export neemt exact deze inhoud over, inclusief je bewerkingen en eigen tekstblokken.</span>'+
   '</div>';
   container.innerHTML=html;
 }
@@ -3598,12 +3746,18 @@ window.downloadKostenExcel=async()=>{
 window.downloadMJOPExcel=async()=>{
   await loadXLSX();const opn=getOpname();const wb=XLSX.utils.book_new();
   const totaal=opn.mjop?.reduce((s,e)=>s+(e.kosten_totaal||0),0)||0;
-  const rows=[['MJOP — '+(currentObj?.naam||'')],['Datum: '+new Date().toLocaleDateString('nl-NL')],['Periode: 10 jaar'],[],
-    ['Element','Omschrijving','Cyclus','Jaar 1–3','Jaar 4–7','Jaar 8–10','Totaal','Toelichting'],
-    ...(opn.mjop||[]).map(e=>[e.element,e.omschrijving||'',e.cyclus||'',e.jaar1_3||0,e.jaar4_7||0,e.jaar8_10||0,e.kosten_totaal||0,e.toelichting||'']),
-    [],[],['Totaal 10 jaar','','','','','',totaal,''],
-    ['Jaarlijkse voorziening','','','','','',Math.round(totaal/10),'']];
-  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:18},{wch:22},{wch:10},{wch:12},{wch:12},{wch:12},{wch:12},{wch:30}];
+  const dotatieSom=(opn.mjop||[]).reduce((s,e)=>s+mjopDotatie(e),0);
+  const inspBron=snelInspectiesLijst.find(x=>x.id===(window._planInspId||currentSnelInspectieId));
+  const rows=[['MJOP — '+(currentObj?.naam||'')],['Datum: '+new Date().toLocaleDateString('nl-NL')+' · Periode: 10 jaar'],
+    ['Bron: gebouwpaspoort, bouwjaar '+(currentObj?.jaar||'onbekend')+(inspBron?', inspectie '+inspBron.naam:'')],[],
+    ['Element','Omschrijving','Cyclus','Hoeveelheid','Eenheid','Prijs €/eenh.','Jaar 1–3','Jaar 4–7','Jaar 8–10','Totaal','Dotatie €/jr','Toelichting'],
+    ...(opn.mjop||[]).map(e=>[e.element,e.omschrijving||'',e.cyclus||'',e.hoeveelheid||'',e.eenheid||'',e.prijs_per_eenheid||'',e.jaar1_3||0,e.jaar4_7||0,e.jaar8_10||0,e.kosten_totaal||0,mjopDotatie(e),e.toelichting||'']),
+    [],['Totaal 10 jaar','','','','','','','','',totaal,Math.round(dotatieSom),''],
+    ['Jaarlijkse voorziening (som dotaties per onderdeel)','','','','','','','','','',Math.round(dotatieSom),'']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:20},{wch:24},{wch:9},{wch:11},{wch:8},{wch:11},{wch:11},{wch:11},{wch:11},{wch:11},{wch:12},{wch:34}];
+  // Euro-celformaten op de bedragkolommen
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  for(let R=5;R<=range.e.r;R++){for(const C of [5,6,7,8,9,10]){const adr=XLSX.utils.encode_cell({r:R,c:C});if(ws[adr]&&typeof ws[adr].v==='number')ws[adr].z='€ #,##0';}}
   XLSX.utils.book_append_sheet(wb,ws,'MJOP');
   XLSX.writeFile(wb,'MJOP_'+(currentObj?.naam||'').replace(/[^a-z0-9]/gi,'_')+'.xlsx');showToast('MJOP Excel gedownload');
 };
