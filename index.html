@@ -764,6 +764,12 @@ window.planStartMeting=async id=>{
   activeSection='snel';renderSidebarNav();navToChapter('snelinspectie');
   showToast('Nieuwe meting gestart voor '+(o?.naam||''));
 };
+window.planOpenInspectie=async(objId,inspId)=>{
+  await selectObject(objId);
+  if(snelInspectiesLijst.some(x=>x.id===inspId))currentSnelInspectieId=inspId;
+  window._planInspId=currentSnelInspectieId;
+  activeSection='snel';renderSidebarNav();navToChapter('snelinspectie');
+};
 window.planVerderGaan=async id=>{
   const o=objects.find(x=>x.id===id);
   await selectObject(id);
@@ -815,6 +821,34 @@ window.renderMijnInspecties=()=>{
     '<datalist id="inspecteurs-lijst">'+bekendeInspecteurs.map(n=>'<option value="'+escHtml(n)+'">').join('')+'</datalist></span>'+
     '<button class="btn btn-blue btn-sm" onclick="planMeting()">Inplannen</button></div>';
   html+='</div>';
+  // Uitgevoerde inspecties (uit het register op de objecten)
+  let uitgevoerd=objects.flatMap(o=>(o.inspecties||[]).map(insp=>({o,insp,t:planDatumParse(insp)||0})));
+  if(window._uitgFilter)uitgevoerd=uitgevoerd.filter(x=>x.o.id===window._uitgFilter);
+  uitgevoerd.sort((a,b)=>b.t-a.t);
+  const uitgObjecten=[...new Map(objects.filter(o=>(o.inspecties||[]).length).map(o=>[o.id,o])).values()];
+  if(uitgObjecten.length){
+    const MAX=window._uitgAlles?uitgevoerd.length:10;
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'+
+      '<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">✓ Uitgevoerd</span>'+
+      '<select onchange="window._uitgFilter=this.value;renderMijnInspecties()" style="margin-left:auto;border:0.5px solid var(--border2);border-radius:6px;padding:3px 7px;font-size:10.5px;background:var(--bg);color:var(--text);">'+
+        '<option value="">Alle objecten</option>'+uitgObjecten.map(o=>'<option value="'+o.id+'" '+(window._uitgFilter===o.id?'selected':'')+'>'+escHtml(o.naam||'Naamloos')+'</option>').join('')+'</select></div>';
+    html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);margin-bottom:14px;">';
+    if(!uitgevoerd.length)html+='<div style="padding:11px;font-size:12px;color:var(--text3);">Geen uitgevoerde inspecties gevonden.</div>';
+    uitgevoerd.slice(0,MAX).forEach(({o,insp},j)=>{
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
+        '<span style="background:var(--bg1);color:var(--text2);border-radius:6px;padding:3px 9px;font-size:10.5px;min-width:80px;text-align:center;">'+escHtml(insp.datum||'—')+'</span>'+
+        '<span style="flex:1;min-width:0;">'+
+          '<span style="font-size:12.5px;font-weight:600;display:block;">'+escHtml(o.naam||'Naamloos')+'</span>'+
+          '<span style="font-size:10.5px;color:var(--text3);">'+escHtml(insp.naam||'')+(insp.inspecteur?' · 👤 '+escHtml(insp.inspecteur):'')+(insp.bevindingen?' · '+insp.bevindingen+' bevindingen':'')+'</span>'+
+        '</span>'+
+        '<button class="btn btn-light btn-sm" onclick="planOpenInspectie(\''+o.id+'\',\''+insp.id+'\')">Openen</button>'+
+      '</div>';
+    });
+    if(uitgevoerd.length>10&&!window._uitgAlles){
+      html+='<div onclick="window._uitgAlles=true;renderMijnInspecties()" style="padding:6px;text-align:center;font-size:10.5px;color:var(--blue-text);cursor:pointer;border-top:0.5px solid var(--border);">Toon alle '+uitgevoerd.length+' ▾</div>';
+    }
+    html+='</div>';
+  }
   // Voorstellen
   if(voorstellen.length){
     html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">💡 Voorstel — langer dan 2 jaar geen meting</div>';
@@ -1648,10 +1682,15 @@ async function updateObjectStats(){
     const fotosTeDoen=((siId&&data[siId]&&data[siId].fotos)||[]).filter(f=>!f.label||/^Foto \d+$/.test(f.label)).length;
     const inspNaam=(snelInspectiesLijst.find(x=>x.id===siId)||{}).naam||null;
     const stats={openstaand,condGem,urgente,voorzieningJr,fotosTeDoen,inspectieNaam:inspNaam,inspectieId:siId||null,bijgewerkt:Date.now()};
+    // Compact register van uitgevoerde inspecties (geen foto's/rijen — enkele honderden bytes)
+    const register=snelInspectiesLijst.map(s=>({id:s.id,naam:s.naam||'',datum:s.datum||'',inspecteur:s.inspecteur||null,aangemaakt:s.aangemaakt||null,bevindingen:((data[s.id]||{}).rijen||[]).length}));
     const vorige=currentObj.stats||{};
-    if(['openstaand','condGem','urgente','voorzieningJr','fotosTeDoen'].every(k=>vorige[k]===stats[k]))return;
+    const statsGelijk=['openstaand','condGem','urgente','voorzieningJr','fotosTeDoen'].every(k=>vorige[k]===stats[k]);
+    const registerGelijk=JSON.stringify(register)===JSON.stringify(currentObj.inspecties||[]);
+    if(statsGelijk&&registerGelijk)return;
     currentObj.stats=stats;
-    await objDoc(currentObjId).set({stats},{merge:true});
+    currentObj.inspecties=register;
+    await objDoc(currentObjId).set({stats,inspecties:register},{merge:true});
   }catch(e){/* afgeleide data — nooit blokkerend */}
 }
 async function saveMjopData(){
