@@ -828,26 +828,26 @@ window.renderMijnInspecties=()=>{
   const TWEE_JAAR=2*365*86400000;
   const voorstellen=objects.filter(o=>!(o.geplandeMeting&&o.geplandeMeting.datum)&&(!o.laatsteMeting||Date.now()-o.laatsteMeting>TWEE_JAAR)).slice(0,6);
   const verder=objects.filter(o=>o.stats&&o.stats.fotosTeDoen>0).slice(0,5);
-  let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'+
-    '<div class="section-title" style="margin:0;">📋 Mijn inspecties</div>'+
+  let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">'+
+    '<div style="font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);">📋 Mijn inspecties</div>'+
     '<button class="btn btn-light btn-sm" onclick="navTo(\'home\')">← Terug naar overzicht</button></div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'+
-    '<div style="border:0.5px solid var(--border);border-radius:10px;padding:10px;text-align:center;background:var(--bg);"><div style="font-size:19px;font-weight:600;color:var(--red-text);">'+t.telaat+'</div><div style="font-size:11px;color:var(--text3);">Te laat</div></div>'+
-    '<div style="border:0.5px solid var(--border);border-radius:10px;padding:10px;text-align:center;background:var(--bg);"><div style="font-size:19px;font-weight:600;color:var(--amber-text);">'+t.week+'</div><div style="font-size:11px;color:var(--text3);">Deze week</div></div>'+
-    '<div style="border:0.5px solid var(--border);border-radius:10px;padding:10px;text-align:center;background:var(--bg);"><div style="font-size:19px;font-weight:600;">'+t.maand+'</div><div style="font-size:11px;color:var(--text3);">Komende 30 dagen</div></div></div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;">'+
+    '<div style="background:var(--red-bg);border-radius:16px;padding:16px 18px;"><div style="font-family:var(--fd);font-size:28px;font-weight:800;line-height:1;color:var(--red-text);">'+t.telaat+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px;">Te laat</div></div>'+
+    '<div style="background:var(--amber-bg);border-radius:16px;padding:16px 18px;"><div style="font-family:var(--fd);font-size:28px;font-weight:800;line-height:1;color:var(--amber-text);">'+t.week+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px;">Deze week</div></div>'+
+    '<div style="background:var(--blue-bg);border-radius:16px;padding:16px 18px;"><div style="font-family:var(--fd);font-size:28px;font-weight:800;line-height:1;color:var(--text);">'+t.maand+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px;">Komende 30 dagen</div></div></div>';
   // Geplande metingen
-  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;">Gepland</div>';
-  html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);margin-bottom:14px;">';
+  html+='<div style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Gepland</div>';
+  html+='<div style="border:0.5px solid var(--border);border-radius:16px;overflow:hidden;background:var(--bg);margin-bottom:22px;">';
   if(!gepland.length)html+='<div style="padding:12px;font-size:12px;color:var(--text3);">Nog geen metingen ingepland — gebruik de regel hieronder.</div>';
   gepland.forEach((o,j)=>{
     const b=planBadge(o.geplandeMeting.datum);
     html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
-      '<span style="border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:600;min-width:84px;text-align:center;'+b.stijl+'">'+b.label+'</span>'+
+      '<span style="border-radius:999px;padding:5px 11px;font-size:11px;font-weight:600;min-width:108px;text-align:center;'+b.stijl+'">'+b.label+'</span>'+
       '<span style="flex:1;min-width:0;cursor:pointer;" onclick="selectObject(\''+o.id+'\')">'+
         '<span style="font-size:12.5px;font-weight:600;display:block;">'+escHtml(o.naam||'Naamloos')+'</span>'+
         '<span style="font-size:10.5px;color:var(--text3);">'+escHtml(eigNaam(o))+(eigNaam(o)?' · ':'')+(PLAN_HERH[o.geplandeMeting.herhaling]||'eenmalig')+(o.geplandeMeting.inspecteur?' · 👤 '+escHtml(o.geplandeMeting.inspecteur):'')+(o.laatsteMeting?' · vorige: '+new Date(o.laatsteMeting).toLocaleDateString('nl-NL'):'')+'</span>'+
       '</span>'+
-      '<button class="btn btn-light btn-sm" onclick="planStartMeting(\''+o.id+'\')">Start meting</button>'+
+      '<button class="btn btn-dark btn-sm" onclick="planStartMeting(\''+o.id+'\')">Start meting</button>'+
       '<button onclick="planWijzigDatum(\''+o.id+'\')" title="Datum wijzigen" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px;">✎</button>'+
       '<button onclick="planVerwijderen(\''+o.id+'\')" title="Verwijderen" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px;">×</button>'+
     '</div>';
@@ -871,7 +871,7 @@ window.renderMijnInspecties=()=>{
   {
     const MAX=window._uitgAlles?uitgevoerd.length:10;
     html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'+
-      '<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;">✓ Uitgevoerd</span>'+
+      '<span style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);">✓ Reeds uitgevoerd</span>'+
       '<select onchange="window._uitgFilter=this.value;renderMijnInspecties()" style="margin-left:auto;border:0.5px solid var(--border2);border-radius:6px;padding:3px 7px;font-size:10.5px;background:var(--bg);color:var(--text);">'+
         '<option value="">Alle objecten</option>'+uitgObjecten.map(o=>'<option value="'+o.id+'" '+(window._uitgFilter===o.id?'selected':'')+'>'+escHtml(o.naam||'Naamloos')+'</option>').join('')+'</select></div>';
     html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);margin-bottom:14px;">';
@@ -898,7 +898,7 @@ window.renderMijnInspecties=()=>{
   }
   // Voorstellen
   if(voorstellen.length){
-    html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">💡 Voorstel — langer dan 2 jaar geen meting</div>';
+    html+='<div style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">💡 Voorstel — langer dan 2 jaar geen meting</div>';
     html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);margin-bottom:14px;">';
     voorstellen.forEach((o,j)=>{
       html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
@@ -912,7 +912,7 @@ window.renderMijnInspecties=()=>{
   }
   // Verder gaan waar je was
   if(verder.length){
-    html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">▶ Verder gaan waar je was</div>';
+    html+='<div style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">▶ Verder gaan waar je was</div>';
     html+='<div style="border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg);">';
     verder.forEach((o,j)=>{
       html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;'+(j?'border-top:0.5px solid var(--border);':'')+'">'+
