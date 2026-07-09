@@ -3,36 +3,40 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#1a1a1a"/>
+<meta name="theme-color" content="#4b46e5"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Inspectie"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <title>VastgoedInspectie</title>
 <style>
 :root{
-  --bg:#fff;--bg1:#fafafa;--bg2:#f5f5f5;--bg3:#ebebeb;
-  --text:#1a1a1a;--text2:#555;--text3:#888;--text4:#bbb;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
-  --accent:#1a1a1a;--accent-text:#fff;
-  --blue:#185fa5;--blue-bg:#e6f1fb;--blue-text:#185fa5;
-  --green:#3b6d11;--green-bg:#eaf3de;--green-text:#3b6d11;
-  --amber:#854f0b;--amber-bg:#faeeda;--amber-text:#854f0b;
-  --orange:#993c1d;--orange-bg:#faece7;--orange-text:#993c1d;
-  --red:#a32d2d;--red-bg:#fcebeb;--red-text:#a32d2d;
-  --red2:#501313;
-  --radius:10px;--radius-sm:6px;
+  --fd:'Bricolage Grotesque',-apple-system,sans-serif;
+  --bg:#fff;--bg1:#f5f6fb;--bg2:#eef0f6;--bg3:#e2e5ef;
+  --text:#1c2030;--text2:#545a6e;--text3:#9aa0b4;--text4:#c4c8d6;
+  --border:rgba(28,32,48,0.09);--border2:rgba(28,32,48,0.15);--border-strong:rgba(28,32,48,0.22);
+  --accent:#4b46e5;--accent-text:#fff;
+  --blue:#4b46e5;--blue-bg:#ecebfd;--blue-text:#3a35c9;
+  --green:#1f7a4d;--green-bg:#e6f4ec;--green-text:#1f7a4d;
+  --amber:#c77e12;--amber-bg:#fdf2e3;--amber-text:#c77e12;
+  --orange:#d9622f;--orange-bg:#fdeee6;--orange-text:#d9622f;
+  --red:#d33c3c;--red-bg:#fdeceb;--red-text:#d33c3c;
+  --red2:#7a1f1f;
+  --radius:14px;--radius-sm:10px;
   --sidebar:240px;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bot:env(safe-area-inset-bottom,0px);
 }
 @media(prefers-color-scheme:dark){:root{
-  --bg:#181818;--bg1:#1e1e1e;--bg2:#242424;--bg3:#2a2a2a;
-  --text:#f0f0f0;--text2:#aaa;--text3:#666;--text4:#444;
-  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
-  --accent:#f0f0f0;--accent-text:#1a1a1a;
-  --blue:#6aadee;--blue-bg:#0a1e35;--blue-text:#6aadee;
+  --bg:#141520;--bg1:#1b1d2b;--bg2:#232636;--bg3:#2c3042;
+  --text:#eceefb;--text2:#a6abc4;--text3:#6b7089;--text4:#454a63;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);--border-strong:rgba(255,255,255,0.24);
+  --accent:#6d67ff;--accent-text:#ffffff;
+  --blue:#8b86ff;--blue-bg:#23244a;--blue-text:#b7b4ff;
   --green:#8ecf50;--green-bg:#1a2e0a;--green-text:#8ecf50;
   --amber:#f5b942;--amber-bg:#2e1f00;--amber-text:#f5b942;
   --orange:#f09060;--orange-bg:#2e1208;--orange-text:#f09060;
@@ -40,7 +44,7 @@
   --red2:#f9a0a0;
 }}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+html,body{height:100%;font-family:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
 #app{display:flex;height:100%;height:100dvh;}
 #sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s;}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -50,11 +54,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .sb-opname-select{width:100%;padding:5px 8px;font-size:11px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-family:inherit;margin-top:8px;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;}
 .sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
 .sb-section-label{font-size:10px;font-weight:600;color:var(--text3);padding:8px 14px 3px;text-transform:uppercase;letter-spacing:.5px;}
-.sb-item{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--text2);border-left:2px solid transparent;user-select:none;}
+.sb-item{display:flex;align-items:center;gap:9px;margin:1px 8px;padding:9px 12px;border-radius:11px;cursor:pointer;font-size:13px;color:var(--text2);user-select:none;}
 .sb-item:hover{background:var(--bg2);}
-.sb-item.active{color:var(--text);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-item.active{color:#fff;background:var(--accent);font-weight:600;}
 .sb-item.sub{padding-left:26px;font-size:12px;}
-.sb-item.sub.active{color:var(--blue-text);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-item.sub.active{color:#fff;background:var(--accent);}
 .sb-num{width:18px;height:18px;border-radius:50%;background:var(--bg3);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);}
 .sb-item.active .sb-num{background:var(--blue);color:#fff;}
 .sb-dot{width:7px;height:7px;border-radius:50%;background:var(--bg3);flex-shrink:0;}
@@ -361,6 +365,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
   .sidebar-overlay.show{display:block;}
 }
+/* Kobalt look & feel — laag 2 componentvorm */
+.topbar-chapter-title,.login-logo h1,.card-header,.eig-stat-val,.tax-val,.kosten-totaal-amt,.mjop-stat-val,.sb-object-name{font-family:var(--fd);letter-spacing:-.01em;}
+.sb-item.active .sb-num{background:rgba(255,255,255,.22);color:#fff;}
+.eig-stat{background:var(--blue-bg);border-radius:14px;}
+.eig-stat-val{color:var(--text);}
+.chapter-tab{border-radius:999px;}
+.login-logo-icon{border-radius:19px;box-shadow:0 12px 26px -12px rgba(75,70,229,.6);}
+.card,.login-card{border-radius:var(--radius);}
 </style>
 </head>
 <body>
